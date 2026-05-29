@@ -10,6 +10,13 @@ The engine library is `TileKit`, the CLI is `tile-down`, the namespace root is
 `TileDown`. The engine targets macOS and Linux. A native macOS and iOS editor app
 over the same tile model is a separate, future concern. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
 
+## Rule loading (do this first)
+
+At session start, read [docs/rules/README.md](docs/rules/README.md) and the rules
+it marks as always relevant. Confirm by replying with the token `rules-loaded` and
+naming the rule files that apply to the current task. If you cannot name them, you
+have not loaded them.
+
 ## Read first
 
 - [AGENTS.md](AGENTS.md) - the agent guide: language policy, workflow, commands.
