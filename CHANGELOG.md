@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   files and writing slugged `index.html` outputs.
 - Mustache-style list sections and nested object lookups, including a `pages`
   collection in content-directory builds.
+- A typed content query core with filters, ordering, offset, and limit support
+  for future site collections and tile function manifests.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,
