@@ -185,12 +185,14 @@ browser runtime forms. It emits deterministic HTML, a JSON data island, scoped
 CSS, and browser JavaScript for `remote` and `proxy` modes. It rejects `build`,
 `local`, and `static` until those modes have dedicated execution paths.
 
-The site generator does not know `service-form` directly. The next integration
-step is a `TileServiceForm` tile renderer adapter that conforms to
+The site generator does not know `service-form` directly. The integration runs
+through `TileKit.ServiceForm.TileRenderer`, an adapter that conforms to
 `TileKit.Tile.Rendering`, resolves the referenced service contract through an
-injected resolver, uses the binder, and delegates output generation to
-`TileKit.ServiceForm.Renderer`. The CLI or another composition root registers
-that adapter in `TileKit.Tile.Registry`.
+injected `TileKit.Service.ContractResolving` resolver, uses the binder, and
+delegates output generation to `TileKit.ServiceForm.Renderer`. The CLI registers
+that adapter in `TileKit.Tile.Registry`. The first concrete resolver is the pure
+`TileKit.Service.InMemoryContractResolver`; file- and network-backed resolvers
+arrive behind the same protocol when service binding configuration lands.
 
 Generation then produces:
 

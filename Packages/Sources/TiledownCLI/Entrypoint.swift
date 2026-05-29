@@ -70,10 +70,25 @@ private struct Command {
             markdownParser: TileKit.Source.FrontMatterParser(),
             markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
             tileParser: TileKit.Tile.DirectiveParser(),
-            tileRegistry: TileKit.Tile.Registry(),
+            tileRegistry: makeTileRegistry(),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )
+    }
+
+    private func makeTileRegistry() -> TileKit.Tile.Registry {
+        // The resolver is empty until config loading can populate service contracts.
+        // A service-form tile therefore fails with a typed missing-service error
+        // rather than silently rendering nothing.
+        let serviceForm = TileKit.ServiceForm.TileRenderer(
+            resolver: TileKit.Service.InMemoryContractResolver(),
+        )
+
+        return TileKit.Tile.Registry()
+            .registering(
+                serviceForm,
+                for: TileKit.Tile.ServiceFormRequest.typeID,
+            )
     }
 }
 

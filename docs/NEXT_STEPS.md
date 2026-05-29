@@ -26,11 +26,15 @@ The repository currently has:
 - Service manifest and service operation contract models.
 - `service-form` request validation, binding, and generated browser output for
   `remote` and `proxy` modes.
+- `TileKit.ServiceForm.TileRenderer`, a tile renderer adapter that resolves a
+  service contract through `TileKit.Service.ContractResolving`, binds the
+  request, and delegates output to `TileKit.ServiceForm.Renderer`. The CLI
+  registers it in `TileKit.Tile.Registry` for the `service-form` type id.
 
-The important gap is wiring: `service-form` can render once it has a bound
-service operation, and `TileSite` can render any registered tile, but there is
-not yet a default `service-form` tile renderer registered by the composition
-root.
+The wiring slice is done: a `:::tile service-form` block now renders through the
+normal site pipeline. The CLI's contract resolver is still empty, so a
+service-form tile fails with a typed missing-service error until service binding
+configuration lands.
 
 ## Working Constraints
 
@@ -49,44 +53,21 @@ root.
 
 ## Immediate Sequence
 
-### 1. Register `service-form` through the tile registry
+### 1. Register `service-form` through the tile registry (done)
 
-Goal: make this Markdown render through the normal site pipeline:
+Shipped. `TileKit.Service.ContractResolving` is the resolver seam, with a pure
+`TileKit.Service.InMemoryContractResolver` as the first concrete.
+`TileKit.ServiceForm.TileRenderer` conforms to `TileKit.Tile.Rendering`, converts
+a `TileKit.Tile.Instance` into a `TileKit.Tile.ServiceFormRequest`, resolves the
+contract, binds through `TileKit.ServiceForm.Binder`, and delegates output to
+`TileKit.ServiceForm.Renderer`. The CLI registers it for the `service-form` type
+id. `TileSite` still does not import `TileServiceForm`.
 
-```markdown
-:::tile service-form
-id: price-calculator
-service: calculator
-operation: positive-decimal-calculation
-mode: proxy
-submitLabel: Calculate
-:::
-```
-
-Design:
-
-- Add a service contract resolving protocol in `TileService`.
-- Add a `TileKit.ServiceForm.TileRenderer` in `TileServiceForm`.
-- The tile renderer conforms to `TileKit.Tile.Rendering`.
-- The tile renderer converts `TileKit.Tile.Instance` to
-  `TileKit.Tile.ServiceFormRequest`.
-- The tile renderer resolves the service contract by service id.
-- The tile renderer uses `TileKit.ServiceForm.Binder`.
-- The tile renderer delegates generated output to
-  `TileKit.ServiceForm.Renderer`.
-- The tile renderer returns `TileKit.Tile.Rendered`.
-- The CLI, tests, or future site config register it in `TileKit.Tile.Registry`.
-- `TileSite` does not import `TileServiceForm`.
-
-Acceptance:
-
-- A `TileSiteTests` case builds a page containing `:::tile service-form`.
-- The output contains generated form HTML.
-- The output exposes generated CSS through `page.assets.css`.
-- The output exposes generated browser JavaScript through
-  `page.assets.javascript`.
-- Missing services, missing operations, unsupported modes, and unsafe credential
-  exposure fail with typed errors.
+Covered by tests: `TileSiteTests` builds a page containing `:::tile service-form`
+and asserts generated form HTML plus CSS and browser JavaScript exposed through
+`page.assets.css` and `page.assets.javascript`. `TileServiceFormTests` asserts
+that missing services, missing operations, unsupported modes, unsafe credential
+exposure, and wrong tile types fail with typed errors.
 
 ### 2. Add service binding configuration
 
