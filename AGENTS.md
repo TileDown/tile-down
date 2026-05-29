@@ -6,8 +6,9 @@ Guidance for anyone (human or coding agent) writing code in Tiledown.
 
 A tile-native static site generator. The canonical document is a tree of typed
 **tiles** (not Markdown), rendered to static HTML for publishing to GitHub Pages.
-The engine library is `TileKit`; the CLI is `tile-down`. A native macOS and iOS
-visual editor over the same tile model is planned. See [docs/DESIGN.md](docs/DESIGN.md).
+The engine library is `TileKit`; the CLI is `tile-down`. The engine targets macOS
+and Linux. A native macOS editor app over the same tile model is a separate, future
+concern. See [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Language policy
 

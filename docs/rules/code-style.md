@@ -306,7 +306,7 @@ For cross-cutting namespaces (e.g. a `Tile` namespace that touches multiple SPM 
 
 #### One non-private type per file (mandatory)
 
-Each file contains **exactly one** `public`, `package`, or `internal` (default-visibility) top-level type. Private/fileprivate helper types MAY co-locate with the main type when they exist solely to support it.
+Each file contains **exactly one** `public`, `package`, or `internal` (default-visibility) top-level type. Private/fileprivate helper types MAY co-locate with the main type when they exist solely to support it. This is enforced by `scripts/check-namespacing.sh` locally (pre-push) and in CI; see [verification.md](verification.md).
 
 Strict reading:
 
@@ -360,19 +360,3 @@ Output MUST be empty; any reported file is a violation. Add the `private`/`filep
 #### File renames ship in their own PR
 
 Type renames (`TilesIndexerService` to `Indexer.TilesService`) and file renames (`TilesIndexerService.swift` to `Indexer.TilesService.swift`) are different PRs. Type-rename first; easier review surface, can revert without filesystem churn. File-rename follows once the type change is settled.
-
-## Rename workflow (when migrating legacy code)
-
-When relocating types into the namespace tree (e.g. migrating a project from flat file-scope public types to hierarchical namespaces), follow this discipline:
-
-1. **One subnamespace per PR.** Don't try to do everything at once. Each PR moves the types of one logical area, sweeps every caller, builds clean, runs tests, ships.
-
-2. **Wrap individual types, not whole files.** Wrap each `public struct/enum/...` declaration in its own `extension Namespace { ... }` block. Whole-file wrapping accidentally nests `extension OtherType { ... }` helper blocks (e.g. `extension FileHandle`) inside the namespace, which is not what you want.
-
-3. **String- and comment-aware sweeps.** When rewriting caller files via regex, parse Swift tokens: skip line comments (`// ...`), block comments (`/* ... */`), and string literals (regular, triple-quoted, raw `#"..."#`). A naive sweep that touches strings will corrupt `print("Tool execution complete")` and JSON content embedded as raw string literals.
-
-4. **Restrict sweeps to consumers.** Only rewrite files that import the affected SPM target. Files that don't import the module shouldn't be touched, even if they happen to contain a same-named local type.
-
-5. **Build + test gate per slice.** Verify `swift build` clean AND `swift test` green before pushing. Don't ship a PR with broken tests, even if the failure is "in another file".
-
-6. **File renames ship separately.** Type-level renames (`RenderCommand` to `Command.Render`) and file-level renames (`RenderCommand.swift` to `Render.swift`) are different PRs. Type rename first; easier review surface, can revert without filesystem churn. File rename follows once the type change is settled.

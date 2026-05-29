@@ -15,7 +15,7 @@ If your target runs on Linux in production (server, CLI binary, container worklo
 
 If the answer is "Apple-only iOS/macOS app, no Linux," skip this file; load `cross-platform.md` for the Apple-cross-platform patterns instead.
 
-Note: the TileKit engine must build for iOS, so it cannot spawn subprocesses. Keep subprocess and server-only code (this file's patterns) out of the core and in dedicated CLI/server targets.
+Note: the TileKit engine targets macOS and Linux. Both support subprocess and shell-out, so the engine may spawn subprocesses. As a design preference, keep server-only concerns (this file's HTTP/database/signal patterns) in dedicated CLI/server targets rather than the core, so the core stays focused; this is an organizational choice, not a platform limitation.
 
 ## 1. HTTP: AsyncHTTPClient, not URLSession
 
@@ -33,7 +33,7 @@ let body = try await response.body.collect(upTo: 1024 * 1024)
 
 **Why not URLSession on Linux:** `FoundationNetworking`'s URLSession on Linux lacks `URLSessionWebSocketTask`, `URLSessionStreamTask`, and PAC (proxy auto-configuration). For any feature beyond plain `data(from:)`, you will hit gaps.
 
-**Why use AsyncHTTPClient on Apple too:** a single HTTP client across all platforms eliminates the entire `#if canImport(FoundationNetworking)` class of bug. The cost is one dependency. You can tune one `HTTPClient` config (HTTP/1.1 only, short idle timeout, POSIX sockets) and run the same code on iOS and Linux.
+**Why use AsyncHTTPClient on Apple too:** a single HTTP client across all platforms eliminates the entire `#if canImport(FoundationNetworking)` class of bug. The cost is one dependency. You can tune one `HTTPClient` config (HTTP/1.1 only, short idle timeout, POSIX sockets) and run the same code on macOS and Linux.
 
 **TLS:** AsyncHTTPClient ships bundled BoringSSL on Linux; on Apple it uses Security.framework transparently. No source-level branching needed.
 

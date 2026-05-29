@@ -17,12 +17,10 @@ the full set.
   namespace anchors.
 - [dependency-injection.md](dependency-injection.md) - no singletons, inject every
   collaborator through `init`, protocol seams.
-- [point-free-dependencies.md](point-free-dependencies.md) - the Dependencies
-  library for injectable, testable dependencies.
 - [concurrency.md](concurrency.md) - Swift 6 strict concurrency: `Sendable`,
   actors, `@MainActor`.
-- [cross-platform.md](cross-platform.md) - Apple platforms and Linux; keep the
-  core platform-neutral so it runs on iOS.
+- [cross-platform.md](cross-platform.md) - the core builds on macOS and Linux;
+  guard platform-divergent code behind a protocol seam.
 - [linux-server.md](linux-server.md) - server-side operational rules for the
   `serve` command and any networking.
 - [testing.md](testing.md) - Swift Testing, `@Test` / `#expect`, test isolation.
@@ -35,6 +33,15 @@ the full set.
 - [documentation.md](documentation.md) - DocC catalogs and `///` requirements.
 - [file-naming.md](file-naming.md) - filename conventions.
 - [folder-grouping.md](folder-grouping.md) - when to flatten one-file folders.
+- [package-structure.md](package-structure.md) - workspace and package layout: one
+  `Package.swift` under `Packages/`, many targets, `Apps/` for app targets.
+- [package-architecture.md](package-architecture.md) - single-responsibility
+  targets with unidirectional dependencies.
+- [package-import-contract.md](package-import-contract.md) - per-target allowed
+  imports; applies now, the engine and CLI are already two targets.
+- [shared-protocols.md](shared-protocols.md) - the cross-target protocol seam.
+
+Open decisions live in [docs/decisions/](../decisions/).
 
 ## Git and process
 
@@ -42,19 +49,10 @@ the full set.
 - [git-discipline.md](git-discipline.md) - issues, labels, PRs, branches, commits,
   remotes.
 
-## The planned native macOS and iOS editor
+## The planned native macOS editor
 
 - [views.md](views.md) - SwiftUI view architecture and identity.
 - [view-models.md](view-models.md) - ViewModel responsibilities and patterns.
 - [components.md](components.md) - the component system.
 - [colors.md](colors.md) - the color system.
 - [fonts.md](fonts.md) - font registration in SPM packages.
-
-## If Tiledown grows into multiple packages
-
-- [package-structure.md](package-structure.md) - workspace and package layout.
-- [package-architecture.md](package-architecture.md) - single-responsibility
-  packages with unidirectional dependencies.
-- [package-import-contract.md](package-import-contract.md) - per-package allowed
-  imports.
-- [shared-protocols.md](shared-protocols.md) - the cross-package protocol seam.

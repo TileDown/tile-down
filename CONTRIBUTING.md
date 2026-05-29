@@ -58,8 +58,8 @@ Engine and tooling code follows the conventions documented in
   non-private type per file; file named for the qualified type.
 - Dependencies are injected through initialisers. No force-unwrapping in shipping
   code. Errors carry a reason and a recovery path.
-- Cross-platform: the core builds and runs on Apple platforms and Linux. Keep
-  subprocess and platform-only APIs out of the core.
+- Cross-platform: the core builds on macOS and Linux. Abstract platform-specific
+  dependencies behind a protocol seam.
 - Tests use the Swift Testing framework and assert behaviour, not implementation.
 
 Read the surrounding files before writing new code and match what is already
