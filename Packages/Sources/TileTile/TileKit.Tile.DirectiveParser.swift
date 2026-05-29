@@ -20,10 +20,30 @@ public extension TileKit.Tile {
 
             var blocks: [Block] = []
             var markdownLines: [String] = []
+            var openFence: (marker: Character, length: Int)?
             var index = 0
 
             while index < lines.count {
                 let line = lines[index]
+
+                // Inside a fenced code block everything is Markdown content,
+                // including lines that look like tile directives.
+                if let fence = openFence {
+                    markdownLines.append(line)
+                    if closesCodeFence(line, fence) {
+                        openFence = nil
+                    }
+                    index += 1
+                    continue
+                }
+
+                if let opened = openingCodeFence(line) {
+                    markdownLines.append(line)
+                    openFence = opened
+                    index += 1
+                    continue
+                }
+
                 if isTileDirectiveStart(line) {
                     flushMarkdown(
                         markdownLines: &markdownLines,
