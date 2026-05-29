@@ -69,28 +69,25 @@ and asserts generated form HTML plus CSS and browser JavaScript exposed through
 that missing services, missing operations, unsupported modes, unsafe credential
 exposure, and wrong tile types fail with typed errors.
 
-### 2. Add service binding configuration
+### 2. Add service binding configuration (done)
 
-Goal: make service-backed tiles configurable without hard-coded test fixtures.
+Shipped. `TileKit.Service.Binding` models site bindings (service id, contract
+source, mode, optional proxy route, availability, auth binding), separate from
+`TileKit.Service.Contract`. `TileKit.Service.Availability` carries the build
+policy (`required`/`optional`/`unchecked`); `TileKit.Service.ContractSource` is
+`.localFile(path:)` for now (extensible to remote); `TileKit.Service.AuthBinding`
+is a declarative placeholder (no secret resolution; `remote` uses a public key,
+`server`/`build` reference secrets by name only). A new `TileServiceImpl` target
+holds `TileKit.Service.LocalFileContractResolver`, the concrete file-backed
+`ContractResolving` that reads a binding's file and decodes a `Contract`. New
+`ContractResolutionError` cases cover unreadable and malformed files.
 
-Design:
-
-- Model site service bindings separately from service operation contracts.
-- A binding maps service id to manifest source, selected mode, optional proxy
-  route, availability policy, and auth binding.
-- Start with direct values or local JSON fixtures in tests.
-- Add YAML only when CLI config loading needs it.
-- Keep service contract loading behind an injected resolver.
-- Add a concrete local-file resolver before adding HTTP.
-- Add HTTP later in a `TileServiceImpl` target or another focused implementation
-  target, not in `TileService`.
-
-Acceptance:
-
-- A service binding can point to a local service contract file.
-- The generator can resolve the contract through an injected resolver.
-- Server and build credentials are never emitted to generated browser output.
-- Availability policy is represented even if health checks are not executed yet.
+Bindings are constructed as direct values; a config file format is deferred until
+CLI config loading needs it ("add YAML only when needed"). HTTP loading stays for
+a later `TileServiceImpl` slice. Covered by `TileServiceImplTests`: resolve from a
+file, missing service, unreadable file, malformed file, availability carried, and
+a file-resolved contract rendering through the service-form path without leaking
+server credentials.
 
 ### 3. Add derived JSON output
 
