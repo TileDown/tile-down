@@ -124,10 +124,16 @@ verbatim. `TileTileTests` proves the research's semantic round-trip:
 Byte identity is not a goal (the parser trims values and folds blank lines; the
 research rules byte-identity out). Done was taken at the tile-tree level.
 
-Remaining (now milestone 2 in DESIGN): full Markdown-syntax normalization (ATX
-headings, `-` lists, fenced code) needs a structural Markdown model, so Markdown
-blocks pass through verbatim until that lands. Definition-driven canonical
-property order also waits on tile definitions with schema.
+Prose canonicalization is now done too: `TileKit.Markdown.CommonMarkFormatter`
+(swift-markdown `MarkupFormatter`) normalizes prose to ATX headings, `-` markers,
+fenced code, and `*` emphasis, and `TileKit.Site.DocumentSerializer` composes
+prose + tiles into a fixed-point canonical document (`TileSiteTests`,
+`TileMarkdownTests`). Custom ordered-list start is normalized to 1 (swift-markdown
+#76), an accepted profile property documented in `docs/markdown-profile.md`.
+
+Still open: definition-driven canonical property order (waits on tile definitions
+with schema), and exposing canonical serialization through a `tiledown fmt`
+command.
 
 ### 5. Add asset declarations and deduplication
 

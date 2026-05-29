@@ -34,9 +34,20 @@ security posture, not a CommonMark default.
 
 ## Canonical form
 
-The canonical serializer is the source of truth for "one official style". Today
-it canonicalizes tile blocks (see `DirectiveSerializer`) and passes prose through
-verbatim. Full Markdown-syntax normalization (ATX headings, `-` lists, fenced
-code) arrives when the prose serializer is built on swift-markdown's
-`MarkupFormatter`. Byte-identical round-trips are explicitly not a goal; the
-round-trip is semantic, at the tile-tree level.
+`TileKit.Site.DocumentSerializer` is the source of truth for "one official
+style". It canonicalizes tile blocks through `TileKit.Tile.DirectiveSerializer`
+and prose through `TileKit.Markdown.CommonMarkFormatter` (swift-markdown's
+`MarkupFormatter`), joined in source order.
+
+Prose normalizes to: ATX headings (`# H`, never Setext), `-` for unordered-list
+and thematic-break markers, fenced code blocks, and `*` for emphasis. The output
+is a fixed point: serializing it again yields the same string.
+
+Known normalization, by design: custom ordered-list start indices are not
+preserved (swift-markdown #76), so `3.`/`4.` become `1.`/`1.`. The renderer still
+honors `<ol start>` for non-canonical authored source; the canonical form simply
+does not carry a custom start. Byte-identical round-trips are explicitly not a
+goal; the round-trip is semantic, and the canonical form is the normalized
+profile. The laws that hold are idempotence (the canonical form is a fixed point)
+and, once a document is canonical, tile-tree round-trip (`parse(serialize(x)) ==
+x`).
