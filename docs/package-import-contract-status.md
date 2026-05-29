@@ -8,7 +8,7 @@ and facade targets are the exceptions.
 |---|---|---|
 | `TileCore` | none | matches |
 | `TileContent` | `TileCore` | matches |
-| `TileMarkdown` | `Foundation`, `TileCore` | matches |
+| `TileMarkdown` | `Foundation`, `TileCore`, `Markdown` (swift-markdown) | matches |
 | `TileService` | `Foundation`, `TileCore` | matches |
 | `TileServiceForm` | `Foundation`, `TileCore`, `TileService`, `TileTile` | matches |
 | `TileServiceImpl` | `Foundation`, `TileCore`, `TileService` | matches |

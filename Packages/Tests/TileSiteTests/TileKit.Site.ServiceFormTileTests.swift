@@ -167,7 +167,7 @@ struct SiteGeneratorServiceFormTests {
         .init(
             fileSystem: fileSystem,
             markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
             tileParser: TileKit.Tile.DirectiveParser(),
             tileRegistry: tileRegistry,
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
