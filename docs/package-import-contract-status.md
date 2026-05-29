@@ -11,10 +11,11 @@ and facade targets are the exceptions.
 | `TileMarkdown` | `Foundation`, `TileCore` | matches |
 | `TileService` | `Foundation`, `TileCore` | matches |
 | `TileServiceForm` | `Foundation`, `TileCore`, `TileService`, `TileTile` | matches |
+| `TileServiceImpl` | `Foundation`, `TileCore`, `TileService` | matches |
 | `TileSource` | `Foundation`, `TileCore` | matches |
 | `TileTemplate` | `Foundation`, `TileCore` | matches |
 | `TileTile` | `Foundation`, `TileCore` | matches |
 | `TileSite` | `TileCore`, `TileMarkdown`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TileSiteImpl` | `Foundation`, `TileCore`, `TileSite` | matches |
-| `TileKit` | re-exports `TileCore`, `TileContent`, `TileMarkdown`, `TileService`, `TileServiceForm`, `TileSite`, `TileSiteImpl`, `TileSource`, `TileTemplate`, `TileTile` | matches |
+| `TileKit` | re-exports `TileCore`, `TileContent`, `TileMarkdown`, `TileService`, `TileServiceForm`, `TileServiceImpl`, `TileSite`, `TileSiteImpl`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TiledownCLI` | `Foundation`, `TileKit` | matches |

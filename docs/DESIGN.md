@@ -205,7 +205,8 @@ Implemented as of the current design revision:
 | Site generation | renders Markdown and tile blocks in source order through injected parser and registry values |
 | Services | provider integration manifest models, service operation contracts, capability inventory, validation, and auth exposure models |
 | Service forms | request-to-contract binding, generated HTML/CSS/browser-JS renderer for `remote` and `proxy` modes, and a `TileKit.ServiceForm.TileRenderer` adapter registered in the tile registry |
-| Service resolution | `TileKit.Service.ContractResolving` seam with an in-memory contract resolver |
+| Service resolution | `TileKit.Service.ContractResolving` seam with an in-memory resolver and a file-backed `TileKit.Service.LocalFileContractResolver` |
+| Service bindings | `TileKit.Service.Binding` site config (source, mode, proxy route, availability, declarative auth binding) separate from contracts |
 | Filesystem | local filesystem adapter isolated in `TileSiteImpl` |
 
 Not implemented yet:
@@ -214,8 +215,8 @@ Not implemented yet:
 |---|---|
 | Canonical source | canonical Markdown serializer and parse/serialize/parse law tests |
 | Output | derived JSON output and output renderer registry |
-| Site config | config loading, service binding config, output config, and template/theme config |
-| Service loading | local or remote service contract resolver, health checks, availability policy execution, and manifest caching |
+| Site config | config file loading, output config, and template/theme config (service binding values exist; no file format yet) |
+| Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |
 | CLI workflow | `init`, `serve`, `watch`, and proxy support |
@@ -251,6 +252,7 @@ Packages/
     TileSite/
     TileService/
     TileServiceForm/
+    TileServiceImpl/
     TileSource/
     TileTemplate/
     TileTile/
@@ -264,6 +266,7 @@ Packages/
     TileSiteTests/
     TileServiceTests/
     TileServiceFormTests/
+    TileServiceImplTests/
     TileSourceTests/
     TileTemplateTests/
     TileTileTests/
@@ -299,6 +302,7 @@ integration code only when that code is not pure domain logic. Today that means:
 | Target | Owns |
 |---|---|
 | `TileSiteImpl` | local filesystem I/O through `TileKit.Site.LocalFileSystem` |
+| `TileServiceImpl` | file-backed contract loading through `TileKit.Service.LocalFileContractResolver` |
 
 `TileKit` is a facade target. It re-exports the domain targets and the current
 implementation adapter so consumers can import one module while the internal
@@ -322,6 +326,7 @@ TileCore
   |     ^
   |     |
   |   TileServiceForm ----> TileTile
+  |   TileServiceImpl
   +-- TileSource
   +-- TileTemplate
   +-- TileTile
@@ -333,7 +338,7 @@ TileCore
         v
       TileSiteImpl
 
-TileKit facade -> TileCore, domain targets, TileSiteImpl
+TileKit facade -> TileCore, domain targets, TileServiceImpl, TileSiteImpl
 TiledownCLI    -> TileKit
 ```
 
@@ -367,7 +372,7 @@ future targets when they gain real code:
 |---|---|
 | `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
 | `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
-| `TileServiceImpl` | local or remote service contract loading, HTTP clients, health checks, and manifest caching |
+| `TileServiceImpl` | exists for local file contract loading; remote/HTTP clients, health checks, and manifest caching are the remaining triggers |
 | `TileDiagnostics` | structured warnings, build errors, and diagnostic sinks when diagnostics need their own API |
 
 Do not put future tile, service, asset, output, or diagnostics code into
@@ -1146,23 +1151,24 @@ Completed slices:
 | `service-form` request-to-contract binding | implemented |
 | `service-form` generated HTML/CSS/browser-JS renderer | implemented in `TileServiceForm` |
 | `service-form` tile renderer adapter and registry wiring | implemented via `TileKit.ServiceForm.TileRenderer` and a `TileKit.Service.ContractResolving` seam |
+| Service binding config and file-backed contract resolver | implemented via `TileKit.Service.Binding` and `TileKit.Service.LocalFileContractResolver` in `TileServiceImpl` |
 
 Near-term slices are tracked in [NEXT_STEPS.md](NEXT_STEPS.md). The service-form
 domain logic now renders through the tile registry without `TileSite` depending
 on concrete service-form behavior: the CLI registers
 `TileKit.ServiceForm.TileRenderer` for the `service-form` type id, and `TileSite`
 still knows only about `TileKit.Tile.Rendering` through the injected registry.
-The contract resolver injected into the adapter is the seam for later
-service binding configuration; the CLI's resolver is currently empty until
-config loading can populate it.
+Service bindings are modeled by `TileKit.Service.Binding`, and
+`TileKit.Service.LocalFileContractResolver` (in `TileServiceImpl`) resolves a
+contract from a binding's local file. Bindings are still direct values; the CLI's
+resolver stays empty until a config file format can populate it.
 
 Next major design milestones:
 
-1. Add service binding configuration and a file-backed service contract resolver.
-2. Add JSON output as a derived renderer, not a source format.
-3. Add canonical Markdown serialization.
-4. Add asset declarations and asset behavior registry.
-5. Add `init`, `serve`, `watch`, and optional proxy support.
+1. Add JSON output as a derived renderer, not a source format.
+2. Add canonical Markdown serialization.
+3. Add asset declarations and asset behavior registry.
+4. Add `init`, `serve`, `watch`, and optional proxy support.
 
 ---
 
