@@ -347,8 +347,8 @@ let baseProducts: [Product] = [
 
 #if os(iOS) || os(macOS)
 let appleOnlyProducts: [Product] = [
-    .singleTargetLibrary("TileDownUI"),
-    .singleTargetLibrary("TileDownComponents"),
+    .singleTargetLibrary("TiledownUI"),
+    .singleTargetLibrary("TiledownComponents"),
     // ... Apple-only UI
 ]
 #else

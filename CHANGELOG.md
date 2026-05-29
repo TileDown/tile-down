@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
+  Swift Testing coverage.
+- `docs/research/`: research notes for Markdown-canonical tiles, tile functions,
+  service-backed tiles, and Toucan parity.
 - Community and governance docs: contributing guide, code of conduct, security
   policy, support guide, issue forms, pull request template, and git style hooks.
 - `docs/CONVENTIONS.md`: the project's Swift coding conventions.
@@ -24,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated the architecture and agent guidance for Tiledown Markdown as the
+  canonical source format, the `tiledown` CLI name, Toucan-parity SSG goals, and
+  dependency-injected registries.
+- Updated SwiftLint settings to ignore SwiftPM build artifacts and align trailing
+  comma handling with SwiftFormat.
 - Restructured the coding rules: `engineering.md` now holds only judgment
   principles; agent-interaction rules moved to `AGENTS.md`; the no-force-unwrap
   rule is enforced by `.swiftlint.yml`; formatting by `.swiftformat`.

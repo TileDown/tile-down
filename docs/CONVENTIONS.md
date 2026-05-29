@@ -15,6 +15,88 @@ intrinsic to the output: client-side tiles (Mermaid, charts, forms, polls) emit
 HTML and JS that run in the visitor's browser. JS is never used for build logic or
 tooling.
 
+## Tile and function conventions
+
+Tiledown is Markdown-canonical on disk. The parser turns a constrained,
+normalized Tiledown Markdown profile into a typed tile tree. JSON is a derived
+form for tests, debugging, interchange, or editor internals, not the primary
+source file.
+
+- Plain Markdown is shorthand for core tiles: heading, paragraph, list, quote,
+  code, image, and link.
+- Tiles with structured properties use directive blocks:
+
+  ```markdown
+  :::tile poll
+  id: favorite-editor
+  mode: local
+  question: What editor do you use?
+  options:
+    - Xcode
+    - VS Code
+    - Other
+  :::
+  ```
+
+- Tile type ids use lowercase kebab-case for built-ins (`youtube-video`,
+  `email-response`) and dotted prefixes for externally supplied packages
+  (`vendor.poll`) when a collision is possible.
+- Tile ids are stable, lowercase kebab-case, unique within a document, and
+  preserved by the serializer. The editor may generate ids for new tiles.
+- Tile property keys use lowerCamelCase so Markdown, Swift `Codable`, and JSON
+  exports stay aligned.
+- Unknown tile types and unknown properties are preserved when parsing and
+  serializing. Unknown tiles render as visible non-fatal diagnostics in generated
+  output.
+- Attribute order is canonical. The serializer emits `id`, `mode`, required
+  schema properties, optional known properties, then unknown properties in source
+  order.
+
+Tile functions are declared by tile definitions, not by ad-hoc string
+replacement. A tile definition declares its schema, renderer, required assets,
+optional client script, and capability mode:
+
+| Mode | Meaning | Examples |
+|---|---|---|
+| `static` | Emits HTML only, no browser state or network | YouTube embed, callout |
+| `local` | Emits client JS and stores state in the browser | local poll using `localStorage` |
+| `remote` | Browser calls a public endpoint with no secret | comments through a public widget endpoint |
+| `proxy` | Browser calls a site-owned proxy that holds secrets | email response, private poll API |
+| `build` | Generator fetches or transforms data during build | YouTube metadata, chart CSV |
+
+Service-backed tiles use a provider-neutral manifest, not backend-specific
+knowledge. The manifest declares service availability, operations, input schema,
+output schema, UI hints, auth exposure, cache behavior, and error format. The
+backend may be Hummingbird, Vapor, serverless, or a third-party API; Tiledown
+consumes the manifest contract.
+
+```markdown
+:::tile service-form
+id: price-calculator
+service: calculator
+operation: positive-decimal-calculation
+mode: proxy
+submitLabel: Calculate
+:::
+```
+
+The generated HTML, CSS, and browser JavaScript come from the operation's input
+and output schemas plus `inputUi` and `outputUi` hints. JSON Schema is the
+normative format for service input and output contracts. OpenAPI may be linked
+for full HTTP API descriptions, but the Tiledown service manifest is the source
+for tile rendering and capability decisions.
+
+Secrets never appear in Markdown, generated HTML, or browser JavaScript. If a
+tile needs an API key, the tile uses `mode: proxy` or `mode: build` and refers to
+an endpoint or environment variable name, never the secret value. Public browser
+keys must be named `publicKey`, not `apiKey`, so review can distinguish them from
+secrets.
+
+Runtime Swift plugin loading is out of scope. Pluggability means in-process Swift
+registries wired by the CLI composition root: tile definitions, renderers, output
+engines, asset behaviors, and build-time functions are injected rather than
+looked up from global state.
+
 ## Engineering principles
 
 1. **Optimal over fast.** Respect existing code and idioms. Clarify ambiguity

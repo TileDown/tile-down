@@ -47,8 +47,8 @@ Apple-only products and targets go in conditional arrays so non-Apple builds see
 ```swift
 #if os(iOS) || os(macOS)
 let appleOnlyProducts: [Product] = [
-    .singleTargetLibrary("TileDownUI"),
-    .singleTargetLibrary("TileDownComponents"),
+    .singleTargetLibrary("TiledownUI"),
+    .singleTargetLibrary("TiledownComponents"),
     // ...
 ]
 #else
@@ -99,7 +99,7 @@ Linux UI is out of scope (no SwiftUI on Linux).
 A SwiftUI file that has no Linux meaning gets a file-level gate:
 
 ```swift
-// TileDownUI/MainTabs.swift
+// TiledownUI/MainTabs.swift
 import SwiftUI
 
 #if os(iOS) || os(macOS)
