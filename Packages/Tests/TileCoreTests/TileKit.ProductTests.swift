@@ -7,4 +7,9 @@ struct ProductTests {
     func commandName() {
         #expect(TileKit.Product.commandName == "tiledown")
     }
+
+    @Test("reports its version")
+    func version() {
+        #expect(TileKit.Product.version == "0.1.0")
+    }
 }
