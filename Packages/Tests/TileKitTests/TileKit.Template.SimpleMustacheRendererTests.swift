@@ -29,4 +29,52 @@ struct SimpleMustacheRendererTests {
             )
         }
     }
+
+    @Test("renders list sections with local item scope")
+    func rendersListSections() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: "{{# pages }}<a href=\"{{ url }}\">{{ title }}</a>{{ /pages }}",
+            context: [
+                "pages": .list(
+                    [
+                        [
+                            "title": "Home",
+                            "url": "/",
+                        ],
+                        [
+                            "title": "Blog <News>",
+                            "url": "/blog/",
+                        ],
+                    ],
+                ),
+            ],
+        )
+
+        #expect(html == "<a href=\"/\">Home</a><a href=\"/blog/\">Blog &lt;News&gt;</a>")
+    }
+
+    @Test("renders nested object values")
+    func rendersNestedObjectValues() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: "<h1>{{ page.title }}</h1>{{{ page.contents.html }}}",
+            context: [
+                "page": .object(
+                    [
+                        "title": "Home",
+                        "contents": .object(
+                            [
+                                "html": "<p>Body</p>",
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        #expect(html == "<h1>Home</h1><p>Body</p>")
+    }
 }
