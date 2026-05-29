@@ -1,8 +1,7 @@
 name: CI
 
-# The mechanical gates, run on GitHub as the backstop to the local git hooks.
-# Style runs now (docs). The Swift gates are guarded on Packages/Package.swift,
-# so they stay green and skip until the engine package lands, then activate.
+# The mechanical gates, run on GitHub as the backstop to the local git hooks:
+# style + namespacing on every change, plus build and test on macOS and Linux.
 
 on:
   push:
@@ -30,10 +29,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Format, lint, build, test
         run: |
-          if [ ! -f Packages/Package.swift ]; then
-            echo "No Packages/Package.swift yet; skipping Swift gates."
-            exit 0
-          fi
           brew install swiftformat swiftlint
           swiftformat . --config .swiftformat --lint
           swiftlint --config .swiftlint.yml --strict
@@ -47,8 +42,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and test
         run: |
-          if [ ! -f Packages/Package.swift ]; then
-            echo "No Packages/Package.swift yet; skipping Swift gates."
-            exit 0
-          fi
           cd Packages && swift build && swift test
