@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Derived JSON output: a new `TileOutput` target carrying the output renderer seam
+  (DESIGN G7, § 8.3). `TileKit.Output.Rendering` is the renderer Strategy (a
+  `formatID` plus `render(_:) -> Artifact`), `TileKit.Output.Registry` is the
+  injected registry that dispatches a `TileKit.Output.Document` by format id (the
+  structural twin of `TileKit.Tile.Registry`; an unregistered format throws
+  `TileKit.Output.RenderingError.unknownFormat` rather than guessing).
+  `TileKit.Output.JSONRenderer` is the second output renderer (HTML is the first),
+  projecting the parsed tile tree into deterministic JSON: tile type ids, source
+  property order (properties are an ordered array, not an object), both value kinds
+  (tagged `string`/`list`), and unknown tile data all survive. JSON is a derived
+  view, never canonical. A `tiledown json <source.md> <output.json>` command writes
+  it. See [docs/DESIGN.md](docs/DESIGN.md) § 7.2 and § 8.3.
+
 - Canonical serialization for the whole document: `TileKit.Markdown.CommonMarkFormatter`
   normalizes prose via swift-markdown's `MarkupFormatter` (ATX headings, `-` markers,
   fenced code, `*` emphasis), behind a `TileKit.Markdown.Formatting` seam, and
