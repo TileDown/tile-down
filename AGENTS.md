@@ -102,3 +102,6 @@ swift run tiledown
 
 (Run these from `Packages/`. The engine package is committed and builds today. See
 [CONTRIBUTING.md](CONTRIBUTING.md).)
+
+To build and test on Linux (the engine targets macOS and Linux), see
+[docs/linux-testing.md](docs/linux-testing.md).
