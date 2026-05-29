@@ -185,6 +185,8 @@ let targets: [Target] = {
         dependencies: [
             "TileCore",
             "TileMarkdown",
+            "TileService",
+            "TileServiceForm",
             "TileSite",
             "TileSource",
             "TileTemplate",

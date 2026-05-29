@@ -125,7 +125,7 @@ with dependency-injected registries and protocol boundaries.
 | F6 | Output escaping prevents script injection through text fields | implemented for Markdown, templates, and service-form runtime config | unit tests |
 | F7 | Service-backed tiles reject server secrets in generated browser output | implemented in binding and rendering rules | `TileServiceFormTests` |
 | F8 | Query filtering, ordering, limit, and offset work for content collections | implemented | `TileContentTests` |
-| F9 | `service-form` can generate controls, result regions, CSS, and browser JS from a service contract | implemented as a domain renderer, not yet registered by the site generator by default | `TileServiceFormTests` |
+| F9 | `service-form` can generate controls, result regions, CSS, and browser JS from a service contract | implemented; wired through `TileKit.ServiceForm.TileRenderer` and registered in the tile registry | `TileServiceFormTests`, `TileSiteTests` |
 
 ### 4.2 Non-functional
 
@@ -204,7 +204,8 @@ Implemented as of the current design revision:
 | Tiles | source-ordered directive parser, typed tile values, `service-form` request validation, renderer protocol, render output, registry, and unknown fallback |
 | Site generation | renders Markdown and tile blocks in source order through injected parser and registry values |
 | Services | provider integration manifest models, service operation contracts, capability inventory, validation, and auth exposure models |
-| Service forms | request-to-contract binding and generated HTML/CSS/browser-JS renderer for `remote` and `proxy` modes |
+| Service forms | request-to-contract binding, generated HTML/CSS/browser-JS renderer for `remote` and `proxy` modes, and a `TileKit.ServiceForm.TileRenderer` adapter registered in the tile registry |
+| Service resolution | `TileKit.Service.ContractResolving` seam with an in-memory contract resolver |
 | Filesystem | local filesystem adapter isolated in `TileSiteImpl` |
 
 Not implemented yet:
@@ -215,7 +216,7 @@ Not implemented yet:
 | Output | derived JSON output and output renderer registry |
 | Site config | config loading, service binding config, output config, and template/theme config |
 | Service loading | local or remote service contract resolver, health checks, availability policy execution, and manifest caching |
-| Built-in tile wiring | default registration for `service-form`, `youtube-video`, `poll`, comments, email response, and charts |
+| Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |
 | CLI workflow | `init`, `serve`, `watch`, and proxy support |
 
@@ -1143,22 +1144,25 @@ Completed slices:
 | Service operation contract decoding and validation | implemented |
 | `service-form` tile request decoding and validation | implemented |
 | `service-form` request-to-contract binding | implemented |
-| `service-form` generated HTML/CSS/browser-JS renderer | implemented in `TileServiceForm`; not yet registered in the site generator by default |
+| `service-form` generated HTML/CSS/browser-JS renderer | implemented in `TileServiceForm` |
+| `service-form` tile renderer adapter and registry wiring | implemented via `TileKit.ServiceForm.TileRenderer` and a `TileKit.Service.ContractResolving` seam |
 
-Near-term slices are tracked in [NEXT_STEPS.md](NEXT_STEPS.md). The immediate
-priority is to wire existing service-form domain logic through the tile registry
-without making `TileSite` depend on concrete service-form behavior. `TileSite`
-should continue to know only about `TileKit.Tile.Rendering` through the injected
-registry.
+Near-term slices are tracked in [NEXT_STEPS.md](NEXT_STEPS.md). The service-form
+domain logic now renders through the tile registry without `TileSite` depending
+on concrete service-form behavior: the CLI registers
+`TileKit.ServiceForm.TileRenderer` for the `service-form` type id, and `TileSite`
+still knows only about `TileKit.Tile.Rendering` through the injected registry.
+The contract resolver injected into the adapter is the seam for later
+service binding configuration; the CLI's resolver is currently empty until
+config loading can populate it.
 
 Next major design milestones:
 
-1. Add a `service-form` tile renderer adapter in `TileServiceForm`.
-2. Add an injected service contract resolver and service binding configuration.
-3. Add JSON output as a derived renderer, not a source format.
-4. Add canonical Markdown serialization.
-5. Add asset declarations and asset behavior registry.
-6. Add `init`, `serve`, `watch`, and optional proxy support.
+1. Add service binding configuration and a file-backed service contract resolver.
+2. Add JSON output as a derived renderer, not a source format.
+3. Add canonical Markdown serialization.
+4. Add asset declarations and asset behavior registry.
+5. Add `init`, `serve`, `watch`, and optional proxy support.
 
 ---
 

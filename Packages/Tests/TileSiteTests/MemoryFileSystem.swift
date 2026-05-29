@@ -1,0 +1,44 @@
+import TileCore
+import TileSite
+
+/// In-memory file system for site generator tests.
+final class MemoryFileSystem: TileKit.Site.FileSystem {
+    enum Error: Swift.Error {
+        case missingFile(String)
+    }
+
+    var files: [String: String]
+
+    init(
+        files: [String: String],
+    ) {
+        self.files = files
+    }
+
+    func listFilesRecursively(
+        at path: String,
+    ) throws -> [String] {
+        let prefix = path.hasSuffix("/") ? path : path + "/"
+        return files.keys
+            .filter { $0.hasPrefix(prefix) }
+            .map { String($0.dropFirst(prefix.count)) }
+            .filter { !$0.isEmpty }
+            .sorted()
+    }
+
+    func readTextFile(
+        at path: String,
+    ) throws -> String {
+        guard let file = files[path] else {
+            throw Error.missingFile(path)
+        }
+        return file
+    }
+
+    func writeTextFile(
+        _ contents: String,
+        at path: String,
+    ) throws {
+        files[path] = contents
+    }
+}
