@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for future site collections and tile function manifests.
 - A `TileTile` domain target with typed tile blocks, source-ordered properties,
   directive parsing, and tests for structured Tiledown Markdown tile blocks.
+- A `TileService` domain target with manifest models, capability inventory, and
+  validation for manifest-driven provider integrations.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,

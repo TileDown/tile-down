@@ -21,6 +21,7 @@ let allProducts: [Product] = [
     .singleTargetLibrary("TileMarkdown"),
     .singleTargetLibrary("TileSite"),
     .singleTargetLibrary("TileSiteImpl"),
+    .singleTargetLibrary("TileService"),
     .singleTargetLibrary("TileSource"),
     .singleTargetLibrary("TileTemplate"),
     .singleTargetLibrary("TileTile"),
@@ -129,6 +130,23 @@ let targets: [Target] = {
     )
     let tileTileTargets = [tileTileTarget, tileTileTestsTarget]
 
+    let tileServiceTarget = Target.target(
+        name: "TileService",
+        dependencies: [
+            "TileCore",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServiceTestsTarget = Target.testTarget(
+        name: "TileServiceTests",
+        dependencies: [
+            "TileCore",
+            "TileService",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServiceTargets = [tileServiceTarget, tileServiceTestsTarget]
+
     let tileSiteTarget = Target.target(
         name: "TileSite",
         dependencies: [
@@ -181,6 +199,7 @@ let targets: [Target] = {
             "TileMarkdown",
             "TileSite",
             "TileSiteImpl",
+            "TileService",
             "TileSource",
             "TileTemplate",
             "TileTile",
@@ -212,6 +231,7 @@ let targets: [Target] = {
         + tileSourceTargets
         + tileTemplateTargets
         + tileTileTargets
+        + tileServiceTargets
         + tileSiteTargets
         + tileSiteImplTargets
         + tileKitTargets
