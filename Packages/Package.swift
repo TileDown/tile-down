@@ -13,7 +13,12 @@ extension Product {
     }
 }
 
-let packageDependencies: [Package.Dependency] = []
+let packageDependencies: [Package.Dependency] = [
+    .package(
+        url: "https://github.com/apple/swift-markdown",
+        from: "0.6.0",
+    ),
+]
 
 let allProducts: [Product] = [
     .singleTargetLibrary("TileCore"),
@@ -68,6 +73,7 @@ let targets: [Target] = {
         name: "TileMarkdown",
         dependencies: [
             "TileCore",
+            .product(name: "Markdown", package: "swift-markdown"),
         ],
         swiftSettings: swiftSettings,
     )
