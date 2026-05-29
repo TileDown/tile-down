@@ -100,5 +100,5 @@ swift test
 swift run tiledown
 ```
 
-(The engine package is not yet committed; these are the intended commands once it
-lands. See [CONTRIBUTING.md](CONTRIBUTING.md).)
+(Run these from `Packages/`. The engine package is committed and builds today. See
+[CONTRIBUTING.md](CONTRIBUTING.md).)
