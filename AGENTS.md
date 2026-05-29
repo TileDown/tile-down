@@ -2,6 +2,15 @@
 
 Guidance for anyone (human or coding agent) writing code in Tiledown.
 
+## Rule loading (read this first)
+
+At the start of a session, read [docs/rules/README.md](docs/rules/README.md) and
+the rules it marks as always relevant. Then confirm you have done so by replying
+with the token `rules-loaded`, and name the rule files that apply to the task at
+hand. If you cannot name them, you have not loaded the rules. The mechanical gates
+(hooks and CI) enforce the checkable rules regardless, but the judgment rules
+depend on you having read them.
+
 ## What Tiledown is
 
 A tile-native static site generator. The canonical document is a tree of typed
