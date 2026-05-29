@@ -1,6 +1,6 @@
 # App Colors Architecture Rules
 
-Color-system rules for the planned Tiledown native macOS editor app (the engine is non-UI and is out of scope here). Build the colors package with HSV-based color management, dynamic light/dark support, and semantic naming. The colors package is independent from the theme package, which combines colors + fonts.
+Color-system rules for the planned Tiledown native editor. Build the colors package with HSV-based color management, dynamic light/dark support, and semantic naming. The colors package is independent from the theme package, which combines colors + fonts.
 
 ## Core rules
 
@@ -28,7 +28,7 @@ Use these exact semantic names:
 - `success`: success states (like systemGreen)
 - `secondary`: secondary brand color (like systemPurple)
 - `destructive`: destructive/error actions (like systemRed). Apple uses "destructive", NOT "danger".
-- `label`: primary text color (like `NSColor.labelColor`)
+- `label`: primary text color (like `UIColor.label`)
 - `secondaryLabel`: secondary text color
 - `onPrimary`: text on primary-colored backgrounds
 - `background`: primary background (like systemBackground)
@@ -38,8 +38,9 @@ Use these exact semantic names:
 
 Create dynamic colors that adapt to appearance:
 
-- Use `NSColor` dynamic colors on macOS (the editor's only target).
-- Fall back to the light variant on any other platform.
+- Use `UIColor` dynamic colors on iOS.
+- Use `NSColor` dynamic colors on macOS.
+- Fall back to the light variant on other platforms.
 
 ### Rule 5: Initialization modes
 
@@ -152,7 +153,9 @@ public struct HSVColor: Equatable, Sendable {
 ```swift
 import SwiftUI
 
-#if canImport(AppKit)
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
 import AppKit
 #endif
 
@@ -162,7 +165,12 @@ extension Color {
     }
 
     public func toHSV() -> HSVColor {
-        #if canImport(AppKit)
+        #if canImport(UIKit)
+        let uiColor = UIColor(self)
+        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
+        uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        return HSVColor(hue: Double(hue), saturation: Double(saturation), value: Double(brightness), alpha: Double(alpha))
+        #elseif canImport(AppKit)
         let nsColor = NSColor(self)
         let converted = nsColor.usingColorSpace(.deviceRGB) ?? nsColor
         var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
@@ -180,14 +188,20 @@ extension Color {
 ```swift
 import SwiftUI
 
-#if canImport(AppKit)
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
 import AppKit
 #endif
 
 extension Color {
     /// Creates a dynamic color that adapts to appearance.
     public init(light: Color, dark: Color) {
-        #if os(macOS)
+        #if os(iOS)
+        self = Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+        })
+        #elseif os(macOS)
         self = Color(NSColor(name: nil) { appearance in
             appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(dark) : NSColor(light)
         })
@@ -441,4 +455,4 @@ struct TiledownApp: App {
 - [ ] `SystemColorDefaults` provides fallback values
 - [ ] `AppColors.system` static property exists
 - [ ] Environment keys for `appColors` and `appTheme`
-- [ ] macOS dynamic colors via `NSColor` under `#if os(macOS)`
+- [ ] Platform-specific dynamic colors (`#if os(iOS)` / `os(macOS)`)
