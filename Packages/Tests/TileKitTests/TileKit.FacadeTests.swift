@@ -8,12 +8,19 @@ struct TileKitFacadeTests {
         let queryRunner = TileKit.Content.QueryRunner()
         let markdownRenderer = TileKit.Markdown.BasicHTMLRenderer()
         let manifestValidator = TileKit.Service.ManifestValidator()
+        let serviceFormBinder = TileKit.ServiceForm.Binder()
         let tileParser = TileKit.Tile.DirectiveParser()
 
         #expect(TileKit.Product.commandName == "tiledown")
         #expect(queryRunner.run(.init(), records: []) == [])
         #expect(markdownRenderer.renderHTML("# Hello") == "<h1>Hello</h1>")
         #expect(manifestValidator.validate(typeformManifest()).isEmpty)
+        #expect(
+            try serviceFormBinder.bind(
+                serviceFormRequest(),
+                to: serviceContract(),
+            ).operation.id == "positive-decimal-calculation",
+        )
         #expect(try tileParser.parseBlocks("Text") == [.markdown("Text")])
     }
 
@@ -35,6 +42,35 @@ struct TileKitFacadeTests {
             ],
             layout: .init(mode: .block),
             build: .init(strategy: .providerEmbed),
+        )
+    }
+
+    private func serviceFormRequest() -> TileKit.Tile.ServiceFormRequest {
+        .init(
+            id: "price-calculator",
+            serviceID: "calculator",
+            operationID: "positive-decimal-calculation",
+            mode: .proxy,
+        )
+    }
+
+    private func serviceContract() -> TileKit.Service.Contract {
+        .init(
+            id: "calculator",
+            name: "Calculator",
+            version: "1.0.0",
+            operations: [
+                .init(
+                    id: "positive-decimal-calculation",
+                    modes: [.proxy],
+                    transport: .init(
+                        method: .post,
+                        path: "/calculate",
+                    ),
+                    inputSchema: .init(type: .object),
+                    outputSchema: .init(type: .object),
+                ),
+            ],
         )
     }
 }

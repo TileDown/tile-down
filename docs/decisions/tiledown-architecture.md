@@ -68,6 +68,7 @@ Current source targets are:
 | `TileContent` | content records, values, queries, conditions, sorting, and query execution |
 | `TileMarkdown` | Markdown rendering contract and basic HTML renderer |
 | `TileService` | provider manifests, service operation contracts, capability inventory, and validation |
+| `TileServiceForm` | binding between service-form tile requests and service contract operations |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
 | `TileTile` | typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
@@ -167,6 +168,10 @@ generic tile instance first, then `TileKit.Tile.ServiceFormRequest` validates th
 tile id, service id, operation id, selected mode, and optional submit label. It
 does not import `TileService`; later composition binds the request to a
 `TileKit.Service.Contract`.
+
+`TileKit.ServiceForm.Binder` performs that composition. It rejects mismatched
+service ids, missing operations, unsupported modes, and direct browser `remote`
+mode when the operation requires non-browser credentials.
 
 Generation then produces:
 

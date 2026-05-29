@@ -188,6 +188,7 @@ Packages/
     TileMarkdown/
     TileSite/
     TileService/
+    TileServiceForm/
     TileSource/
     TileTemplate/
     TileTile/
@@ -200,6 +201,7 @@ Packages/
     TileMarkdownTests/
     TileSiteTests/
     TileServiceTests/
+    TileServiceFormTests/
     TileSourceTests/
     TileTemplateTests/
     TileTileTests/
@@ -223,6 +225,7 @@ logic:
 | `TileContent` | `TileKit.Content` records, field values, conditions, sort orders, queries, and query execution |
 | `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
 | `TileService` | `TileKit.Service` provider manifests, service operation contracts, capability inventory, and validation |
+| `TileServiceForm` | `TileKit.ServiceForm` binding between service-form tile requests and service contract operations |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
 | `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
@@ -254,6 +257,9 @@ TileCore
   +-- TileContent
   +-- TileMarkdown
   +-- TileService
+  |     ^
+  |     |
+  |   TileServiceForm ----> TileTile
   +-- TileSource
   +-- TileTemplate
   +-- TileTile
@@ -316,6 +322,7 @@ Initial namespaces:
 | `TileKit.Template` | template loading and rendering contracts |
 | `TileKit.Tile` | tile model, directive parsing, definitions, renderers, registry |
 | `TileKit.Service` | service manifests, auth exposure, operation schemas |
+| `TileKit.ServiceForm` | service-form request binding and validation |
 | `TileKit.Asset` | asset declarations and behavior registry |
 | `TileKit.Output` | output renderer contracts and generated files |
 | `TileKit.Diagnostics` | warnings and build errors |
@@ -535,6 +542,11 @@ This parses to a generic `TileKit.Tile.Instance` first. The service-specific
 view of that generic tile is `TileKit.Tile.ServiceFormRequest`, which validates
 the tile id, service id, operation id, selected mode, and optional submit label
 without importing `TileService`.
+
+`TileKit.ServiceForm.Binder` then binds that request to a
+`TileKit.Service.Contract` operation. The binder verifies that the service id
+matches, the operation exists, the selected mode is supported, and private
+credentials are not used by direct browser `remote` mode.
 
 Example service binding:
 
@@ -1023,6 +1035,7 @@ Initial tests:
 - Service manifest decoding.
 - Service operation contract decoding and validation.
 - `service-form` tile request decoding and validation.
+- `service-form` request-to-contract binding.
 - `service-form` rejects server secrets in browser output.
 
 No live network tests in the core suite. HTTP is injected and tested with fakes.
@@ -1040,9 +1053,10 @@ No live network tests in the core suite. HTTP is injected and tested with fakes.
 6. Add generated assets and asset behavior registry.
 7. Add service operation contract decoding and validation.
 8. Add `service-form` tile request decoding and validation.
-9. Add `service-form` generated HTML/CSS/JS.
-10. Add JSON output.
-11. Add `init`, `serve`, and `watch`.
+9. Add `service-form` request-to-contract binding.
+10. Add `service-form` generated HTML/CSS/JS.
+11. Add JSON output.
+12. Add `init`, `serve`, and `watch`.
 
 ---
 

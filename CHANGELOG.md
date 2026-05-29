@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service operation contracts for service-backed tiles, including health,
   transport, input/output schema, UI hints, auth references, errors, cache, and
   validation.
+- A `TileServiceForm` composition target that binds typed `service-form` tile
+  requests to service contract operations and rejects unsafe remote credentials.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,
