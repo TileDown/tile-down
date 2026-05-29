@@ -39,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Split the Swift package into focused domain targets for content, source,
+  Markdown, templates, and site generation, with `TileCore` limited to the root
+  namespace and product metadata, `TileSiteImpl` holding concrete filesystem I/O,
+  and `TileKit` acting as a facade target.
+- Changed site generation to receive content discovery through the injected
+  `TileKit.Source.ContentDiscovering` protocol.
 - Updated the architecture and agent guidance for Tiledown Markdown as the
   canonical source format, the `tiledown` CLI name, Toucan-parity SSG goals, and
   dependency-injected registries.
