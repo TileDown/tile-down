@@ -24,20 +24,28 @@ in [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Getting started
 
-Will require a recent Swift toolchain (Swift 6.1+). Once the package is in:
+Will require a recent Swift toolchain (Swift 6.1+). Tiledown is a monorepo: a
+workspace at the root, a single `Package.swift` under `Packages/`, and `Apps/`
+for app targets. Once the package is in:
 
 ```sh
+cd Packages
 swift build
 swift test
 swift run tile-down            # renders a demo page to stdout
 ```
 
-Install the project git hooks once after cloning. They reject commit messages and
-staged content that carry forbidden style tells:
+Install the project git hooks once after cloning:
 
 ```sh
 git config core.hooksPath .githooks
 ```
+
+This wires three hooks: `commit-msg` and `pre-commit` reject forbidden style tells
+(em dashes, tool-attribution) in messages and staged content, and `pre-push` runs
+the style, namespacing, format, lint, build, and test gates. The same gates run in
+GitHub CI (`.github/workflows/ci.yml`) as the backstop. The Swift gates are inert
+until the package lands.
 
 ## Conventions
 
