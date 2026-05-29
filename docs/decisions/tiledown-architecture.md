@@ -67,7 +67,7 @@ Current source targets are:
 | `TileCore` | root `TileKit` namespace and tiny product metadata |
 | `TileContent` | content records, values, queries, conditions, sorting, and query execution |
 | `TileMarkdown` | Markdown rendering contract and basic HTML renderer |
-| `TileService` | manifest models, capability inventory, and manifest validation |
+| `TileService` | provider manifests, service operation contracts, capability inventory, and validation |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
 | `TileTile` | typed tile blocks, source-ordered properties, and directive parser |
@@ -152,6 +152,10 @@ Markdown references a service id and operation id. Site config maps the service
 id to a manifest URL, availability policy, proxy route when needed, and auth
 policy. The manifest describes operations using JSON Schema 2020-12 for input
 and output plus Tiledown-specific `inputUi` and `outputUi` hints.
+
+The Swift model for this operation manifest is `TileKit.Service.Contract`.
+Provider integration manifests remain separate because they describe capability
+composition for provider embeds rather than callable service operations.
 
 OpenAPI can be linked later, but the Tiledown service manifest remains the
 rendering and capability contract.

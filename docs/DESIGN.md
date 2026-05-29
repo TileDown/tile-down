@@ -222,7 +222,7 @@ logic:
 |---|---|
 | `TileContent` | `TileKit.Content` records, field values, conditions, sort orders, queries, and query execution |
 | `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
-| `TileService` | `TileKit.Service` manifest models, capability inventory, and manifest validation |
+| `TileService` | `TileKit.Service` provider manifests, service operation contracts, capability inventory, and validation |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
 | `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, and directive parser |
@@ -578,6 +578,12 @@ Minimum manifest fields:
 | `operations[].errors` | error format, preferably Problem Details JSON |
 | `operations[].cache` | whether results can be cached and for how long |
 
+The Swift model for this service-backed contract is
+`TileKit.Service.Contract`. It is separate from provider integration manifests:
+contracts describe callable operations, while provider manifests map a
+third-party embed or provider surface onto existing Tiledown capabilities. Both
+stay declarative and both are validated before generation.
+
 JSON Schema 2020-12 is the normative contract for inputs and outputs. UI hints
 are presentation only. If an input fails schema validation, the value is invalid
 even if a UI hint would have rendered it.
@@ -788,7 +794,7 @@ Initial input capabilities:
 | Capability | Meaning |
 |---|---|
 | `text` | single-line string |
-| `multilineText` | multi-line string |
+| `multiline-text` | multi-line string |
 | `integer` | integer number |
 | `double` | floating-point number when exact decimal precision is not required |
 | `decimal` | exact decimal transported as a string |
@@ -799,21 +805,21 @@ Initial input capabilities:
 | `color` | color value |
 | `url` | URL value |
 | `select` | one value from allowed values |
-| `credentialReference` | reference to a declared credential, not the credential value |
+| `credential-reference` | reference to a declared credential, not the credential value |
 
 Initial output capabilities:
 
 | Capability | Meaning |
 |---|---|
-| `escapedText` | escaped text output |
-| `trustedMarkdown` | Markdown rendered by Tiledown only when explicitly allowed |
-| `imagePlaceholder` | generated image placeholder |
-| `videoPlaceholder` | generated video placeholder |
+| `html` | generated HTML output from Tiledown capabilities |
+| `markdown` | Markdown rendered by Tiledown only when explicitly allowed |
+| `image-placeholder` | generated image placeholder |
+| `video-placeholder` | generated video placeholder |
 | `iframe` | iframe embed with declared origin and layout constraints |
 | `form` | generated form |
-| `cssAsset` | CSS asset declaration |
-| `javascriptAsset` | browser JavaScript asset declaration |
-| `externalEmbed` | declared third-party embed surface |
+| `css-asset` | CSS asset declaration |
+| `javascript-asset` | browser JavaScript asset declaration |
+| `external-embed` | declared third-party embed surface |
 
 Initial layout capabilities:
 
@@ -821,7 +827,7 @@ Initial layout capabilities:
 |---|---|
 | `inline` | inline flow |
 | `block` | normal block flow |
-| `fullWidth` | spans available content width |
+| `full-width` | spans available content width |
 | `responsive` | preserves responsive sizing behavior |
 
 Initial validation capabilities:
@@ -830,10 +836,10 @@ Initial validation capabilities:
 |---|---|
 | `required` | value must be present |
 | `optional` | value may be omitted |
-| `defaultValue` | default applied when omitted |
-| `allowedValues` | enum-like allowed value set |
-| `minLength` | minimum string length |
-| `maxLength` | maximum string length |
+| `default-value` | default applied when omitted |
+| `allowed-values` | enum-like allowed value set |
+| `min-length` | minimum string length |
+| `max-length` | maximum string length |
 | `regex` | regular expression validation |
 | `minimum` | numeric lower bound |
 | `maximum` | numeric upper bound |
@@ -859,11 +865,11 @@ requirements:
 
 inputs:
   formId:
-    capability: text
+    type: text
     required: true
 
   theme:
-    capability: select
+    type: select
     required: false
     default: light
     allowedValues:
@@ -872,7 +878,7 @@ inputs:
 
 outputs:
   embed:
-    capability: iframe
+    type: iframe
     responsive: true
     origin: https://form.typeform.com
 
@@ -1010,6 +1016,7 @@ Initial tests:
 - Query filter/order/limit/offset.
 - Mustache render from prepared context.
 - Service manifest decoding.
+- Service operation contract decoding and validation.
 - `service-form` rejects server secrets in browser output.
 
 No live network tests in the core suite. HTTP is injected and tested with fakes.
@@ -1025,9 +1032,10 @@ No live network tests in the core suite. HTTP is injected and tested with fakes.
 4. Add content type and query basics.
 5. Add Markdown tile directives and tile registry.
 6. Add generated assets and asset behavior registry.
-7. Add `service-form` manifest decoding and generated HTML/CSS/JS.
-8. Add JSON output.
-9. Add `init`, `serve`, and `watch`.
+7. Add service operation contract decoding and validation.
+8. Add `service-form` generated HTML/CSS/JS.
+9. Add JSON output.
+10. Add `init`, `serve`, and `watch`.
 
 ---
 
