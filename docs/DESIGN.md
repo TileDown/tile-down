@@ -225,7 +225,7 @@ logic:
 | `TileService` | `TileKit.Service` provider manifests, service operation contracts, capability inventory, and validation |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
-| `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, and directive parser |
+| `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
 | `TileSite` | `TileKit.Site` build requests/results, page context, generator orchestration, and filesystem protocol |
 
 Implementation targets are meatless adapters. They contain concrete I/O or
@@ -530,6 +530,11 @@ mode: proxy
 submitLabel: Calculate
 :::
 ```
+
+This parses to a generic `TileKit.Tile.Instance` first. The service-specific
+view of that generic tile is `TileKit.Tile.ServiceFormRequest`, which validates
+the tile id, service id, operation id, selected mode, and optional submit label
+without importing `TileService`.
 
 Example service binding:
 
@@ -1017,6 +1022,7 @@ Initial tests:
 - Mustache render from prepared context.
 - Service manifest decoding.
 - Service operation contract decoding and validation.
+- `service-form` tile request decoding and validation.
 - `service-form` rejects server secrets in browser output.
 
 No live network tests in the core suite. HTTP is injected and tested with fakes.
@@ -1033,9 +1039,10 @@ No live network tests in the core suite. HTTP is injected and tested with fakes.
 5. Add Markdown tile directives and tile registry.
 6. Add generated assets and asset behavior registry.
 7. Add service operation contract decoding and validation.
-8. Add `service-form` generated HTML/CSS/JS.
-9. Add JSON output.
-10. Add `init`, `serve`, and `watch`.
+8. Add `service-form` tile request decoding and validation.
+9. Add `service-form` generated HTML/CSS/JS.
+10. Add JSON output.
+11. Add `init`, `serve`, and `watch`.
 
 ---
 

@@ -70,7 +70,7 @@ Current source targets are:
 | `TileService` | provider manifests, service operation contracts, capability inventory, and validation |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
-| `TileTile` | typed tile blocks, source-ordered properties, and directive parser |
+| `TileTile` | typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
 | `TileSite` | build requests/results, page context, generator orchestration, and filesystem protocol |
 | `TileSiteImpl` | concrete local filesystem adapter |
 | `TileKit` | facade target re-exporting domain targets and current implementation adapter |
@@ -162,7 +162,13 @@ rendering and capability contract.
 
 ### D13. Generated service-form behavior
 
-The first generic service-backed tile is `service-form`. It generates:
+The first generic service-backed tile is `service-form`. Markdown parses to a
+generic tile instance first, then `TileKit.Tile.ServiceFormRequest` validates the
+tile id, service id, operation id, selected mode, and optional submit label. It
+does not import `TileService`; later composition binds the request to a
+`TileKit.Service.Contract`.
+
+Generation then produces:
 
 - Input fields from `inputSchema` plus `inputUi`.
 - Client-side validation for user experience.

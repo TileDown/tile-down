@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A typed content query core with filters, ordering, offset, and limit support
   for future site collections and tile function manifests.
 - A `TileTile` domain target with typed tile blocks, source-ordered properties,
-  directive parsing, and tests for structured Tiledown Markdown tile blocks.
+  directive parsing, typed `service-form` requests, and tests for structured
+  Tiledown Markdown tile blocks.
 - A `TileService` domain target with manifest models, capability inventory, and
   validation for manifest-driven provider integrations.
 - Service operation contracts for service-backed tiles, including health,
