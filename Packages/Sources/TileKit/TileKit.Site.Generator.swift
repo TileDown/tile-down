@@ -23,21 +23,16 @@ public extension TileKit.Site {
         public func build(
             _ request: BuildRequest,
         ) throws -> BuildResult {
-            let source = try fileSystem.readTextFile(at: request.sourcePath)
-            let document = try markdownParser.parse(source)
-            let bodyHTML = markdownRenderer.renderHTML(document.body)
-
-            var context = document.frontMatter
-            for (key, value) in document.frontMatter {
-                context["page.\(key)"] = value
-            }
-            context["contents"] = bodyHTML
-            context["page.contents.html"] = bodyHTML
-
+            let page = try loadPage(
+                sourcePath: request.sourcePath,
+                outputPath: request.outputPath,
+                slug: "",
+            )
             let template = try fileSystem.readTextFile(at: request.templatePath)
-            let output = try templateRenderer.render(
+            let output = try render(
+                page: page,
+                pages: [page],
                 template: template,
-                context: context,
             )
 
             try fileSystem.writeTextFile(
@@ -57,26 +52,106 @@ public extension TileKit.Site {
             let locations = contentDiscovery.discover(
                 relativePaths: relativePaths,
             )
+            let pages = try locations.map { location in
+                try loadPage(
+                    sourcePath: join(
+                        request.contentRootPath,
+                        location.sourceRelativePath,
+                    ),
+                    outputPath: outputPath(
+                        outputRootPath: request.outputRootPath,
+                        slug: location.slug,
+                    ),
+                    slug: location.slug,
+                )
+            }
+            let template = try fileSystem.readTextFile(at: request.templatePath)
 
             var outputPaths: [String] = []
-            for location in locations {
-                let result = try build(
-                    .init(
-                        sourcePath: join(
-                            request.contentRootPath,
-                            location.sourceRelativePath,
-                        ),
-                        templatePath: request.templatePath,
-                        outputPath: outputPath(
-                            outputRootPath: request.outputRootPath,
-                            slug: location.slug,
-                        ),
-                    ),
+            for page in pages {
+                let output = try render(
+                    page: page,
+                    pages: pages,
+                    template: template,
                 )
-                outputPaths.append(result.outputPath)
+                try fileSystem.writeTextFile(
+                    output,
+                    at: page.outputPath,
+                )
+                outputPaths.append(page.outputPath)
             }
 
             return .init(outputPaths: outputPaths)
+        }
+
+        private func loadPage(
+            sourcePath: String,
+            outputPath: String,
+            slug: String,
+        ) throws -> Page {
+            let source = try fileSystem.readTextFile(at: sourcePath)
+            let document = try markdownParser.parse(source)
+            let html = markdownRenderer.renderHTML(document.body)
+            return .init(
+                sourcePath: sourcePath,
+                outputPath: outputPath,
+                slug: slug,
+                document: document,
+                html: html,
+            )
+        }
+
+        private func render(
+            page: Page,
+            pages: [Page],
+            template: String,
+        ) throws -> String {
+            try templateRenderer.render(
+                template: template,
+                context: context(
+                    page: page,
+                    pages: pages,
+                ),
+            )
+        }
+
+        private func context(
+            page: Page,
+            pages: [Page],
+        ) -> TileKit.Template.Context {
+            var result = stringValues(page.document.frontMatter)
+            result["page"] = pageValue(page)
+            result["pages"] = .list(pages.map(pageContext))
+            result["contents"] = .string(page.html)
+            return result
+        }
+
+        private func pageValue(
+            _ page: Page,
+        ) -> TileKit.Template.Value {
+            .object(pageContext(page))
+        }
+
+        private func pageContext(
+            _ page: Page,
+        ) -> TileKit.Template.Context {
+            var context = stringValues(page.document.frontMatter)
+            context["slug"] = .string(page.slug)
+            context["url"] = .string(url(for: page.slug))
+            context["contents"] = .object(
+                [
+                    "html": .string(page.html),
+                ],
+            )
+            return context
+        }
+
+        private func stringValues(
+            _ values: [String: String],
+        ) -> TileKit.Template.Context {
+            values.reduce(into: [:]) { result, item in
+                result[item.key] = .string(item.value)
+            }
         }
 
         private func join(
@@ -100,6 +175,12 @@ public extension TileKit.Site {
         ) -> String {
             let path = slug.isEmpty ? "index.html" : slug + "/index.html"
             return join(outputRootPath, path)
+        }
+
+        private func url(
+            for slug: String,
+        ) -> String {
+            slug.isEmpty ? "/" : "/" + slug + "/"
         }
     }
 }

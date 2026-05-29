@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content-directory generation with `tiledown build-site <content-dir>
   <template.html> <output-dir>`, discovering `index.md` and `index.markdown`
   files and writing slugged `index.html` outputs.
+- Mustache-style list sections and nested object lookups, including a `pages`
+  collection in content-directory builds.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,

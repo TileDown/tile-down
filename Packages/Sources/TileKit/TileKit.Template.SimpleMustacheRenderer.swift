@@ -6,7 +6,17 @@ public extension TileKit.Template {
 
         public func render(
             template: String,
-            context: [String: String],
+            context: Context,
+        ) throws -> String {
+            try render(
+                template: template,
+                scopes: [context],
+            )
+        }
+
+        private func render(
+            template: String,
+            scopes: [Context],
         ) throws -> String {
             var result = ""
             var cursor = template.startIndex
@@ -15,36 +25,21 @@ public extension TileKit.Template {
                 result += template[cursor ..< openRange.lowerBound]
 
                 if template[openRange.upperBound...].hasPrefix("{") {
-                    let keyStart = template.index(after: openRange.upperBound)
-                    guard let closeRange = template[keyStart...].range(of: "}}}") else {
-                        throw SimpleMustacheRendererError.unterminatedTag(
-                            String(template[openRange.lowerBound...]),
-                        )
-                    }
-
-                    let key = Self.key(
-                        in: template[keyStart ..< closeRange.lowerBound],
+                    let tag = try renderRawTag(
+                        template: template,
+                        openRange: openRange,
+                        scopes: scopes,
                     )
-                    guard let value = context[key] else {
-                        throw SimpleMustacheRendererError.missingValue(key)
-                    }
-                    result += value
-                    cursor = closeRange.upperBound
+                    result += tag.output
+                    cursor = tag.cursor
                 } else {
-                    guard let closeRange = template[openRange.upperBound...].range(of: "}}") else {
-                        throw SimpleMustacheRendererError.unterminatedTag(
-                            String(template[openRange.lowerBound...]),
-                        )
-                    }
-
-                    let key = Self.key(
-                        in: template[openRange.upperBound ..< closeRange.lowerBound],
+                    let tag = try renderTag(
+                        template: template,
+                        openRange: openRange,
+                        scopes: scopes,
                     )
-                    guard let value = context[key] else {
-                        throw SimpleMustacheRendererError.missingValue(key)
-                    }
-                    result += Self.escapeHTML(value)
-                    cursor = closeRange.upperBound
+                    result += tag.output
+                    cursor = tag.cursor
                 }
             }
 
@@ -52,10 +47,231 @@ public extension TileKit.Template {
             return result
         }
 
+        private func renderRawTag(
+            template: String,
+            openRange: Range<String.Index>,
+            scopes: [Context],
+        ) throws -> (
+            output: String,
+            cursor: String.Index
+        ) {
+            let keyStart = template.index(after: openRange.upperBound)
+            guard let closeRange = template[keyStart...].range(of: "}}}") else {
+                throw SimpleMustacheRendererError.unterminatedTag(
+                    String(template[openRange.lowerBound...]),
+                )
+            }
+
+            let key = Self.key(
+                in: template[keyStart ..< closeRange.lowerBound],
+            )
+            guard let value = Self.lookup(key, scopes: scopes)?.stringValue else {
+                throw SimpleMustacheRendererError.missingValue(key)
+            }
+            return (value, closeRange.upperBound)
+        }
+
+        private func renderTag(
+            template: String,
+            openRange: Range<String.Index>,
+            scopes: [Context],
+        ) throws -> (
+            output: String,
+            cursor: String.Index
+        ) {
+            guard let closeRange = template[openRange.upperBound...].range(of: "}}") else {
+                throw SimpleMustacheRendererError.unterminatedTag(
+                    String(template[openRange.lowerBound...]),
+                )
+            }
+
+            let key = Self.key(
+                in: template[openRange.upperBound ..< closeRange.lowerBound],
+            )
+
+            if key.hasPrefix("#") {
+                return try renderSectionTag(
+                    key,
+                    template: template,
+                    closeRange: closeRange,
+                    scopes: scopes,
+                )
+            }
+
+            if key.hasPrefix("/") {
+                throw SimpleMustacheRendererError.unexpectedClosingTag(key)
+            }
+
+            guard let value = Self.lookup(key, scopes: scopes)?.stringValue else {
+                throw SimpleMustacheRendererError.missingValue(key)
+            }
+            return (Self.escapeHTML(value), closeRange.upperBound)
+        }
+
+        private func renderSectionTag(
+            _ key: String,
+            template: String,
+            closeRange: Range<String.Index>,
+            scopes: [Context],
+        ) throws -> (
+            output: String,
+            cursor: String.Index
+        ) {
+            let sectionName = Self.sectionName(key)
+            let sectionEnd = try sectionEnd(
+                sectionName,
+                template: template,
+                after: closeRange.upperBound,
+            )
+            let sectionBody = String(
+                template[closeRange.upperBound ..< sectionEnd.lowerBound],
+            )
+            let output = try renderSection(
+                sectionName,
+                body: sectionBody,
+                scopes: scopes,
+            )
+            return (output, sectionEnd.upperBound)
+        }
+
+        private func renderSection(
+            _ key: String,
+            body: String,
+            scopes: [Context],
+        ) throws -> String {
+            guard let value = Self.lookup(key, scopes: scopes) else {
+                throw SimpleMustacheRendererError.missingValue(key)
+            }
+
+            switch value {
+            case let .list(items):
+                return try items
+                    .map { item in
+                        try render(
+                            template: body,
+                            scopes: [item] + scopes,
+                        )
+                    }
+                    .joined()
+            case let .object(item):
+                return try render(
+                    template: body,
+                    scopes: [item] + scopes,
+                )
+            case let .string(value):
+                guard !value.isEmpty else {
+                    return ""
+                }
+                return try render(
+                    template: body,
+                    scopes: scopes,
+                )
+            }
+        }
+
+        private func sectionEnd(
+            _ key: String,
+            template: String,
+            after index: String.Index,
+        ) throws -> Range<String.Index> {
+            var cursor = index
+            var depth = 1
+
+            while let openRange = template[cursor...].range(of: "{{") {
+                if template[openRange.upperBound...].hasPrefix("{") {
+                    let keyStart = template.index(after: openRange.upperBound)
+                    guard let closeRange = template[keyStart...].range(of: "}}}") else {
+                        throw SimpleMustacheRendererError.unterminatedTag(
+                            String(template[openRange.lowerBound...]),
+                        )
+                    }
+                    cursor = closeRange.upperBound
+                    continue
+                }
+
+                guard let closeRange = template[openRange.upperBound...].range(of: "}}") else {
+                    throw SimpleMustacheRendererError.unterminatedTag(
+                        String(template[openRange.lowerBound...]),
+                    )
+                }
+
+                let tag = Self.key(
+                    in: template[openRange.upperBound ..< closeRange.lowerBound],
+                )
+
+                if tag.hasPrefix("#"), Self.sectionName(tag) == key {
+                    depth += 1
+                }
+
+                if tag.hasPrefix("/"), Self.sectionName(tag) == key {
+                    depth -= 1
+                    if depth == 0 {
+                        return openRange.lowerBound ..< closeRange.upperBound
+                    }
+                }
+
+                cursor = closeRange.upperBound
+            }
+
+            throw SimpleMustacheRendererError.missingSectionEnd(key)
+        }
+
         private static func key(
             in value: Substring,
         ) -> String {
             String(value).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        private static func sectionName(
+            _ key: String,
+        ) -> String {
+            String(key.dropFirst())
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        private static func lookup(
+            _ key: String,
+            scopes: [Context],
+        ) -> Value? {
+            for scope in scopes {
+                if let direct = scope[key] {
+                    return direct
+                }
+
+                if let nested = nestedValue(
+                    key,
+                    in: scope,
+                ) {
+                    return nested
+                }
+            }
+
+            return nil
+        }
+
+        private static func nestedValue(
+            _ key: String,
+            in scope: Context,
+        ) -> Value? {
+            let parts = key.split(separator: ".").map(String.init)
+            guard
+                let first = parts.first,
+                var value = scope[first]
+            else {
+                return nil
+            }
+
+            for part in parts.dropFirst() {
+                guard case let .object(object) = value else {
+                    return nil
+                }
+                guard let next = object[part] else {
+                    return nil
+                }
+                value = next
+            }
+
+            return value
         }
 
         private static func escapeHTML(

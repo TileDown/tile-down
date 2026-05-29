@@ -47,6 +47,11 @@ struct SiteGeneratorTests {
 
     @Test("builds content directory pages from index markdown files")
     func buildsContentDirectoryPages() throws {
+        let template = [
+            #"<nav>{{#pages}}<a href="{{ url }}">{{ title }}</a>{{/pages}}</nav>"#,
+            #"<title>{{ page.title }}</title>{{{ page.contents.html }}}"#,
+        ].joined()
+
         let fileSystem = MemoryFileSystem(
             files: [
                 "content/index.md": """
@@ -64,9 +69,7 @@ struct SiteGeneratorTests {
                 "content/blog/draft.md": """
                 # Draft
                 """,
-                "templates/page.html": """
-                <title>{{ page.title }}</title>{{{ page.contents.html }}}
-                """,
+                "templates/page.html": template,
             ],
         )
 
@@ -86,8 +89,15 @@ struct SiteGeneratorTests {
         )
 
         #expect(result.outputPaths == ["dist/index.html", "dist/blog/index.html"])
-        #expect(fileSystem.files["dist/index.html"] == "<title>Home</title><h1>Home</h1>")
-        #expect(fileSystem.files["dist/blog/index.html"] == "<title>Blog</title><h1>Blog</h1>")
+        let navigation = #"<nav><a href="/">Home</a><a href="/blog/">Blog</a></nav>"#
+        #expect(
+            fileSystem.files["dist/index.html"] ==
+                navigation + #"<title>Home</title><h1>Home</h1>"#,
+        )
+        #expect(
+            fileSystem.files["dist/blog/index.html"] ==
+                navigation + #"<title>Blog</title><h1>Blog</h1>"#,
+        )
         #expect(fileSystem.files["dist/blog/draft/index.html"] == nil)
     }
 }
