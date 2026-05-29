@@ -1,6 +1,6 @@
 # Per-Package Import Contract
 
-The rule for what each SPM target may `import` if and when Tiledown becomes a multi-package monorepo. Today Tiledown is one package, so there is nothing to enforce yet. Adopt this contract once you split into several focused packages and want each one to stay independently buildable and pullable.
+The rule for what each SPM target may `import`. Tiledown is a monorepo from day one with many targets in one package, and the engine (`TileKit`) and CLI (`tile-down`) are already two targets, so this contract applies now and governs every target added to the manifest.
 
 This is the operational companion to [dependency-injection.md](dependency-injection.md) and [shared-protocols.md](shared-protocols.md). Read those first for the underlying principles (no singletons, constructor injection, protocol seams).
 
@@ -8,7 +8,7 @@ This is the operational companion to [dependency-injection.md](dependency-inject
 
 Every target should be able to be lifted out of the monorepo and built on its own against only its declared external dependencies. To make that true, each target has a hard contract about what it may `import`. Anything outside that contract is a violation and must be fixed in the same change.
 
-The shape is: single-responsibility packages with unidirectional dependencies. A package never reaches sideways into a peer's concrete implementation; it talks to a protocol seam, and the composition root supplies the concrete.
+The shape is: single-responsibility targets with unidirectional dependencies. A target never reaches sideways into a peer's concrete implementation; it talks to a protocol seam, and the composition root supplies the concrete.
 
 ## The SPM target name is load-bearing
 
@@ -58,7 +58,7 @@ If you proceed past the stop rule, you have coupled two producers, which is exac
 
 ## Per-project checked-in contract
 
-Once Tiledown has several packages, keep a `docs/package-import-contract-status.md` with one table row per target listing:
+Keep a `docs/package-import-contract-status.md` with one table row per target listing:
 
 - **Target name**
 - **Allowed imports** (the explicit list; anything else is a violation)

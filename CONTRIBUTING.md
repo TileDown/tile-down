@@ -24,20 +24,28 @@ in [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Getting started
 
-Will require a recent Swift toolchain (Swift 6.1+). Once the package is in:
+Will require a recent Swift toolchain (Swift 6.1+). Tiledown is a monorepo: a
+workspace at the root, a single `Package.swift` under `Packages/`, and `Apps/`
+for app targets. Once the package is in:
 
 ```sh
+cd Packages
 swift build
 swift test
 swift run tile-down            # renders a demo page to stdout
 ```
 
-Install the project git hooks once after cloning. They reject commit messages and
-staged content that carry forbidden style tells:
+Install the project git hooks once after cloning:
 
 ```sh
 git config core.hooksPath .githooks
 ```
+
+This wires three hooks: `commit-msg` and `pre-commit` reject forbidden style tells
+(em dashes, tool-attribution) in messages and staged content, and `pre-push` runs
+the style, namespacing, format, lint, build, and test gates. The same gates run in
+GitHub CI (`.github/workflows/ci.yml`) as the backstop. The Swift gates are inert
+until the package lands.
 
 ## Conventions
 
@@ -50,8 +58,8 @@ Engine and tooling code follows the conventions documented in
   non-private type per file; file named for the qualified type.
 - Dependencies are injected through initialisers. No force-unwrapping in shipping
   code. Errors carry a reason and a recovery path.
-- Cross-platform: the core builds and runs on Apple platforms and Linux. Keep
-  subprocess and platform-only APIs out of the core.
+- Cross-platform: the core builds on macOS and Linux. Abstract platform-specific
+  dependencies behind a protocol seam.
 - Tests use the Swift Testing framework and assert behaviour, not implementation.
 
 Read the surrounding files before writing new code and match what is already

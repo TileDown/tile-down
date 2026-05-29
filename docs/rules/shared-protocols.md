@@ -1,12 +1,12 @@
-# Shared Protocols Package
+# Shared Protocols Target
 
-The pattern for a single foundation-only package that holds every cross-target protocol seam, if and when Tiledown becomes a multi-package monorepo. Today Tiledown is one package, so there is no seam package yet. Adopt this once you have several producer packages that need to talk to each other without importing each other's concretes.
+The pattern for a single foundation-only target that holds every cross-target protocol seam. Tiledown is a monorepo from day one with many targets in one package, so the seam target applies as soon as one producer target needs to talk to another without importing its concretes. Add it when the first cross-target seam appears.
 
-Companion to [dependency-injection.md](dependency-injection.md) and [package-import-contract.md](package-import-contract.md). The package described here is conventionally named `SharedProtocols`.
+Companion to [dependency-injection.md](dependency-injection.md) and [package-import-contract.md](package-import-contract.md). The target described here is conventionally named `SharedProtocols`.
 
 ## Target regime
 
-Once you split into packages, every internal target falls into one of two categories:
+Across the package's targets, every internal target falls into one of two categories:
 
 1. **Producer / feature targets** import only `SharedProtocols` plus external dependencies (Foundation, SwiftUI, Combine, third-party SPM). Their SPM `dependencies:` list is `["SharedProtocols", ...external products]` and nothing else internal.
 2. **Composition root and live-writer targets** (the CLI, networking, storage, environment, and similar glue) import `SharedProtocols` plus the external framework they bridge. Their `dependencies:` list is `["SharedProtocols", ...the framework being wrapped]`. These are the only places where protocol-to-concrete glue exists.

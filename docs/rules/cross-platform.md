@@ -4,7 +4,25 @@ How to structure Tiledown's Swift so the same sources build and run on Apple pla
 
 Load on demand. Triggers: `canImport`, `Linux`, `FoundationNetworking`, `Darwin`, `Glibc`, `swift-system`, `swift-foundation`, cross-platform, manifest, `.when(platforms:)`, `os(Linux)`, `os(iOS)`, `os(macOS)`, `os(visionOS)`, `os(tvOS)`, Vapor, AsyncHTTPClient, Hummingbird.
 
-Grounded in Swift Evolution and `swiftlang/swift-foundation`. The TileKit core must run on iOS (no subprocess in the core), so it falls under Topology 3 below.
+Grounded in Swift Evolution and `swiftlang/swift-foundation`. The TileKit engine targets macOS and Linux (a server-style Apple + Linux split), so it falls under Topology 2/3 below. Subprocess and shell-out are available on both macOS and Linux; the engine may use them.
+
+## Linux portability and the platform seam (mandatory)
+
+The engine targets macOS and Linux. Two obligations follow:
+
+1. Guard every platform-divergent line, preferring `#if canImport(<Framework>)` over `#if os(...)` so future platforms inherit the right branch.
+2. Check Linux availability before adding a dependency. Many Apple frameworks, and the packages that wrap them, do not build on Linux.
+
+When the same functionality needs a different implementation per platform, abstract it behind a protocol seam; do not branch at call sites. Define a foundation-only protocol (see [shared-protocols.md](shared-protocols.md)), implement it once per platform (a macOS target using the Apple package, a Linux target using a Linux-available package), and let the composition root wire the correct one (see [dependency-injection.md](dependency-injection.md)). The core depends only on the protocol.
+
+```swift
+public protocol ClockService: Sendable { var now: Date { get } }
+#if canImport(Darwin)
+let clock: any ClockService = DarwinClock()
+#else
+let clock: any ClockService = LinuxClock()
+#endif
+```
 
 ## Three topologies (pick one before designing)
 
@@ -12,7 +30,7 @@ The rest of this rule depends on which topology your target is in. Mixing them s
 
 1. **Apple-only.** iOS, macOS, plus optional visionOS/tvOS/watchOS. UI-heavy, SwiftUI or UIKit/AppKit primary. No Linux build, no server-side targets.
 2. **Apple clients + Linux server (split package).** UI lives on Apple, one or more server products build to Linux. The Linux-buildable surface is narrow (typically a single server product). Apple-only stuff is wrapped in conditional product/target arrays in `Package.swift`.
-3. **Cross-platform library or CLI.** Runs identically on Apple + Linux + Windows. No UI. Probably uses URLSession-via-FoundationNetworking, Darwin/Glibc conditionals, swift-system. The TileKit engine lives here: it must build for iOS, so it cannot spawn subprocesses.
+3. **Cross-platform library or CLI.** Runs identically on Apple + Linux + Windows. No UI. Probably uses URLSession-via-FoundationNetworking, Darwin/Glibc conditionals, swift-system. The TileKit engine lives here (macOS + Linux): both platforms support subprocess and shell-out, so the engine may spawn subprocesses when needed.
 
 A "Linux UI" topology technically exists but is not production-grade. Do not try to render SwiftUI on Linux; if a server needs UI, ship HTTP responses (templates, JSON for an SPA), not native widgets.
 
@@ -64,13 +82,15 @@ For a target that is mostly cross-platform but has one Apple-only dependency, us
     dependencies: [
         "TileModels",
         .product(name: "CryptoKit", package: "swift-crypto"),
-    ].when(platforms: [.iOS, .macOS])
+    ].when(platforms: [.macOS])
 )
 ```
 
 Avoid spreading platform conditioning across both Layer A and Layer C for the same target; pick one place per concern.
 
 ## UI cross-platform patterns
+
+These patterns (Patterns 1-7 and Pattern 13: iOS-only SwiftUI modifiers, UIKit/AppKit app shells, the forward-compat SDK shim, and the `@available(iOS ...)` examples) describe the planned native Apple UI app, NOT the TileKit engine. The engine targets macOS + Linux and has no UI. Apply these only in the app tier.
 
 Linux UI is out of scope (no SwiftUI on Linux).
 
@@ -445,7 +465,7 @@ Run only the test suites known to be Linux-buildable; gate the others with `#if 
 
 If your repo ships an Apple-clients-plus-Linux-server split:
 
-1. **Declare Apple platforms in `platforms:`**. There is no stable Linux entry in the SPM platforms enum; Linux support is implicit when the package builds on a Linux toolchain. Example: `platforms: [.iOS(.v18), .macOS(.v15)]`.
+1. **Declare Apple platforms in `platforms:`**. There is no stable Linux entry in the SPM platforms enum; Linux support is implicit when the package builds on a Linux toolchain. For the engine (macOS + Linux), declare macOS only: `platforms: [.macOS(.v15)]`. A repo that also ships an Apple UI app tier adds `.iOS(.v18)` for that tier.
 
 2. **Document the Linux-buildable surface.** In the repo's `README.md` / `AGENTS.md`, name the products that build to Linux: e.g. "On Linux, build the server product only: `swift build --product tiledownserver`." Otherwise a new developer running `swift build` on Linux hits confusing errors from Apple-only targets.
 

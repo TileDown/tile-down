@@ -16,9 +16,9 @@ Tiledown is a tile-native static site generator. A page is a tree of typed
 **tiles** rather than a Markdown document, and that tile tree is the canonical,
 source-of-truth representation. The engine resolves each tile through a registry
 to a renderer and emits static HTML for publishing to GitHub Pages. Rich tiles
-(charts, diagrams, forms, polls) render client-side, so there is no server to run
-and the whole pipeline can run on-device, which is what makes a future native
-macOS and iOS visual editor over the same model possible.
+(charts, diagrams, forms, polls) render client-side, so there is no server to run.
+The engine builds on macOS and Linux. A future native macOS visual editor over the
+same tile model is a separate concern that can reuse the engine.
 
 ---
 
@@ -53,8 +53,8 @@ tile-native engine is the foundation that makes the editor tractable.
   JSON without loss.
 - **G2**: The engine renders a tile tree to static HTML via a registry of tile
   types.
-- **G3**: The core is pure Swift, builds on Apple platforms and Linux, and uses no
-  subprocess or platform-only APIs, so it can run on iOS.
+- **G3**: The core is pure Swift and builds on macOS and Linux. Platform-divergent
+  code is guarded, and platform-specific dependencies sit behind a protocol seam.
 
 ### P1
 - **G4**: Rich tiles (chart, diagram, form, poll) render client-side with no
@@ -62,7 +62,7 @@ tile-native engine is the foundation that makes the editor tractable.
 - **G5**: A CLI generates a site and a path exists to publish it to GitHub Pages.
 
 ### P2
-- **G6**: A native macOS and iOS visual editor over the same tile model.
+- **G6**: A native macOS visual editor over the same tile model.
 
 ---
 
@@ -92,8 +92,8 @@ tile-native engine is the foundation that makes the editor tractable.
 
 | ID | Requirement | Target | Current state |
 |---|---|---|---|
-| N1 | Core builds on Linux | green CI on Linux | not yet set up |
-| N2 | Core has no subprocess dependency | grep clean in core | holds in scaffold |
+| N1 | Core builds on macOS and Linux | green CI on both | not yet set up |
+| N2 | Platform-specific dependencies sit behind a protocol seam | one impl per platform, wired by the composition root | holds in scaffold |
 
 ---
 
@@ -230,7 +230,7 @@ only the tile model.
 |---|---|---|
 | Q1 | Exact JSON schema for tiles and inline marks | open |
 | Q2 | Theme story: Swift render functions, user-editable templates, or both | open |
-| Q3 | iOS publishing UX and GitHub auth flow | open |
+| Q3 | Publishing UX and GitHub auth flow from macOS/CI | open |
 
 ### Risks
 
@@ -243,10 +243,10 @@ only the tile model.
 
 ## 17. Future Work
 
-- Native macOS and iOS visual editor over the tile model.
+- Native macOS visual editor over the tile model.
 - Markdown import/export.
 - Rich tile library: charts, Mermaid, forms, polls.
-- GitHub Pages publishing, including an on-device path via the GitHub API.
+- GitHub Pages publishing via the GitHub API.
 
 ---
 

@@ -1,8 +1,10 @@
 # Swift Testing Framework Rules
 
-How to write tests for Tiledown: focused, isolated, deterministic suites built on the Swift Testing framework and Point-Free's Dependencies library.
+How to write tests for Tiledown: focused, isolated, deterministic suites built on the Swift Testing framework.
 
-Write comprehensive tests using the Swift Testing framework (`@Test`) with Point-Free's Dependencies library. Tests must be focused, isolated, deterministic, and leverage modern Swift Testing features for maximum reliability and maintainability. The core engine (`TileKit`, the `Tile` / `TileType` primitives, the `TileDown` namespace) is non-UI and is exercised with plain unit and integration tests. The SwiftUI/ViewInspector/snapshot patterns below apply to the planned native macOS/iOS app, not to the engine.
+Write comprehensive tests using the Swift Testing framework (`@Test`). Tests must be focused, isolated, deterministic, and leverage modern Swift Testing features for maximum reliability and maintainability. The core engine (`TileKit`, the `Tile` / `TileType` primitives, the `TileDown` namespace) is non-UI and is exercised with plain unit and integration tests. The SwiftUI/ViewInspector/snapshot patterns below apply to the planned native macOS/iOS app, not to the engine.
+
+The `withDependencies` overrides shown in the patterns below assume the Point-Free Dependencies library, whose adoption is an open question; see [../decisions/point-free-dependencies.md](../decisions/point-free-dependencies.md). Where Tiledown does not use that library, control collaborators through plain constructor injection instead; the test-isolation and determinism rules apply either way.
 
 ## Core rules
 
@@ -17,7 +19,7 @@ Use modern Swift Testing:
 ### Rule 2: Dependency isolation
 
 Control dependencies in tests:
-- MUST use `withDependencies` for all tests
+- MUST control collaborators in tests (via `withDependencies` if the Dependencies library is adopted, otherwise via constructor injection)
 - MUST provide deterministic test values
 - MUST isolate tests from external systems
 - MUST NOT use live dependencies in tests
@@ -540,33 +542,32 @@ let tileKitTargets = [tileKitTarget, tileKitTestsTarget]
 
 ### Folder layout
 
-For a standard single-package SPM project, tests live in `Tests/<SourceTarget>Tests/`, mirroring `Sources/<SourceTarget>/`:
+Tiledown is a monorepo from day one: sources live under `Packages/Sources/<SourceTarget>/` and tests under `Packages/Tests/<SourceTarget>Tests/`, mirroring each other:
 
 ```
 .
-├── Sources/
-│   └── TileKit/
-│       └── ...source files...
-└── Tests/
-    └── TileKitTests/
-        ├── ...test files...
-        └── Mocks/
-            └── ...mock implementations...
+├── Packages/
+│   ├── Sources/
+│   │   └── TileKit/
+│   │       └── ...source files...
+│   └── Tests/
+│       └── TileKitTests/
+│           ├── ...test files...
+│           └── Mocks/
+│               └── ...mock implementations...
 ```
-
-If Tiledown grows into multiple packages, the monorepo variant applies: sources live under `Packages/Sources/<SourceTarget>/` and tests under `Packages/Tests/<SourceTarget>Tests/`, mirroring each other.
 
 ### Mocks live in the test target, never in the source package
 
-Public test doubles (mocks, fakes, stubs) are placed in `Tests/<SourceTarget>Tests/Mocks/`, NOT in `Sources/<SourceTarget>/`. Mocks shipped from `Sources/` leak into production binaries.
+Public test doubles (mocks, fakes, stubs) are placed in `Packages/Tests/<SourceTarget>Tests/Mocks/`, NOT in `Packages/Sources/<SourceTarget>/`. Mocks shipped from `Packages/Sources/` leak into production binaries.
 
 ```swift
-// Sources/FileClient/FileClientProtocol.swift
+// Packages/Sources/FileClient/FileClientProtocol.swift
 public protocol FileClientProtocol {
     func read(path: String) async throws -> String
 }
 
-// Tests/FileClientTests/Mocks/MockFileClient.swift
+// Packages/Tests/FileClientTests/Mocks/MockFileClient.swift
 public struct MockFileClient: FileClientProtocol {
     public var readResult: Result<String, Error>
     public func read(path: String) async throws -> String {
