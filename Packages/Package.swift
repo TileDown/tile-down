@@ -23,6 +23,7 @@ let allProducts: [Product] = [
     .singleTargetLibrary("TileSiteImpl"),
     .singleTargetLibrary("TileSource"),
     .singleTargetLibrary("TileTemplate"),
+    .singleTargetLibrary("TileTile"),
     .singleTargetLibrary("TileKit"),
     .executable(name: "tiledown", targets: ["TiledownCLI"]),
 ]
@@ -111,6 +112,23 @@ let targets: [Target] = {
     )
     let tileTemplateTargets = [tileTemplateTarget, tileTemplateTestsTarget]
 
+    let tileTileTarget = Target.target(
+        name: "TileTile",
+        dependencies: [
+            "TileCore",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileTileTestsTarget = Target.testTarget(
+        name: "TileTileTests",
+        dependencies: [
+            "TileCore",
+            "TileTile",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileTileTargets = [tileTileTarget, tileTileTestsTarget]
+
     let tileSiteTarget = Target.target(
         name: "TileSite",
         dependencies: [
@@ -165,6 +183,7 @@ let targets: [Target] = {
             "TileSiteImpl",
             "TileSource",
             "TileTemplate",
+            "TileTile",
         ],
         swiftSettings: swiftSettings,
     )
@@ -192,6 +211,7 @@ let targets: [Target] = {
         + tileMarkdownTargets
         + tileSourceTargets
         + tileTemplateTargets
+        + tileTileTargets
         + tileSiteTargets
         + tileSiteImplTargets
         + tileKitTargets

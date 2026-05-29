@@ -69,6 +69,7 @@ Current source targets are:
 | `TileMarkdown` | Markdown rendering contract and basic HTML renderer |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
+| `TileTile` | typed tile blocks, source-ordered properties, and directive parser |
 | `TileSite` | build requests/results, page context, generator orchestration, and filesystem protocol |
 | `TileSiteImpl` | concrete local filesystem adapter |
 | `TileKit` | facade target re-exporting domain targets and current implementation adapter |

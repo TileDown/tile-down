@@ -5,3 +5,4 @@
 @_exported import TileSiteImpl
 @_exported import TileSource
 @_exported import TileTemplate
+@_exported import TileTile

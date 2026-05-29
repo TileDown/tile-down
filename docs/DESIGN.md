@@ -189,6 +189,7 @@ Packages/
     TileSite/
     TileSource/
     TileTemplate/
+    TileTile/
     TileKit/
     TileSiteImpl/
     TiledownCLI/
@@ -199,6 +200,7 @@ Packages/
     TileSiteTests/
     TileSourceTests/
     TileTemplateTests/
+    TileTileTests/
     TileKitTests/
     TileSiteImplTests/
 ```
@@ -220,6 +222,7 @@ logic:
 | `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
+| `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, and directive parser |
 | `TileSite` | `TileKit.Site` build requests/results, page context, generator orchestration, and filesystem protocol |
 
 Implementation targets are meatless adapters. They contain concrete I/O or
@@ -249,6 +252,7 @@ TileCore
   +-- TileMarkdown
   +-- TileSource
   +-- TileTemplate
+  +-- TileTile
   |
   +-- TileSite ----> TileMarkdown
         |            TileSource
@@ -287,7 +291,6 @@ future targets when they gain real code:
 
 | Future target | Trigger |
 |---|---|
-| `TileTile` | tile model, definitions, renderers, registry, and typed directive parsing |
 | `TileService` | service manifests, operation schemas, auth exposure, availability, and generated service-form contracts |
 | `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
 | `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
@@ -306,9 +309,9 @@ Initial namespaces:
 | `TileKit.Site` | build request, generator, target, output |
 | `TileKit.Source` | source files, front matter, content loading |
 | `TileKit.Content` | content type, property, relation, query, scope |
-| `TileKit.Markdown` | Markdown source parsing and tile directive parsing |
+| `TileKit.Markdown` | Markdown rendering contracts and Markdown-to-HTML rendering |
 | `TileKit.Template` | template loading and rendering contracts |
-| `TileKit.Tile` | tile model, definitions, renderers, registry |
+| `TileKit.Tile` | tile model, directive parsing, definitions, renderers, registry |
 | `TileKit.Service` | service manifests, auth exposure, operation schemas |
 | `TileKit.Asset` | asset declarations and behavior registry |
 | `TileKit.Output` | output renderer contracts and generated files |
