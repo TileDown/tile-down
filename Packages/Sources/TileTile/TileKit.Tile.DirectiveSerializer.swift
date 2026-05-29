@@ -32,7 +32,10 @@ public extension TileKit.Tile {
             }
         }
 
-        private func serialize(
+        /// Serializes a single tile instance to its canonical directive block.
+        /// Exposed so a document-level serializer can canonicalize prose and tiles
+        /// separately and compose them.
+        public func serialize(
             _ instance: Instance,
         ) -> String {
             var lines = [":::tile \(instance.typeID)"]
