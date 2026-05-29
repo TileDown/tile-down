@@ -10,6 +10,31 @@ public extension TileKit.Site {
             self.fileManager = fileManager
         }
 
+        public func listFilesRecursively(
+            at path: String,
+        ) throws -> [String] {
+            let rootURL = URL(fileURLWithPath: path)
+                .standardizedFileURL
+            guard let enumerator = fileManager.enumerator(
+                at: rootURL,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles],
+            ) else {
+                return []
+            }
+
+            var files: [String] = []
+            for case let fileURL as URL in enumerator {
+                let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey])
+                guard values.isRegularFile == true else {
+                    continue
+                }
+                files.append(relativePath(for: fileURL, rootURL: rootURL))
+            }
+
+            return files.sorted()
+        }
+
         public func readTextFile(
             at path: String,
         ) throws -> String {
@@ -33,6 +58,16 @@ public extension TileKit.Site {
                 atomically: true,
                 encoding: .utf8,
             )
+        }
+
+        private func relativePath(
+            for fileURL: URL,
+            rootURL: URL,
+        ) -> String {
+            let rootPath = rootURL.pathComponents
+            let filePath = fileURL.standardizedFileURL.pathComponents
+            let relativeComponents = filePath.dropFirst(rootPath.count)
+            return relativeComponents.joined(separator: "/")
         }
     }
 }

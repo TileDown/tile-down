@@ -23,6 +23,8 @@ private struct Command {
         switch subcommand {
         case "build":
             try build()
+        case "build-site":
+            try buildSite()
         default:
             throw CommandError.invalidArguments
         }
@@ -33,14 +35,7 @@ private struct Command {
             throw CommandError.invalidArguments
         }
 
-        let generator = TileKit.Site.Generator(
-            fileSystem: TileKit.Site.LocalFileSystem(
-                fileManager: .default,
-            ),
-            markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
-            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
-        )
+        let generator = makeGenerator()
 
         _ = try generator.build(
             .init(
@@ -48,6 +43,33 @@ private struct Command {
                 templatePath: arguments[2],
                 outputPath: arguments[3],
             ),
+        )
+    }
+
+    private func buildSite() throws {
+        guard arguments.count == 4 else {
+            throw CommandError.invalidArguments
+        }
+
+        let generator = makeGenerator()
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: arguments[1],
+                templatePath: arguments[2],
+                outputRootPath: arguments[3],
+            ),
+        )
+    }
+
+    private func makeGenerator() -> TileKit.Site.Generator {
+        .init(
+            fileSystem: TileKit.Site.LocalFileSystem(
+                fileManager: .default,
+            ),
+            markdownParser: TileKit.Source.FrontMatterParser(),
+            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
         )
     }
 }
@@ -58,7 +80,11 @@ private enum CommandError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .invalidArguments:
-            "usage: tiledown build <source.md> <template.html> <output.html>"
+            """
+            usage:
+              tiledown build <source.md> <template.html> <output.html>
+              tiledown build-site <content-dir> <template.html> <output-dir>
+            """
         }
     }
 }
