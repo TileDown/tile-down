@@ -73,11 +73,11 @@ tooling.
 
 ## Cross-platform
 
-Tiledown builds and runs on Apple platforms and Linux, and the core is meant to
-run on-device on iOS.
+Tiledown builds and runs on macOS and Linux.
 
-- Keep the core free of platform-only APIs and subprocess use. Anything that
-  shells out is a desktop-only concern, never part of the core render path.
+- Guard platform-divergent code and abstract platform-specific dependencies behind
+  a protocol seam: one implementation per platform, wired by the composition root.
+  Subprocess use is allowed.
 - Prefer pure-Swift implementations over Foundation-only conveniences in the core.
 - On the server side, prefer cross-platform libraries (for example AsyncHTTPClient
   over URLSession, swift-log over os.log).

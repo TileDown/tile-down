@@ -1,57 +1,56 @@
 # Package and Repository Structure
 
-How the repository is laid out if and when Tiledown grows from a standalone SPM package into a multi-package monorepo. Today Tiledown is one package (the `TileKit` library plus the `tile-down` executable). The rules below are aspirational: adopt them only when the project actually needs more than one package or more than one app target.
+How the repository is laid out. Tiledown is a monorepo from day one: a workspace, a single `Package.swift` under `Packages/`, many single-responsibility targets in that one package, and `Apps/` for app targets. Sources live in `Packages/Sources/`, tests in `Packages/Tests/`. The `TileKit` library and the `tile-down` executable are already two targets in that package, so the layout rules below apply now.
 
-## When this applies
+## What this covers
 
-Right now Tiledown is a single SPM package. There is one `Package.swift`, one library target (`TileKit`), and one executable target (`tile-down`). None of the monorepo machinery below is needed yet.
+Tiledown ships as one SPM package with many targets, not one package per library. There is a single `Package.swift` under `Packages/`; the `TileKit` library and the `tile-down` CLI are two targets in it today, and new targets join the same manifest as responsibilities separate out. The workspace and `Apps/` directory are part of the structure from the start; `Apps/` holds app targets (such as the planned native macOS/iOS editor) while the CLI executable target stays in `Package.swift`.
 
-Adopt this structure when one of these becomes true:
+Reach for additional targets in the single package when one of these is true:
 
-- TileKit splits into multiple libraries with distinct responsibilities.
-- A second app target appears (for example a GUI front-end alongside the CLI).
-- You want isolated compilation and parallel builds across several focused packages.
+- A part of TileKit becomes a clearly separable responsibility (a parser, a transport, a renderer) used in more than one place.
+- A second app target appears (for example the GUI editor alongside the CLI).
+- You want isolated compilation and parallel builds across several focused targets.
 
-Until then, treat this document as the target shape, not a present requirement.
-
-## Core rules (multi-package shape)
+## Core rules
 
 ### Rule 1: Root structure
 
 Organize the repository with these top-level directories:
 
-- `Main.xcworkspace` (only if you adopt an Xcode workspace) containing all projects
-- `Packages/` for a single SPM package with all library targets
-- `Apps/` for app/executable targets that ship a UI or a distinct binary
+- `Main.xcworkspace` containing all projects
+- `Packages/` for the single SPM package with all library and CLI targets
+- `Apps/` for app targets that ship a UI (such as the planned native editor)
 - `docs/` for documentation
 
-A pure-SPM project that never needs Xcode app targets can keep a single root `Package.swift` and skip the workspace entirely. The workspace is only worthwhile once you have Xcode app projects to host.
+The workspace hosts the `Packages/` SPM package and any `Apps/*/*.xcodeproj`. The CLI executable target stays inside the single `Package.swift`; `Apps/` is for app targets that need Xcode project settings a plain SPM executable target cannot express.
 
 ### Rule 2: Single Package.swift
 
-Use ONE `Package.swift` for all libraries:
+Use ONE `Package.swift` for all targets:
 
 - It contains ALL library targets and products.
+- It contains the CLI executable target.
 - It contains ALL test targets.
 - It uses `#if os()` for platform-specific targets.
 - App projects reference the package via a local path dependency.
 
-Do not split the libraries into one `Package.swift` per package. A single manifest keeps the dependency graph in one readable place.
+Do not split the targets into one `Package.swift` per library. A single manifest keeps the dependency graph in one readable place.
 
 ### Rule 3: Apps as separate projects
 
-If you ship a GUI app, keep app targets as separate Xcode projects in `Apps/`:
+App targets (such as the planned native macOS/iOS editor) are separate Xcode projects in `Apps/`:
 
 - Each app has its own `.xcodeproj`.
 - Apps import the package as a local SPM dependency.
 - This enables different app configurations (Debug, Release, alternate backends).
 - It supports multiple platforms per app.
 
-A CLI-only project can keep its executable target inside the single `Package.swift` and skip `Apps/` altogether. Use `Apps/` only when an app needs Xcode project settings a plain SPM executable target cannot express.
+The CLI executable target stays inside the single `Package.swift`. Use `Apps/` for app targets that need Xcode project settings a plain SPM executable target cannot express.
 
 ### Rule 4: Workspace references
 
-If you adopt a workspace, add every project to it: the `Packages/` SPM package, each `Apps/*/*.xcodeproj`, and the docs/README files.
+Add every project to the workspace: the `Packages/` SPM package, each `Apps/*/*.xcodeproj`, and the docs/README files.
 
 ### Rule 5: No storyboards or XIBs
 
@@ -70,23 +69,23 @@ Keep views and view controllers in packages, not in app targets:
 - UIKit/AppKit views in a dedicated UI package.
 - App targets contain ONLY entry points (`AppDelegate`, `SceneDelegate`, `@main`).
 
-## Directory structure (target shape)
+## Directory structure
 
 ```
 TileDownRoot/
-├── Main.xcworkspace/              # Optional: only with Xcode app targets
+├── Main.xcworkspace/              # Hosts the package and any Apps/ projects
 │   └── contents.xcworkspacedata
 ├── Packages/                      # Single SPM package
 │   ├── Package.swift              # ALL targets defined here
 │   ├── Package.resolved
 │   ├── Sources/
-│   │   ├── TileKit/
-│   │   ├── TileCore/
-│   │   └── ...                    # Additional focused libraries
+│   │   ├── TileKit/               # the engine library
+│   │   ├── TileDownCLI/           # the tile-down CLI target
+│   │   └── ...                    # additional focused libraries
 │   └── Tests/
 │       ├── TileKitTests/
 │       └── ...
-├── Apps/                          # Only if a GUI app ships
+├── Apps/                          # App targets (planned native editor)
 │   └── TileDownApp/
 │       ├── TileDownApp.xcodeproj/
 │       └── TileDownApp/
@@ -94,9 +93,7 @@ TileDownRoot/
 └── README.md
 ```
 
-A CLI-only Tiledown that simply outgrows one library can stay much flatter: a single `Package.swift` with several targets under `Sources/`, no workspace, no `Apps/`.
-
-## Package.swift structure (when you have several targets)
+## Package.swift structure (many targets in one package)
 
 Use helper-driven, grouped target declarations rather than one giant inline array.
 
@@ -251,7 +248,7 @@ Do NOT create a new app target when:
 
 - Do NOT put app executable targets for shipping GUI apps in `Package.swift` when they need real Xcode project settings. (A plain CLI executable target is fine in `Package.swift`.)
 - Do NOT create multiple `Package.swift` files, one per library. Use a single manifest.
-- Do NOT put business logic, view models, services, or models in an app target. They belong in packages under `Sources/`.
+- Do NOT put business logic, view models, services, or models in an app target. They belong in targets under `Packages/Sources/`.
 - Do NOT keep `.storyboard` or `.xib` files anywhere.
 - Do NOT keep view controllers in the app target. Move them into a package.
 
@@ -259,9 +256,9 @@ Do NOT create a new app target when:
 
 Before changing repo structure:
 
-- [ ] Single SPM package manifest for all libraries
-- [ ] All library code under `Sources/`
-- [ ] All test code under `Tests/`
+- [ ] Single SPM package manifest for all targets
+- [ ] All library and CLI code under `Packages/Sources/`
+- [ ] All test code under `Packages/Tests/`
 - [ ] Each GUI app, if any, is a separate `.xcodeproj` in `Apps/`
 - [ ] Apps import the package via a local dependency
 - [ ] Platform-specific targets use `#if os()`

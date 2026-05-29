@@ -1,16 +1,16 @@
 # Package Architecture
 
-How to decompose Tiledown into focused SPM packages if and when it outgrows a single package. Today Tiledown is one package (the `TileKit` library plus the `tile-down` executable), so none of this is required yet. Adopt it when distinct responsibilities, build-time pressure, or a second app target make modularization worthwhile.
+How to decompose Tiledown into focused SPM targets within its single package. Tiledown is a monorepo from day one: one `Package.swift` under `Packages/`, many single-responsibility targets in it. The `TileKit` library and the `tile-down` executable are already two such targets, so the decomposition rules below apply now and guide every target that joins the manifest.
 
-The pattern: a monorepo of single-responsibility SPM packages with explicit, unidirectional dependencies. Each package has one cohesive job and declares exactly what it depends on. This buys isolated compilation, parallel builds, a clear dependency graph, and packages you can test (and lift out) in isolation.
+The pattern: single-responsibility SPM targets with explicit, unidirectional dependencies, all in one package. Each target has one cohesive job and declares exactly what it depends on. This buys isolated compilation, parallel builds, a clear dependency graph, and targets you can test (and lift out) in isolation.
 
-## When this applies
+## What this covers
 
-While Tiledown is one package, keep it simple: one `Package.swift`, the `TileKit` library, the `tile-down` executable. Reach for the structure below when one of these is true:
+Tiledown already has more than one target (the `TileKit` library and the `tile-down` CLI). Add a new target to the single package when one of these is true:
 
 - A part of TileKit has become a clearly separable responsibility (a parser, a transport, a renderer) used in more than one place.
 - Compilation is slow and a large stable chunk would benefit from being its own target.
-- A second front-door appears (a GUI app, a server, a second CLI verb set).
+- A second front-door appears (an app target, a server, a second CLI verb set).
 
 ## Core rules
 
@@ -142,7 +142,7 @@ If you add a font or resource package:
 
 ## Example layout (illustrative, not normative)
 
-A multi-package Tiledown might look like this. Your actual package list will differ.
+As Tiledown grows targets within its single package, the layout might look like this. Your actual target list will differ.
 
 ```
 Packages/Sources/

@@ -219,7 +219,7 @@ When designing a new type, ask: *"will this need annotations to be `Sendable`/is
 ## Cross-references
 
 - `dependency-injection.md` rule 4: no closure typealiases at cross-module seams. Closures as method parameters / property values are still fine; only the named cross-module typealiases are banned.
-- `point-free-dependencies.md`: within-module Point-Free Dependencies pattern (closure-based, `@Sendable` closures).
+- `../decisions/point-free-dependencies.md`: open decision on the within-module Point-Free Dependencies pattern (closure-based, `@Sendable` closures). Undecided, not a rule.
 
 ## Reading the proposals
 

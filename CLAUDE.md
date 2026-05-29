@@ -7,8 +7,8 @@ Guidance for Claude Code (and other coding agents) working in this repository.
 Tiledown is a tile-native static site generator. A page is a tree of typed
 **tiles** (not Markdown); the engine renders it to static HTML for GitHub Pages.
 The engine library is `TileKit`, the CLI is `tile-down`, the namespace root is
-`TileDown`. A native macOS and iOS visual editor over the same tile model is
-planned. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
+`TileDown`. The engine targets macOS and Linux. A native macOS editor app over the
+same tile model is a separate, future concern. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Read first
 
@@ -28,8 +28,10 @@ planned. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
   shipping code.
 - **Namespace every public type** under an `enum`/`struct` that mirrors its
   folder; one non-private type per file; file named for the qualified type.
-- **Cross-platform core.** Keep platform-only APIs and subprocess use out of the
-  core so it runs on Linux and iOS.
+- **Cross-platform core.** The core builds on macOS and Linux. Guard
+  platform-divergent code and put platform-specific dependencies behind a protocol
+  seam, one implementation per platform, wired by the composition root. Subprocess
+  use is allowed.
 - **Verify before claiming done.** Run `swift build` and `swift test`; cite the
   output. Never say "should pass".
 - **No AI attribution, no em dashes** in any committed text (commits, comments,
