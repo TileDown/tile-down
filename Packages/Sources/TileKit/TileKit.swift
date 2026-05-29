@@ -2,6 +2,7 @@
 @_exported import TileCore
 @_exported import TileMarkdown
 @_exported import TileService
+@_exported import TileServiceForm
 @_exported import TileSite
 @_exported import TileSiteImpl
 @_exported import TileSource
