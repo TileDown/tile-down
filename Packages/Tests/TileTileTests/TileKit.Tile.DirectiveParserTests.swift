@@ -78,4 +78,64 @@ struct TileDirectiveParserTests {
             )
         }
     }
+
+    @Test("treats a tile fence inside a code block as Markdown content")
+    func ignoresTileFenceInsideCodeBlock() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            Example:
+
+            ```
+            :::tile fake
+            content
+            :::
+            ```
+
+            After.
+            """,
+        )
+
+        #expect(!blocks.contains { if case .tile = $0 { true } else { false } })
+        let markdown = blocks
+            .compactMap { if case let .markdown(text) = $0 { text } else { nil } }
+            .joined(separator: "\n")
+        #expect(markdown.contains(":::tile fake"))
+    }
+
+    @Test("tilde code fences also shield tile fences")
+    func ignoresTileFenceInsideTildeFence() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            ~~~
+            :::tile fake
+            ~~~
+            """,
+        )
+
+        #expect(blocks.count == 1)
+        #expect(!blocks.contains { if case .tile = $0 { true } else { false } })
+    }
+
+    @Test("still parses a real tile after a code block")
+    func parsesTileAfterCodeBlock() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            ```
+            code
+            ```
+
+            :::tile poll
+            id: x
+            :::
+            """,
+        )
+
+        #expect(blocks.contains { if case .tile = $0 { true } else { false } })
+    }
 }

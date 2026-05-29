@@ -15,7 +15,9 @@ A Tiledown document interleaves two kinds of block in source order:
 - **Tiles**: directive blocks `:::tile <type>` ... `:::` with `key: value` lines
   and `-` list values, parsed by `TileKit.Tile.DirectiveParser` and serialized by
   `TileKit.Tile.DirectiveSerializer`. Tile directives are extracted before prose
-  is handed to the CommonMark renderer, so prose never contains a tile fence.
+  is handed to the CommonMark renderer, so prose never contains a tile fence. A
+  `:::tile` line inside a fenced code block (``` or `~~~`) is Markdown content,
+  not a directive, so documents can show tile examples in code.
 
 ## Prose: supported CommonMark
 
