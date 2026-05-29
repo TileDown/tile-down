@@ -49,7 +49,7 @@ Open decisions live in [docs/decisions/](../decisions/).
 - [git-discipline.md](git-discipline.md) - issues, labels, PRs, branches, commits,
   remotes.
 
-## The planned native macOS editor
+## The planned native macOS and iOS editor
 
 - [views.md](views.md) - SwiftUI view architecture and identity.
 - [view-models.md](view-models.md) - ViewModel responsibilities and patterns.
