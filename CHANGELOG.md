@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-05-29
+
 ### Added
 
 - First site-generation slice: `tiledown build <source.md> <template.html>
@@ -34,6 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `TileKit.ServiceForm.Renderer` that emits deterministic generated form HTML,
   scoped CSS, and browser JavaScript for remote and proxy service forms without
   emitting credential ids or secrets.
+- A `TileKit.ServiceForm.TileRenderer` adapter that registers `service-form`
+  through the tile registry, resolving the referenced contract via an injected
+  `TileKit.Service.ContractResolving` seam, with an in-memory resolver first.
+- `TileKit.Service.Binding` site bindings (contract source, mode, proxy route,
+  availability policy, declarative auth binding), kept separate from contracts,
+  plus a `TileServiceImpl` target with `TileKit.Service.LocalFileContractResolver`
+  for file-backed contract loading.
+- `tiledown version` (and `--version`) reports the product version.
+- `docs/linux-testing.md`: how to build and test on Linux through Docker/Colima,
+  Podman, a Lima VM, a native toolchain, or cross-compilation.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,
@@ -49,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mechanical enforcement, local and CI: `scripts/check-style.sh` and
   `scripts/check-namespacing.sh`, a `pre-push` hook running the format, lint,
   namespacing, build, and test gates, and `.github/workflows/ci.yml` mirroring all
-  gates on macOS and Linux. Swift gates are inert until the package lands.
+  gates on macOS and Linux.
 
 ### Changed
 

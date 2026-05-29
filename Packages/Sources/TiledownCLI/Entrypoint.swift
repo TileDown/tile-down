@@ -21,6 +21,8 @@ private struct Command {
         }
 
         switch subcommand {
+        case "version", "--version", "-v":
+            print("\(TileKit.Product.name) \(TileKit.Product.version)")
         case "build":
             try build()
         case "build-site":
