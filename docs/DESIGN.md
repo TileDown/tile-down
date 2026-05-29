@@ -187,6 +187,7 @@ Packages/
     TileContent/
     TileMarkdown/
     TileSite/
+    TileService/
     TileSource/
     TileTemplate/
     TileTile/
@@ -198,6 +199,7 @@ Packages/
     TileContentTests/
     TileMarkdownTests/
     TileSiteTests/
+    TileServiceTests/
     TileSourceTests/
     TileTemplateTests/
     TileTileTests/
@@ -220,6 +222,7 @@ logic:
 |---|---|
 | `TileContent` | `TileKit.Content` records, field values, conditions, sort orders, queries, and query execution |
 | `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
+| `TileService` | `TileKit.Service` manifest models, capability inventory, and manifest validation |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
 | `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, and directive parser |
@@ -250,6 +253,7 @@ TileCore
   |
   +-- TileContent
   +-- TileMarkdown
+  +-- TileService
   +-- TileSource
   +-- TileTemplate
   +-- TileTile
@@ -291,7 +295,6 @@ future targets when they gain real code:
 
 | Future target | Trigger |
 |---|---|
-| `TileService` | service manifests, operation schemas, auth exposure, availability, and generated service-form contracts |
 | `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
 | `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
 | `TileDiagnostics` | structured warnings, build errors, and diagnostic sinks when diagnostics need their own API |

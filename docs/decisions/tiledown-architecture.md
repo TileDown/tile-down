@@ -67,6 +67,7 @@ Current source targets are:
 | `TileCore` | root `TileKit` namespace and tiny product metadata |
 | `TileContent` | content records, values, queries, conditions, sorting, and query execution |
 | `TileMarkdown` | Markdown rendering contract and basic HTML renderer |
+| `TileService` | manifest models, capability inventory, and manifest validation |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
 | `TileTile` | typed tile blocks, source-ordered properties, and directive parser |
