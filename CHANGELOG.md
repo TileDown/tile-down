@@ -17,3 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   namespacing, dependency injection, concurrency, cross-platform, testing,
   verification, and more), with an index.
 - `AGENTS.md` and `CLAUDE.md`: agent guides pointing to the rules and workflow.
+
+### Changed
+
+- Restructured the coding rules: `engineering.md` now holds only judgment
+  principles; agent-interaction rules moved to `AGENTS.md`; the no-force-unwrap
+  rule is enforced by `.swiftlint.yml`; formatting by `.swiftformat`.

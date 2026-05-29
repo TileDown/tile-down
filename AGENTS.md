@@ -38,10 +38,42 @@ commits, git-discipline, and (for the planned native app) views, view-models,
 components, colors, fonts, and (if Tiledown becomes multi-package) the package
 architecture set. The index is [docs/rules/README.md](docs/rules/README.md).
 
+## Working with the maintainer
+
+How a coding agent works with the maintainer. These govern agent behavior, not
+the code.
+
+- Clarify ambiguity before coding. Do not assume requirements.
+- When a real trade-off exists, surface two or three options with their
+  trade-offs rather than guessing. On obvious blockers (a build break, a bug in
+  your own change, a fatal regression) fix without asking. On routine edits with
+  no real choice, just do the work.
+- A trivial-looking change with non-trivial downstream blast radius (a version
+  bump, a public API break, a release artefact, a file-format change) needs the
+  maintainer's call on semantics even when the code is one line. The question is
+  "1.0.2 to 1.0.3 or to 1.1.0", not "I see three implementations".
+- Do not modify an existing screen or view unless explicitly asked to change that
+  specific one. Flag which are affected and wait for approval. (Inert until the
+  native app exists.)
+
+When a task is architecturally ambiguous, present the choice:
+
+```text
+For [FEATURE], I see these approaches:
+
+Option A: [NAME] - [one-line benefit]
+  Best when: [use case]
+  Trade-off: [main limitation]
+
+Option B: [NAME] - [one-line benefit]
+  Best when: [use case]
+  Trade-off: [main limitation]
+
+Which fits [the concern driving this choice]?
+```
+
 ## Workflow
 
-- Clarify ambiguity before coding; do not assume requirements. Surface two or
-  three options when a real trade-off exists.
 - Verify before claiming done: run `swift build` and `swift test` and cite the
   output. See [docs/rules/verification.md](docs/rules/verification.md).
 - Commits follow Conventional Commits. One focused change per PR. A CHANGELOG
