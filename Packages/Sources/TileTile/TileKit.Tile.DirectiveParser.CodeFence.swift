@@ -11,9 +11,16 @@ extension TileKit.Tile.DirectiveParser {
         let line = line.trimmingCharacters(in: .whitespaces)
         for marker: Character in ["`", "~"] {
             let length = line.prefix(while: { $0 == marker }).count
-            if length >= 3 {
-                return (marker, length)
+            guard length >= 3 else {
+                continue
             }
+            // CommonMark: a backtick fence's info string may not contain a
+            // backtick, so a line like ```inline``` is an inline code span, not a
+            // fence opener. Treating it as one would swallow following content.
+            if marker == "`", line.dropFirst(length).contains("`") {
+                return nil
+            }
+            return (marker, length)
         }
         return nil
     }

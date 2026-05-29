@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   line inside a ``` or `~~~` code fence is treated as Markdown content instead of
   being mis-parsed as a tile directive (which previously threw
   `missingClosingFence`). This lets documents show tile examples in code blocks.
+  Fence detection follows CommonMark's rule that a backtick fence's info string
+  may not contain a backtick, so an inline code span like ```` ```inline``` ````
+  is not treated as a fence opener.
 
 ### Removed
 

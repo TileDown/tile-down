@@ -19,6 +19,12 @@ A Tiledown document interleaves two kinds of block in source order:
   `:::tile` line inside a fenced code block (``` or `~~~`) is Markdown content,
   not a directive, so documents can show tile examples in code.
 
+Known limitation: the directive parser is line-based and whitespace-lenient (it
+trims leading whitespace before recognizing both `:::tile` and code fences), so
+CommonMark's 0-3 space indentation rule is not enforced. A code fence or tile
+fence indented four or more spaces is still recognized rather than treated as an
+indented code block. Full indentation-aware parsing is future work.
+
 ## Prose: supported CommonMark
 
 Rendered today: headings, paragraphs, emphasis, strong, inline code, fenced code

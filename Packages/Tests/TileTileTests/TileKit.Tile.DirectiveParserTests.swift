@@ -120,6 +120,25 @@ struct TileDirectiveParserTests {
         #expect(!blocks.contains { if case .tile = $0 { true } else { false } })
     }
 
+    @Test("a line with backticks in its info is not a fence opener")
+    func inlineCodeIsNotAFenceOpener() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            ```inline``` text
+
+            :::tile real
+            id: x
+            :::
+            """,
+        )
+
+        // The leading-backtick line is an inline code span, not a code fence, so
+        // the real tile that follows must still be parsed.
+        #expect(blocks.contains { if case .tile = $0 { true } else { false } })
+    }
+
     @Test("still parses a real tile after a code block")
     func parsesTileAfterCodeBlock() throws {
         let parser = TileKit.Tile.DirectiveParser()
