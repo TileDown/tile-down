@@ -225,7 +225,7 @@ logic:
 | `TileContent` | `TileKit.Content` records, field values, conditions, sort orders, queries, and query execution |
 | `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
 | `TileService` | `TileKit.Service` provider manifests, service operation contracts, capability inventory, and validation |
-| `TileServiceForm` | `TileKit.ServiceForm` binding between service-form tile requests and service contract operations |
+| `TileServiceForm` | `TileKit.ServiceForm` binding between service-form tile requests, service contract operations, and generated browser output |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
 | `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
@@ -322,7 +322,7 @@ Initial namespaces:
 | `TileKit.Template` | template loading and rendering contracts |
 | `TileKit.Tile` | tile model, directive parsing, definitions, renderers, registry |
 | `TileKit.Service` | service manifests, auth exposure, operation schemas |
-| `TileKit.ServiceForm` | service-form request binding and validation |
+| `TileKit.ServiceForm` | service-form request binding, validation, and generated browser output |
 | `TileKit.Asset` | asset declarations and behavior registry |
 | `TileKit.Output` | output renderer contracts and generated files |
 | `TileKit.Diagnostics` | warnings and build errors |
@@ -643,8 +643,16 @@ For `service-form`, the generator produces:
 - A result region with generated fields from `outputSchema` plus `outputUi`.
 - Loading, success, unavailable, validation, and error states.
 - CSS scoped by a stable tile class.
-- A JS module that reads JSON configuration, validates user input, performs the
-  call for `remote` or `proxy`, and renders typed output.
+- A browser JavaScript runtime that reads JSON configuration, validates user
+  input, performs the call for `remote` or `proxy`, and renders typed output.
+
+The current `TileKit.ServiceForm.Renderer` covers the first browser-runtime
+slice. It emits deterministic form HTML, a JSON data island, scoped CSS, and a
+small reusable JavaScript runtime for `remote` and `proxy` modes. It derives
+text, email, URL, number, checkbox, textarea, hidden, and select controls from
+the operation schema plus `inputUi`; exact decimal semantic fields render as
+text inputs with decimal input mode. The renderer rejects `build`, `local`, and
+`static` modes until those execution models have their own renderer paths.
 
 For proxy mode, generated browser JavaScript calls the site proxy:
 
@@ -1036,6 +1044,8 @@ Initial tests:
 - Service operation contract decoding and validation.
 - `service-form` tile request decoding and validation.
 - `service-form` request-to-contract binding.
+- `service-form` generated HTML, CSS, and browser JavaScript for `remote` and
+  `proxy` mode.
 - `service-form` rejects server secrets in browser output.
 
 No live network tests in the core suite. HTTP is injected and tested with fakes.

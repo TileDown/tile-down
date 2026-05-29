@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   validation.
 - A `TileServiceForm` composition target that binds typed `service-form` tile
   requests to service contract operations and rejects unsafe remote credentials.
+- A `TileKit.ServiceForm.Renderer` that emits deterministic generated form HTML,
+  scoped CSS, and browser JavaScript for remote and proxy service forms without
+  emitting credential ids or secrets.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,
