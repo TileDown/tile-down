@@ -2,7 +2,7 @@
 
 How to write tests for Tiledown: focused, isolated, deterministic suites built on the Swift Testing framework.
 
-Write comprehensive tests using the Swift Testing framework (`@Test`). Tests must be focused, isolated, deterministic, and leverage modern Swift Testing features for maximum reliability and maintainability. The core engine (`TileKit`, the `Tile` / `TileType` primitives, the `TileDown` namespace) is non-UI and is exercised with plain unit and integration tests. The SwiftUI/ViewInspector/snapshot patterns below apply to the planned native macOS/iOS app, not to the engine.
+Write comprehensive tests using the Swift Testing framework (`@Test`). Tests must be focused, isolated, deterministic, and leverage modern Swift Testing features for maximum reliability and maintainability. The core engine (`TileKit`, the `Tile` / `TileType` primitives, the `Tiledown` namespace) is non-UI and is exercised with plain unit and integration tests. The SwiftUI/ViewInspector/snapshot patterns below apply to the planned native macOS/iOS app, not to the engine.
 
 The `withDependencies` overrides shown in the patterns below assume the Point-Free Dependencies library, whose adoption is an open question; see [../decisions/point-free-dependencies.md](../decisions/point-free-dependencies.md). Where Tiledown does not use that library, control collaborators through plain constructor injection instead; the test-isolation and determinism rules apply either way.
 
@@ -525,7 +525,7 @@ Declare a matching `Target.testTarget` for every `Target.target` in `Package.swi
 ```swift
 let tileKitTarget = Target.target(
     name: "TileKit",
-    dependencies: ["TileDownModels", "FileClient"]
+    dependencies: ["TiledownModels", "FileClient"]
 )
 let tileKitTestsTarget = Target.testTarget(
     name: "TileKitTests",

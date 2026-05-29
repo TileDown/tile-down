@@ -4,11 +4,13 @@ Guidance for Claude Code (and other coding agents) working in this repository.
 
 ## Project
 
-Tiledown is a tile-native static site generator. A page is a tree of typed
-**tiles** (not Markdown); the engine renders it to static HTML for GitHub Pages.
-The engine library is `TileKit`, the CLI is `tile-down`, the namespace root is
-`TileDown`. The engine targets macOS and Linux. A native macOS and iOS editor app
-over the same tile model is a separate, future concern. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
+Tiledown is a Swift static site generator with a Markdown-canonical source format
+and a typed tile model. Tiledown Markdown is parsed into a tree of typed tiles,
+then rendered to static HTML, CSS, browser JavaScript, and optional JSON outputs.
+The engine library is `TileKit`, the CLI is `tiledown`, and the package name is
+`Tiledown`. The engine targets macOS and Linux. A native macOS and iOS editor app
+over the same tile model is a separate, future concern. Architecture:
+[docs/DESIGN.md](docs/DESIGN.md).
 
 ## Rule loading (do this first)
 
@@ -49,7 +51,7 @@ have not loaded them.
 ```sh
 swift build
 swift test
-swift run tile-down
+swift run tiledown
 ```
 
 The engine package is not committed yet; these are the intended commands once it

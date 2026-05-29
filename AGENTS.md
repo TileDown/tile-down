@@ -13,11 +13,12 @@ depend on you having read them.
 
 ## What Tiledown is
 
-A tile-native static site generator. The canonical document is a tree of typed
-**tiles** (not Markdown), rendered to static HTML for publishing to GitHub Pages.
-The engine library is `TileKit`; the CLI is `tile-down`. The engine targets macOS
-and Linux. A native macOS and iOS editor app over the same tile model is a separate,
-future concern. See [docs/DESIGN.md](docs/DESIGN.md).
+A Swift static site generator with a Markdown-canonical source format and a typed
+tile model. Tiledown Markdown is parsed into a tree of typed tiles, then rendered
+to static HTML, CSS, browser JavaScript, and optional JSON outputs. The engine
+library is `TileKit`; the CLI is `tiledown`. The engine targets macOS and Linux.
+A native macOS and iOS editor app over the same tile model is a separate, future
+concern. See [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Language policy
 
@@ -96,7 +97,7 @@ Which fits [the concern driving this choice]?
 ```sh
 swift build
 swift test
-swift run tile-down
+swift run tiledown
 ```
 
 (The engine package is not yet committed; these are the intended commands once it

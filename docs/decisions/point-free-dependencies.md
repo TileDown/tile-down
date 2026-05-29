@@ -20,7 +20,7 @@ The question is about **within-module** dependency injection: replacing ad-hoc c
 - A third-party dependency on the core engine, which otherwise aims to stay lean and portable. Every consumer of `TileKit` inherits the transitive dependency.
 - Struct-of-closures dependencies are a different style from the named-protocol-seam approach the project already uses for cross-module contracts. Running both styles risks inconsistency about when to reach for which.
 - The macro and property-wrapper machinery add a learning surface and a compile-time cost.
-- The engine core (`TileKit`, the `Tile` / `TileType` primitives, the `TileDown` namespace) is non-UI and has few genuine external-system touchpoints so far, so the payoff may be small until the surface grows.
+- The engine core (`TileKit`, the `Tile` / `TileType` primitives, the `Tiledown` namespace) is non-UI and has few genuine external-system touchpoints so far, so the payoff may be small until the surface grows.
 
 ## Technical context (what adoption would look like)
 

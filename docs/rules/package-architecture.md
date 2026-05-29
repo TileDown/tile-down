@@ -1,12 +1,12 @@
 # Package Architecture
 
-How to decompose Tiledown into focused SPM targets within its single package. Tiledown is a monorepo from day one: one `Package.swift` under `Packages/`, many single-responsibility targets in it. The `TileKit` library and the `tile-down` executable are already two such targets, so the decomposition rules below apply now and guide every target that joins the manifest.
+How to decompose Tiledown into focused SPM targets within its single package. Tiledown is a monorepo from day one: one `Package.swift` under `Packages/`, many single-responsibility targets in it. The `TileKit` library and the `tiledown` executable product are already two such targets, so the decomposition rules below apply now and guide every target that joins the manifest.
 
 The pattern: single-responsibility SPM targets with explicit, unidirectional dependencies, all in one package. Each target has one cohesive job and declares exactly what it depends on. This buys isolated compilation, parallel builds, a clear dependency graph, and targets you can test (and lift out) in isolation.
 
 ## What this covers
 
-Tiledown already has more than one target (the `TileKit` library and the `tile-down` CLI). Add a new target to the single package when one of these is true:
+Tiledown already has more than one target (the `TileKit` library and the `tiledown` CLI product). Add a new target to the single package when one of these is true:
 
 - A part of TileKit has become a clearly separable responsibility (a parser, a transport, a renderer) used in more than one place.
 - Compilation is slow and a large stable chunk would benefit from being its own target.
@@ -158,7 +158,7 @@ Packages/Sources/
 │   └── TileKit           # the main library; depends: TileCore, TileParser
 │
 └── Front-door (not under Sources/)
-    └── tile-down         # the CLI executable; wires the concretes
+    └── TiledownCLI      # the CLI executable target; wires the concretes
 ```
 
 ## Related rules
