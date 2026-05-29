@@ -198,7 +198,7 @@ Implemented as of the current design revision:
 | Facade | `TileKit` re-exports the domain targets and current local filesystem adapter |
 | CLI | `tiledown` builds one page or a content directory using injected generator dependencies |
 | Source | front matter parsing and index-content discovery |
-| Markdown | basic HTML renderer for headings, paragraphs, and escaped text |
+| Markdown | CommonMark rendering via swift-markdown (`TileKit.Markdown.CommonMarkRenderer`), raw HTML escaped, not passed through |
 | Templates | Mustache-style rendering, nested values, raw values, and list sections |
 | Content | typed records, field values, filters, sorting, offset, limit, and query runner |
 | Tiles | source-ordered directive parser, typed tile values, `service-form` request validation, renderer protocol, render output, registry, and unknown fallback |
@@ -1070,7 +1070,7 @@ Start small:
 
 - `swift-argument-parser` for the CLI.
 - YAML support when config/front matter lands.
-- Markdown parser when Markdown rendering lands.
+- Markdown parser (swift-markdown) adopted now that Markdown rendering has landed.
 - Mustache renderer when templates land.
 
 Defer:
@@ -1242,7 +1242,7 @@ accepted decisions are:
 
 | ID | Question | Tracking |
 |---|---|---|
-| Q1 | Exact constrained Markdown grammar | open |
+| Q1 | Exact constrained Markdown grammar | first cut in [markdown-profile.md](markdown-profile.md); CommonMark via swift-markdown for prose, `:::tile` for directives |
 | Q2 | Exact service manifest schema URL and versioning | open |
 | Q3 | How much of Toucan's iterator model should be renamed to pagination | open |
 | Q4 | Whether templates support partials through Mustache library features or explicit Tiledown loading | open |

@@ -9,12 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Real CommonMark rendering via [swift-markdown](https://github.com/apple/swift-markdown):
+  `TileKit.Markdown.CommonMarkRenderer` parses prose into swift-markdown's typed
+  tree and emits HTML for headings, paragraphs, emphasis, strong, inline and
+  fenced code, links, images, lists, block quotes, and breaks. Raw HTML is escaped,
+  not passed through. The first external dependency. See
+  [docs/markdown-profile.md](docs/markdown-profile.md).
 - `TileKit.Tile.DirectiveSerializer`: serializes the parsed tile block tree back
   to Tiledown Markdown (tile blocks in one canonical form, preserving unknown tile
   types and properties; Markdown blocks verbatim), the `put` inverse of the
   directive parser. Round-trip law tests assert the research's semantic invariant:
   PutGet (`parse(serialize(parse(x))) == parse(x)`) and PutPut (canonical output is
   a fixed point). Byte identity is not a goal.
+
+### Removed
+
+- `TileKit.Markdown.BasicHTMLRenderer`, the placeholder heading/paragraph renderer,
+  replaced by `CommonMarkRenderer`.
 
 ## [0.1.0] - 2026-05-29
 

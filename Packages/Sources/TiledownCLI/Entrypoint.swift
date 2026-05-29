@@ -70,7 +70,7 @@ private struct Command {
                 fileManager: .default,
             ),
             markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
             tileParser: TileKit.Tile.DirectiveParser(),
             tileRegistry: makeTileRegistry(),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),

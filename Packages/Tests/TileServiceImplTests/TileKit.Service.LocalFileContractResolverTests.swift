@@ -143,8 +143,12 @@ struct LocalFileContractResolverTests {
         _ data: Data,
         name: String,
     ) throws -> String {
+        // A unique directory per call so tests running in parallel never share a
+        // path: a shared filename let one test's cleanup delete a file another
+        // was mid-read, which raced only under CI's scheduling.
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("tiledown-service-impl-tests", isDirectory: true)
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(name)
         try data.write(to: url)

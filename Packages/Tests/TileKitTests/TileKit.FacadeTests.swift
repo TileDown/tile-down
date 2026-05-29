@@ -6,7 +6,7 @@ struct TileKitFacadeTests {
     @Test("exports domain modules and site implementation")
     func exportsModules() throws {
         let queryRunner = TileKit.Content.QueryRunner()
-        let markdownRenderer = TileKit.Markdown.BasicHTMLRenderer()
+        let markdownRenderer = TileKit.Markdown.CommonMarkRenderer()
         let manifestValidator = TileKit.Service.ManifestValidator()
         let serviceFormBinder = TileKit.ServiceForm.Binder()
         let serviceFormRenderer = TileKit.ServiceForm.Renderer()
