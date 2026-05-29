@@ -226,6 +226,25 @@ Do not create a custom Swift tile for every backend operation. Start with
 `service-form` and let manifests describe operation-specific input, output,
 validation, formatting, and availability.
 
+### D18. Manifest-driven provider integrations
+
+Provider integrations should be manifest-driven whenever existing Tiledown
+capabilities are enough.
+
+The authoring input is provider documentation plus the Tiledown capability
+inventory plus the Tiledown manifest schema. The output is `manifest.yml`, not a
+provider-specific Swift plugin.
+
+Tiledown does not execute arbitrary provider-specific code from a manifest. Swift
+code defines capabilities. Manifests compose capabilities. New Swift code is
+required only when an integration needs a new capability: a rendering primitive,
+validation type, asset type, credential exposure model, build-time execution
+model, or transport shape that cannot be described by the current schema.
+
+Provider manifests can declare credential requirements, but secret values are
+bound in site config through `valueFromEnv`, `secretRef`, or `publicKey`
+depending on exposure.
+
 ## Consequences
 
 - The package graph stays explicit without turning `TileCore` or `TileKit` into a

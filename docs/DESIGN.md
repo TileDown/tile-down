@@ -706,7 +706,208 @@ Allowed values:
 The manifest should be cacheable with HTTP caching. Add a lockfile later if
 reproducible builds need pinned manifest versions.
 
-### 10.4 Credentials
+### 10.4 Manifest-Driven Integrations
+
+Provider integrations should be manifest-driven whenever existing Tiledown
+capabilities are enough. New provider support should not require custom Swift
+code just to map provider inputs, validation, layout, credentials, and embed
+outputs onto capabilities the engine already supports.
+
+The refined pipeline is:
+
+```text
+Tiledown Markdown
+        |
+        v
+Tile parser
+        |
+        v
+Typed tile tree
+        |
+        v
+Manifest lookup and validation
+        |
+        v
+Capability renderer
+        |
+        v
+Static site output
+```
+
+Tiledown does not execute arbitrary provider-specific code from a manifest. Swift
+code defines capabilities. Manifests compose those capabilities.
+
+Manifest-driven integrations have three inputs:
+
+| Input | Role |
+|---|---|
+| Tiledown capability inventory | complete set of primitives the engine can validate and render |
+| Tiledown manifest schema | structural contract every integration manifest must satisfy |
+| Provider documentation | provider-specific ids, embed URLs, auth requirements, limits, and options |
+
+The integration authoring flow is:
+
+```text
+Provider documentation
+        +
+Capability inventory
+        +
+Manifest schema
+        |
+        v
+manifest.yml
+        |
+        v
+Tiledown runtime
+```
+
+The output is `manifest.yml`, not `ProviderPlugin.swift`. For example, a quiz
+provider that needs a quiz id, optional theme, credential reference, responsive
+iframe, and block layout should map to existing input, credential, output, and
+layout capabilities. No new Swift code is needed unless the provider requires a
+capability Tiledown does not have.
+
+Do not put secret values in integration manifests. A provider manifest can
+declare that an operation requires a credential with `server`, `build`, or
+`browser` exposure. Site config binds that requirement to `valueFromEnv`,
+`secretRef`, or `publicKey`. If a scaffold accepts shorthand such as
+`apiKey.environmentVariable`, it normalizes that shorthand into an explicit
+credential requirement plus a site-level binding.
+
+### 10.5 Capability Inventory
+
+The capability inventory is the contract between Tiledown and integration
+manifests. It is versioned, documented, and implemented in Swift. Manifests can
+only reference capabilities in the inventory.
+
+Initial input capabilities:
+
+| Capability | Meaning |
+|---|---|
+| `text` | single-line string |
+| `multilineText` | multi-line string |
+| `integer` | integer number |
+| `double` | floating-point number when exact decimal precision is not required |
+| `decimal` | exact decimal transported as a string |
+| `boolean` | true or false value |
+| `date` | date input |
+| `image` | image URL or asset reference |
+| `video` | video URL or asset reference |
+| `color` | color value |
+| `url` | URL value |
+| `select` | one value from allowed values |
+| `credentialReference` | reference to a declared credential, not the credential value |
+
+Initial output capabilities:
+
+| Capability | Meaning |
+|---|---|
+| `escapedText` | escaped text output |
+| `trustedMarkdown` | Markdown rendered by Tiledown only when explicitly allowed |
+| `imagePlaceholder` | generated image placeholder |
+| `videoPlaceholder` | generated video placeholder |
+| `iframe` | iframe embed with declared origin and layout constraints |
+| `form` | generated form |
+| `cssAsset` | CSS asset declaration |
+| `javascriptAsset` | browser JavaScript asset declaration |
+| `externalEmbed` | declared third-party embed surface |
+
+Initial layout capabilities:
+
+| Capability | Meaning |
+|---|---|
+| `inline` | inline flow |
+| `block` | normal block flow |
+| `fullWidth` | spans available content width |
+| `responsive` | preserves responsive sizing behavior |
+
+Initial validation capabilities:
+
+| Capability | Meaning |
+|---|---|
+| `required` | value must be present |
+| `optional` | value may be omitted |
+| `defaultValue` | default applied when omitted |
+| `allowedValues` | enum-like allowed value set |
+| `minLength` | minimum string length |
+| `maxLength` | maximum string length |
+| `regex` | regular expression validation |
+| `minimum` | numeric lower bound |
+| `maximum` | numeric upper bound |
+
+Remote HTML is not an output capability. If a provider needs raw HTML injection,
+that is a new high-trust capability with sanitization and content-security
+requirements, not a default manifest mapping.
+
+Example provider integration manifest:
+
+```yaml
+id: quiz.typeform
+
+provider:
+  name: Typeform
+  website: https://typeform.com
+
+requirements:
+  credentials:
+    - id: typeform
+      type: bearer
+      exposure: server
+
+inputs:
+  formId:
+    capability: text
+    required: true
+
+  theme:
+    capability: select
+    required: false
+    default: light
+    allowedValues:
+      - light
+      - dark
+
+outputs:
+  embed:
+    capability: iframe
+    responsive: true
+    origin: https://form.typeform.com
+
+layout:
+  mode: block
+
+build:
+  strategy: provider-embed
+```
+
+The corresponding site config supplies the credential binding:
+
+```yaml
+services:
+  typeform:
+    integration: quiz.typeform
+    auth:
+      type: bearer
+      valueFromEnv: TYPEFORM_API_KEY
+      exposure: server
+```
+
+### 10.6 When Swift Code Is Required
+
+Swift code is required when an integration needs a capability Tiledown does not
+already support. Examples:
+
+- New rendering primitive.
+- New validation type.
+- New asset type.
+- New credential exposure model.
+- New build-time execution model.
+- New transport that cannot be described by the existing manifest schema.
+
+Once the capability exists, future providers reuse it through manifests. This
+keeps growth capability-first rather than provider-plugin-first.
+
+### 10.7 Credentials
 
 Secrets never appear in Markdown, generated HTML, generated JavaScript, or
 browser storage.
@@ -877,6 +1078,10 @@ accepted decisions are:
 | D12 | Tile capability modes are explicit: `static`, `local`, `remote`, `proxy`, and `build` |
 | D13 | Secret credentials never enter Markdown or generated browser output |
 | D14 | First interactive mechanics are `service-form`, local poll, YouTube embed, email response, comments, and chart |
+| D15 | Services declare build-time availability policy |
+| D16 | Credential exposure is explicit and controls browser output |
+| D17 | First tile roadmap starts with reusable mechanics before provider-specific tiles |
+| D18 | Provider integrations should be manifest-driven whenever existing Tiledown capabilities are enough |
 
 ---
 
