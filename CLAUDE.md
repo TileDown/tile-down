@@ -7,8 +7,8 @@ Guidance for Claude Code (and other coding agents) working in this repository.
 Tiledown is a tile-native static site generator. A page is a tree of typed
 **tiles** (not Markdown); the engine renders it to static HTML for GitHub Pages.
 The engine library is `TileKit`, the CLI is `tile-down`, the namespace root is
-`TileDown`. The engine targets macOS and Linux. A native macOS editor app over the
-same tile model is a separate, future concern. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
+`TileDown`. The engine targets macOS and Linux. A native macOS and iOS editor app
+over the same tile model is a separate, future concern. Architecture: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Read first
 

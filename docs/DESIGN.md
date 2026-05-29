@@ -17,8 +17,8 @@ Tiledown is a tile-native static site generator. A page is a tree of typed
 source-of-truth representation. The engine resolves each tile through a registry
 to a renderer and emits static HTML for publishing to GitHub Pages. Rich tiles
 (charts, diagrams, forms, polls) render client-side, so there is no server to run.
-The engine builds on macOS and Linux. A future native macOS visual editor over the
-same tile model is a separate concern that can reuse the engine.
+The engine builds on macOS and Linux. A future native macOS and iOS visual editor
+over the same tile model is a separate concern that can reuse the engine.
 
 ---
 
@@ -62,7 +62,7 @@ tile-native engine is the foundation that makes the editor tractable.
 - **G5**: A CLI generates a site and a path exists to publish it to GitHub Pages.
 
 ### P2
-- **G6**: A native macOS visual editor over the same tile model.
+- **G6**: A native macOS and iOS visual editor over the same tile model.
 
 ---
 
@@ -243,7 +243,7 @@ only the tile model.
 
 ## 17. Future Work
 
-- Native macOS visual editor over the tile model.
+- Native macOS and iOS visual editor over the tile model.
 - Markdown import/export.
 - Rich tile library: charts, Mermaid, forms, polls.
 - GitHub Pages publishing via the GitHub API.

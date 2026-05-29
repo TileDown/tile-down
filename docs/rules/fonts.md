@@ -1,6 +1,6 @@
 # App Font Registration Rules
 
-Font-registration rules for the planned Tiledown native macOS editor app (the engine is non-UI and is out of scope here). Register custom fonts using Core Text in SPM packages. Never use Info.plist approaches. Resources must use `.process()` in Package.swift and always use `Bundle.module` for resource access.
+Font-registration rules for the planned Tiledown native editor. Register custom fonts using CoreText in SPM packages. Never use Info.plist approaches. Resources must use `.process()` in Package.swift and always use `Bundle.module` for resource access.
 
 ## Core rules
 
@@ -24,10 +24,11 @@ Use `.process()` for font resources:
 
 ### Rule 3: Platform imports
 
-Import the macOS UI framework where platform types are needed:
+Use platform-specific imports:
 
-- Use `#if canImport(AppKit)` and import AppKit for platform types.
-- Core Text and Core Graphics are the registration APIs and need no UI framework import to register fonts.
+- `#if canImport(UIKit)` for iOS.
+- `#elseif canImport(AppKit)` for macOS.
+- Import UIKit/AppKit for platform types.
 
 ### Rule 4: App initialization
 
@@ -70,7 +71,9 @@ import CoreGraphics
 import CoreText
 import Foundation
 
-#if canImport(AppKit)
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
 import AppKit
 #endif
 
@@ -175,9 +178,9 @@ struct MyView: View {
 
 ## Why this pattern?
 
-- **Works in SPM packages.** Info.plist approaches only work in app bundles; Core Text registration works in packages, frameworks, and apps.
+- **Works in SPM packages.** Info.plist approaches only work in app bundles; CoreText registration works in packages, frameworks, and apps.
 - **Explicit error reporting.** Console logs show which fonts loaded and why a failure happened.
-- **Works on macOS.** A single code path using Core Text and AppKit, no per-platform branching needed for the editor's target.
+- **Cross-platform.** Works on iOS and macOS with conditional imports, same code path.
 - **Uses `Bundle.module`.** SPM manages the bundle; no manual path handling.
 - **Multiple formats.** `.otf` (recommended) and `.ttf`, filtered by extension.
 
@@ -204,7 +207,7 @@ CoreText is the only approach that works universally.
 - [ ] Used `.process()` for resources in Package.swift
 - [ ] Created `FontRegistration.swift` with CoreText registration
 - [ ] Imported CoreText and CoreGraphics
-- [ ] Imported AppKit under `#if canImport(AppKit)` where platform types are needed
+- [ ] Used platform-specific imports (`#if canImport(UIKit)` / `#if canImport(AppKit)`)
 - [ ] Used `Bundle.module` for resource access
 - [ ] Filtered font files by extension (.otf, .ttf)
 - [ ] Used `CTFontManagerRegisterFontsForURL` with `.process` scope
