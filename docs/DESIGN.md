@@ -6,7 +6,7 @@
 | **Created** | 2026-05-29 |
 | **Last revised** | 2026-05-29 |
 | **Tracking issue** | none |
-| **Companion docs** | [CONVENTIONS.md](CONVENTIONS.md), [rules](rules/README.md), [research](research/), [architecture decisions](decisions/tiledown-architecture.md) |
+| **Companion docs** | [CONVENTIONS.md](CONVENTIONS.md), [rules](rules/README.md), [research](research/), [architecture decisions](decisions/tiledown-architecture.md), [next steps](NEXT_STEPS.md) |
 
 ---
 
@@ -16,11 +16,12 @@ Tiledown is a Swift static-site generator with a Markdown-canonical source
 format and a typed tile model.
 
 Authors write Tiledown Markdown on disk. The parser turns that constrained
-Markdown profile into a typed tile tree. The site pipeline resolves content,
-queries, templates, assets, and tile renderers, then emits static HTML, CSS,
-browser JavaScript, and optional JSON outputs. JSON is a derived format for
-tests, debugging, interchange, and future editor internals, not the primary
-source file.
+Markdown profile into typed tile data. At full scope, the site pipeline resolves
+content, queries, templates, assets, and tile renderers, then emits static HTML,
+CSS, browser JavaScript, and optional JSON outputs. The current implementation
+emits HTML plus page-local tile CSS and browser JavaScript fragments. JSON is a
+derived format for tests, debugging, interchange, and future editor internals,
+not the primary source file.
 
 The generator aims for Toucan-level SSG functionality first: content loading,
 front matter, content types, queries, scopes, Mustache-style templates, assets,
@@ -114,16 +115,17 @@ with dependency-injected registries and protocol boundaries.
 
 ### 4.1 Functional
 
-| ID | Requirement | Verified by |
-|---|---|---|
-| F1 | Markdown parses to a typed tile tree | unit test |
-| F2 | Tile tree serializes to canonical Markdown | unit test |
-| F3 | Parse, serialize, parse returns the same tile semantics | unit test |
-| F4 | A page renders through a Mustache-style template to HTML | integration test |
-| F5 | Unknown tile types preserve source data and render diagnostics | unit test |
-| F6 | Output escaping prevents script injection through text fields | unit test |
-| F7 | Service-backed tiles reject server secrets in generated browser output | unit test |
-| F8 | Query filtering, ordering, limit, and offset work for content collections | unit test |
+| ID | Requirement | Current status | Verified by |
+|---|---|---|---|
+| F1 | Markdown body parses into source-ordered Markdown and tile blocks | implemented | `TileTileTests` |
+| F2 | Tile tree serializes to canonical Markdown | planned | serializer tests when implemented |
+| F3 | Parse, serialize, parse returns the same tile semantics | planned | round-trip tests when implemented |
+| F4 | A page renders through a Mustache-style template to HTML | implemented | `TileSiteTests` |
+| F5 | Unknown tile types preserve source data and render diagnostics | implemented for rendering | `TileTileTests` |
+| F6 | Output escaping prevents script injection through text fields | implemented for Markdown, templates, and service-form runtime config | unit tests |
+| F7 | Service-backed tiles reject server secrets in generated browser output | implemented in binding and rendering rules | `TileServiceFormTests` |
+| F8 | Query filtering, ordering, limit, and offset work for content collections | implemented | `TileContentTests` |
+| F9 | `service-form` can generate controls, result regions, CSS, and browser JS from a service contract | implemented as a domain renderer, not yet registered by the site generator by default | `TileServiceFormTests` |
 
 ### 4.2 Non-functional
 
@@ -155,8 +157,67 @@ Content resolver -> content types, properties, relations, queries, scopes
 Site pipeline -> templates, output renderers, assets, tile renderers
         |
         v
-Generated HTML/CSS/JS/JSON files
+Generated HTML/CSS/JS files now, derived JSON later
 ```
+
+The current implementation has the first end-to-end HTML path:
+
+```text
+Markdown file
+        |
+        v
+TileKit.Source.FrontMatterParser
+        |
+        v
+TileKit.Tile.DirectiveParser
+        |
+        v
+Markdown blocks -> TileKit.Markdown.BasicHTMLRenderer
+Tile blocks    -> TileKit.Tile.Registry
+        |
+        v
+TileKit.Template.SimpleMustacheRenderer
+        |
+        v
+Static HTML file
+```
+
+The current tile render contract returns page-local HTML, CSS, and browser
+JavaScript fragments. `TileSite` keeps Markdown blocks and tile blocks in source
+order, joins HTML fragments into `page.contents.html`, and exposes collected
+tile assets as `page.assets.css`, `page.assets.javascript`, `assets.css`, and
+`assets.javascript`.
+
+### 5.1 Current Implementation Snapshot
+
+Implemented as of the current design revision:
+
+| Area | Current state |
+|---|---|
+| Package shape | one Swift package manifest under `Packages/` with focused targets and matching test targets |
+| Facade | `TileKit` re-exports the domain targets and current local filesystem adapter |
+| CLI | `tiledown` builds one page or a content directory using injected generator dependencies |
+| Source | front matter parsing and index-content discovery |
+| Markdown | basic HTML renderer for headings, paragraphs, and escaped text |
+| Templates | Mustache-style rendering, nested values, raw values, and list sections |
+| Content | typed records, field values, filters, sorting, offset, limit, and query runner |
+| Tiles | source-ordered directive parser, typed tile values, `service-form` request validation, renderer protocol, render output, registry, and unknown fallback |
+| Site generation | renders Markdown and tile blocks in source order through injected parser and registry values |
+| Services | provider integration manifest models, service operation contracts, capability inventory, validation, and auth exposure models |
+| Service forms | request-to-contract binding and generated HTML/CSS/browser-JS renderer for `remote` and `proxy` modes |
+| Filesystem | local filesystem adapter isolated in `TileSiteImpl` |
+
+Not implemented yet:
+
+| Area | Missing piece |
+|---|---|
+| Canonical source | canonical Markdown serializer and parse/serialize/parse law tests |
+| Output | derived JSON output and output renderer registry |
+| Site config | config loading, service binding config, output config, and template/theme config |
+| Service loading | local or remote service contract resolver, health checks, availability policy execution, and manifest caching |
+| Built-in tile wiring | default registration for `service-form`, `youtube-video`, `poll`, comments, email response, and charts |
+| Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |
+| CLI workflow | `init`, `serve`, `watch`, and proxy support |
 
 Registries are values passed into the generator:
 
@@ -305,6 +366,7 @@ future targets when they gain real code:
 |---|---|
 | `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
 | `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
+| `TileServiceImpl` | local or remote service contract loading, HTTP clients, health checks, and manifest caching |
 | `TileDiagnostics` | structured warnings, build errors, and diagnostic sinks when diagnostics need their own API |
 
 Do not put future tile, service, asset, output, or diagnostics code into
@@ -1063,21 +1125,40 @@ No live network tests in the core suite. HTTP is injected and tested with fakes.
 
 ---
 
-## 15. Implementation Order
+## 15. Implementation Status
 
-1. Scaffold `Packages/Package.swift`, `TileKit`, `TiledownCLI`, and
-   `TileKitTests`.
-2. Implement source loading for one Markdown file with front matter.
-3. Implement one Mustache-style HTML render.
-4. Add content type and query basics.
-5. Add Markdown tile directives and tile registry.
-6. Add generated tile assets to template context.
-7. Add service operation contract decoding and validation.
-8. Add `service-form` tile request decoding and validation.
-9. Add `service-form` request-to-contract binding.
-10. Add `service-form` generated HTML/CSS/JS.
-11. Add JSON output.
-12. Add `init`, `serve`, and `watch`.
+Completed slices:
+
+| Slice | Status |
+|---|---|
+| Package scaffold, facade, and CLI front door | implemented |
+| Single-page source loading with front matter | implemented |
+| Mustache-style HTML render | implemented |
+| Content records and query basics | implemented |
+| Content directory builds from `index.md` files | implemented |
+| Markdown tile directives | implemented |
+| Tile renderer registry and unknown-tile diagnostics | implemented |
+| Tile-generated CSS and JavaScript exposed to templates | implemented |
+| Service integration manifest models and capability inventory | implemented |
+| Service operation contract decoding and validation | implemented |
+| `service-form` tile request decoding and validation | implemented |
+| `service-form` request-to-contract binding | implemented |
+| `service-form` generated HTML/CSS/browser-JS renderer | implemented in `TileServiceForm`; not yet registered in the site generator by default |
+
+Near-term slices are tracked in [NEXT_STEPS.md](NEXT_STEPS.md). The immediate
+priority is to wire existing service-form domain logic through the tile registry
+without making `TileSite` depend on concrete service-form behavior. `TileSite`
+should continue to know only about `TileKit.Tile.Rendering` through the injected
+registry.
+
+Next major design milestones:
+
+1. Add a `service-form` tile renderer adapter in `TileServiceForm`.
+2. Add an injected service contract resolver and service binding configuration.
+3. Add JSON output as a derived renderer, not a source format.
+4. Add canonical Markdown serialization.
+5. Add asset declarations and asset behavior registry.
+6. Add `init`, `serve`, `watch`, and optional proxy support.
 
 ---
 
@@ -1178,6 +1259,7 @@ accepted decisions are:
 - [CONVENTIONS.md](CONVENTIONS.md)
 - [Rules index](rules/README.md)
 - [Architecture decisions](decisions/tiledown-architecture.md)
+- [Next steps](NEXT_STEPS.md)
 - [Markdown source model research](research/2026-05-29-1654-markdown-tile-source-model.md)
 - [Tile function source evaluation](research/2026-05-29-1718-tile-functions-source-evaluation.md)
 - [Tile catalog and service contract](research/2026-05-29-1728-tile-catalog-service-contract.md)
