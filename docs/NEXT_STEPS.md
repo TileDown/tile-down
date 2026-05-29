@@ -89,26 +89,45 @@ file, missing service, unreadable file, malformed file, availability carried, an
 a file-resolved contract rendering through the service-form path without leaking
 server credentials.
 
-### 3. Add derived JSON output
+### 3. Add derived JSON output (done)
 
-Goal: expose the parsed site and tile structure for tests, debugging,
-interchange, and future editor work without making JSON canonical.
+Shipped. The new `TileOutput` target carries the output renderer seam:
+`TileKit.Output.Rendering` (the renderer Strategy: a `formatID` plus
+`render(_:) -> Artifact`), `TileKit.Output.Document` (the renderer input: front
+matter, the parsed tile block tree, slug), `TileKit.Output.Artifact` (contents +
+file extension), and `TileKit.Output.Registry`, the injected registry that
+dispatches by format id and is the structural twin of `TileKit.Tile.Registry`. An
+unregistered format throws `TileKit.Output.RenderingError.unknownFormat` rather
+than falling back, because an unknown output format is a wiring error, not a
+content edge case. `TileKit.Output.JSONRenderer` is the second output renderer
+(HTML is the first); the CLI `tiledown json <source.md> <output.json>` parses
+front matter and blocks, then renders through the registry.
 
-Design:
+The JSON is a derived view of the canonical tile tree, never canonical. The
+projection preserves tile type ids, source property order (properties are an
+ordered array of `{ key, value }`, not an object, so order survives), both value
+kinds (tagged `string`/`list`), and unknown tile data (an unknown tile type
+projects like any other, so its type and properties survive). Output is
+deterministic (sorted object keys, so dictionary order never leaks). There is no
+`diagnostics` field: the engine has no diagnostics model yet, so inventing one
+here was rejected; it lands with that model.
 
-- Introduce `TileOutput` only when the second output renderer is added.
-- Add an output renderer protocol and an injected output renderer registry.
-- HTML remains the first output.
-- JSON is derived from parsed source and resolved page data.
-- JSON output must preserve tile type ids, property order, unknown tile data, and
-  diagnostics.
+Covered by `TileOutputTests`: the JSON renderer (file extension, valid JSON with
+trailing newline, self-describing header, determinism across renders and across
+front-matter insertion order, block and property order, value-kind tagging,
+unknown tile survival, empty document) and the registry (dispatch by explicit and
+self-described format id, last-registration-wins, unknown-format throws, the JSON
+renderer through the registry).
 
-Acceptance:
+Two deviations from the § 7.2 sketch, both forced by the project's invariants and
+now documented there: `props` is an ordered array (not an object), and no
+`id`/`mode` fields (the model does not carry them yet). The fixture is asserted by
+decoding the output and checking structure plus determinism, the same semantic
+posture the Markdown serializer takes, rather than a byte-golden that would be
+fragile across Foundation versions.
 
-- A build can emit HTML and JSON for the same source page.
-- JSON output is deterministic.
-- JSON output is tested against a fixture.
-- No source authoring path treats JSON as canonical.
+Still open: route HTML through the output registry as an `Output.Rendering` (it
+still renders on the site generator's own path), and add RSS or feed renderers.
 
 ### 4. Add canonical Markdown serialization (tile-block slice done)
 
@@ -203,7 +222,7 @@ boundary.
 | site generator orchestration | `TileSite` |
 | local filesystem I/O | `TileSiteImpl` |
 | future local or HTTP service contract loading | future `TileServiceImpl` |
-| future JSON, feed, and output renderer registry | future `TileOutput` |
+| output renderer seam, registry, and JSON renderer (feed renderers later) | `TileOutput` |
 | future asset declarations and transforms | future `TileAsset` |
 | future diagnostics sink if warnings grow | future `TileDiagnostics` |
 

@@ -214,7 +214,7 @@ Not implemented yet:
 | Area | Missing piece |
 |---|---|
 | Canonical source | full document round-trip is implemented (tiles + prose normalized to one canonical form); a typed in-memory prose tree for the future editor and richer JSON is not built (prose round-trips through canonical strings, not stored AST nodes) |
-| Output | derived JSON output and output renderer registry |
+| Output | HTML still renders on the site generator's own path; routing it through the new `TileKit.Output.Registry` as an HTML renderer, plus RSS or feed renderers, is not done (the registry and a JSON renderer exist) |
 | Site config | config file loading, output config, and template/theme config (service binding values exist; no file format yet) |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
@@ -371,7 +371,7 @@ future targets when they gain real code:
 | Future target | Trigger |
 |---|---|
 | `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
-| `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
+| `TileOutput` | exists for the output renderer seam (`Rendering`, `Registry`) and the JSON renderer; routing HTML through the registry and adding RSS or feed renderers are the remaining triggers |
 | `TileServiceImpl` | exists for local file contract loading; remote/HTTP clients, health checks, and manifest caching are the remaining triggers |
 | `TileDiagnostics` | structured warnings, build errors, and diagnostic sinks when diagnostics need their own API |
 
@@ -426,21 +426,49 @@ serializer emits one canonical form.
 
 ### 7.2 Tile Tree
 
-A tile has:
+A tile carries a type id, an ordered list of typed properties, and child blocks.
+Conceptually a tile also has a stable `id` (the reorder-safe keyed chunk) and a
+`mode`; those are future fields the in-memory `TileKit.Tile.Instance` does not
+carry yet, so the implemented JSON projection does not emit them.
+
+The derived JSON (`TileKit.Output.JSONRenderer`) projects a whole parsed document,
+not a tile in isolation. It is a derived view of the canonical tile tree, useful
+for tests, debugging, interchange, and future editor work, never the source of
+truth. The shape:
 
 ```json
 {
-  "id": "stable-id",
-  "type": "service-form",
-  "mode": "proxy",
-  "props": {},
-  "children": []
+  "tiledown": { "version": "0.1.0", "format": "tile-document" },
+  "slug": "",
+  "frontMatter": { "title": "Hello" },
+  "blocks": [
+    { "kind": "markdown", "text": "# Hello\n\nBody." },
+    { "kind": "tile", "type": "poll",
+      "props": [
+        { "key": "question", "value": { "kind": "string", "string": "Best?" } },
+        { "key": "options",  "value": { "kind": "list",   "list": ["A", "B"] } }
+      ],
+      "children": [] }
+  ]
 }
 ```
 
-The exact Swift model should use typed values, not raw dictionaries everywhere.
-The JSON shape is useful for tests and interchange, but it is derived from
-Markdown.
+Two shape decisions follow from the project's invariants rather than convenience:
+
+- **Properties are an ordered array, not an object.** Preserving source property
+  order is required; a JSON object cannot guarantee it. Each entry is a
+  `{ "key", "value" }` pair, and a value is tagged by `kind` (`string` or `list`),
+  mirroring `TileKit.Tile.Value`.
+- **Unknown tile types project like any other tile.** Their `type`, `props`, and
+  `children` survive losslessly, which is what "preserve unknown tile data" means.
+  There is no `diagnostics` field yet, because the engine has no diagnostics model
+  yet; one would be added with that model, not invented here.
+
+Output is deterministic for the same input (object keys are sorted, so dictionary
+iteration order never leaks into the bytes). Byte identity across Foundation
+versions is not part of the contract; the tests assert the schema by decoding the
+output and asserting structure plus determinism, the same semantic posture the
+Markdown serializer takes.
 
 ### 7.3 Content
 
