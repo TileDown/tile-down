@@ -21,8 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A typed content query core with filters, ordering, offset, and limit support
   for future site collections and tile function manifests.
 - A `TileTile` domain target with typed tile blocks, source-ordered properties,
-  directive parsing, typed `service-form` requests, and tests for structured
-  Tiledown Markdown tile blocks.
+  directive parsing, injected tile renderer registry, unknown-tile diagnostics,
+  typed `service-form` requests, and tests for structured Tiledown Markdown tile
+  blocks.
 - A `TileService` domain target with manifest models, capability inventory, and
   validation for manifest-driven provider integrations.
 - Service operation contracts for service-backed tiles, including health,
@@ -58,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `TileKit` acting as a facade target.
 - Changed site generation to receive content discovery through the injected
   `TileKit.Source.ContentDiscovering` protocol.
+- Changed site generation to render Markdown and tile directive blocks in source
+  order through injected `TileKit.Tile.Parsing` and `TileKit.Tile.Registry`
+  values, exposing collected tile CSS and JavaScript as `page.assets`.
 - Updated the architecture and agent guidance for Tiledown Markdown as the
   canonical source format, the `tiledown` CLI name, Toucan-parity SSG goals, and
   dependency-injected registries.

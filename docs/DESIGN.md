@@ -228,8 +228,8 @@ logic:
 | `TileServiceForm` | `TileKit.ServiceForm` binding between service-form tile requests, service contract operations, and generated browser output |
 | `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
-| `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
-| `TileSite` | `TileKit.Site` build requests/results, page context, generator orchestration, and filesystem protocol |
+| `TileTile` | `TileKit.Tile` typed tile blocks, source-ordered properties, directive parser, render output, renderer registry, and typed tile requests |
+| `TileSite` | `TileKit.Site` build requests/results, page context, generator orchestration, tile block rendering, and filesystem protocol |
 
 Implementation targets are meatless adapters. They contain concrete I/O or
 integration code only when that code is not pure domain logic. Today that means:
@@ -267,6 +267,7 @@ TileCore
   +-- TileSite ----> TileMarkdown
         |            TileSource
         |            TileTemplate
+        |            TileTile
         v
       TileSiteImpl
 
@@ -290,7 +291,8 @@ Allowed imports are tracked in
   integrations.
 - Domain targets may depend on `TileCore`. A domain target may depend on another
   domain target only when its public API genuinely composes that domain, as
-  `TileSite` currently composes `TileMarkdown`, `TileSource`, and `TileTemplate`.
+  `TileSite` currently composes `TileMarkdown`, `TileSource`, `TileTemplate`, and
+  `TileTile`.
 - The CLI and future app targets are composition roots. They may import the
   facade or concrete implementations and wire dependencies together.
 
@@ -441,6 +443,14 @@ Tile definitions declare:
 - capability mode
 - unknown-property preservation policy
 - diagnostics
+
+`TileKit.Tile.Registry` is the first tile dispatch seam. It maps tile type ids to
+injected renderers and falls back to a deterministic unsupported-tile diagnostic
+for unknown tile types. `TileKit.Site.Generator` receives a tile parser and tile
+registry through its initializer, renders Markdown blocks and tile blocks in
+source order, and exposes collected tile CSS and JavaScript as
+`page.assets.css`, `page.assets.javascript`, `assets.css`, and
+`assets.javascript` in the template context.
 
 Capability modes:
 
@@ -1033,6 +1043,7 @@ Initial tests:
 
 - Markdown front matter parsing.
 - Markdown tile directive parsing.
+- Tile renderer registry dispatch and unknown-tile diagnostic rendering.
 - Canonical serialization.
 - Parse, serialize, parse round-trip.
 - Unknown tile preservation and diagnostic render.
@@ -1060,7 +1071,7 @@ No live network tests in the core suite. HTTP is injected and tested with fakes.
 3. Implement one Mustache-style HTML render.
 4. Add content type and query basics.
 5. Add Markdown tile directives and tile registry.
-6. Add generated assets and asset behavior registry.
+6. Add generated tile assets to template context.
 7. Add service operation contract decoding and validation.
 8. Add `service-form` tile request decoding and validation.
 9. Add `service-form` request-to-contract binding.

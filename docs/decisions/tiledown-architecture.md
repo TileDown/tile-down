@@ -71,8 +71,8 @@ Current source targets are:
 | `TileServiceForm` | binding between service-form tile requests, service contract operations, and generated browser output |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
-| `TileTile` | typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
-| `TileSite` | build requests/results, page context, generator orchestration, and filesystem protocol |
+| `TileTile` | typed tile blocks, source-ordered properties, directive parser, renderer registry, and typed tile requests |
+| `TileSite` | build requests/results, page context, generator orchestration, tile block rendering, and filesystem protocol |
 | `TileSiteImpl` | concrete local filesystem adapter |
 | `TileKit` | facade target re-exporting domain targets and current implementation adapter |
 | `TiledownCLI` | executable composition root |
@@ -111,8 +111,9 @@ through initializers. Cross-target seams are named protocols, not closure
 typealiases.
 
 The generator receives concrete dependencies such as filesystem, Markdown
-parser, Markdown renderer, template renderer, and content discovery through its
-initializer. Future registries follow the same rule.
+parser, Markdown renderer, tile parser, tile renderer registry, template
+renderer, and content discovery through its initializer. Future registries
+follow the same rule.
 
 ### D10. Registries
 
@@ -120,13 +121,19 @@ Variable behavior is represented by injected values:
 
 | Registry | Purpose |
 |---|---|
-| `TileRegistry` | tile type id to tile definition |
+| `TileRegistry` | tile type id to tile renderer |
 | `OutputRendererRegistry` | renderer id to output renderer |
 | `TemplateRendererRegistry` | template engine id to template renderer |
 | `AssetBehaviorRegistry` | behavior id to asset behavior |
 | `ServiceRegistry` | service id to manifest binding and auth policy |
 
 Registries are not global.
+
+`TileKit.Tile.Registry` is the first implemented registry. It dispatches typed
+tile instances to injected renderers by tile type id and falls back to an escaped
+unsupported-tile diagnostic for unknown tile types. `TileSite` renders Markdown
+and tile blocks in source order and exposes collected tile CSS and JavaScript in
+template context.
 
 ### D11. Tile capability model
 
