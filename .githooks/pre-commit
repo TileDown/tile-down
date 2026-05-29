@@ -13,12 +13,7 @@
 # A future "sweep" task can clean up legacy content; this hook prevents new
 # violations from entering staged commits.
 #
-# Install (per repo):
-#   ln -s ../../../mihaela-agents/templates/git-hooks/pre-commit-style-check \
-#         .git/hooks/pre-commit
-# or copy:
-#   cp <path-to>/pre-commit-style-check .git/hooks/pre-commit
-#   chmod +x .git/hooks/pre-commit
+# Install (per repo): git config core.hooksPath .githooks
 #
 # Skip mechanism (for legitimate meta-references that need to quote the
 # forbidden tokens, like the rule documentation itself):
