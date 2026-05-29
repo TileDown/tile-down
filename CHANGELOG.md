@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   <output.html>` loads one Markdown file with simple front matter, renders
   heading/paragraph HTML through a Mustache-style template, and writes an HTML
   output file.
+- Content-directory generation with `tiledown build-site <content-dir>
+  <template.html> <output-dir>`, discovering `index.md` and `index.markdown`
+  files and writing slugged `index.html` outputs.
 - `Packages/`: initial Swift package scaffold with `TileKit`, `TiledownCLI`, and
   Swift Testing coverage.
 - `docs/research/`: research notes for Markdown-canonical tiles, tile functions,

@@ -44,6 +44,52 @@ struct SiteGeneratorTests {
             """,
         )
     }
+
+    @Test("builds content directory pages from index markdown files")
+    func buildsContentDirectoryPages() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                ---
+                # Home
+                """,
+                "content/blog/index.md": """
+                ---
+                title: Blog
+                ---
+                # Blog
+                """,
+                "content/blog/draft.md": """
+                # Draft
+                """,
+                "templates/page.html": """
+                <title>{{ page.title }}</title>{{{ page.contents.html }}}
+                """,
+            ],
+        )
+
+        let generator = TileKit.Site.Generator(
+            fileSystem: fileSystem,
+            markdownParser: TileKit.Source.FrontMatterParser(),
+            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
+        )
+
+        let result = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                templatePath: "templates/page.html",
+                outputRootPath: "dist",
+            ),
+        )
+
+        #expect(result.outputPaths == ["dist/index.html", "dist/blog/index.html"])
+        #expect(fileSystem.files["dist/index.html"] == "<title>Home</title><h1>Home</h1>")
+        #expect(fileSystem.files["dist/blog/index.html"] == "<title>Blog</title><h1>Blog</h1>")
+        #expect(fileSystem.files["dist/blog/draft/index.html"] == nil)
+    }
 }
 
 private final class MemoryFileSystem: TileKit.Site.FileSystem {
@@ -57,6 +103,17 @@ private final class MemoryFileSystem: TileKit.Site.FileSystem {
         files: [String: String],
     ) {
         self.files = files
+    }
+
+    func listFilesRecursively(
+        at path: String,
+    ) throws -> [String] {
+        let prefix = path.hasSuffix("/") ? path : path + "/"
+        return files.keys
+            .filter { $0.hasPrefix(prefix) }
+            .map { String($0.dropFirst(prefix.count)) }
+            .filter { !$0.isEmpty }
+            .sorted()
     }
 
     func readTextFile(
