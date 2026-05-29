@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Canonical serialization for the whole document: `TileKit.Markdown.CommonMarkFormatter`
+  normalizes prose via swift-markdown's `MarkupFormatter` (ATX headings, `-` markers,
+  fenced code, `*` emphasis), behind a `TileKit.Markdown.Formatting` seam, and
+  `TileKit.Site.DocumentSerializer` composes prose and tile canonicalization into a
+  fixed-point Tiledown Markdown document. Custom ordered-list start is normalized to
+  1 (a documented profile property; swift-markdown #76). See
+  [docs/markdown-profile.md](docs/markdown-profile.md).
+
 - Real CommonMark rendering via [swift-markdown](https://github.com/apple/swift-markdown):
   `TileKit.Markdown.CommonMarkRenderer` parses prose into swift-markdown's typed
   tree and emits HTML for headings, paragraphs, emphasis, strong, inline and
