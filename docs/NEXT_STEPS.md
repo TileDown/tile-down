@@ -110,24 +110,24 @@ Acceptance:
 - JSON output is tested against a fixture.
 - No source authoring path treats JSON as canonical.
 
-### 4. Add canonical Markdown serialization
+### 4. Add canonical Markdown serialization (tile-block slice done)
 
-Goal: make Tiledown Markdown round trips stable.
+`TileKit.Tile.DirectiveSerializer` in `TileTile` serializes the parsed block tree
+back to Tiledown Markdown: tile blocks in one canonical form (preserving unknown
+tile types and unknown properties, source property order), Markdown blocks
+verbatim. `TileTileTests` proves the research's semantic round-trip:
 
-Design:
+- PutGet: `parse(serialize(parse(x))) == parse(x)`.
+- PutPut: the canonical serialization is a fixed point.
+- Unknown tile types and unknown properties survive the round-trip.
 
-- Serialize source-ordered Markdown and tile blocks to one canonical format.
-- Preserve unknown tile types and unknown properties.
-- Preserve property order where it came from source, while allowing tile
-  definitions to declare canonical order later.
-- Keep the serializer in `TileTile` or a focused source/serialization target if
-  the boundary becomes larger.
+Byte identity is not a goal (the parser trims values and folds blank lines; the
+research rules byte-identity out). Done was taken at the tile-tree level.
 
-Acceptance:
-
-- Parse, serialize, parse returns the same tile semantics.
-- Serializer tests cover unknown tile types and unknown properties.
-- Fixture output is stable.
+Remaining (now milestone 2 in DESIGN): full Markdown-syntax normalization (ATX
+headings, `-` lists, fenced code) needs a structural Markdown model, so Markdown
+blocks pass through verbatim until that lands. Definition-driven canonical
+property order also waits on tile definitions with schema.
 
 ### 5. Add asset declarations and deduplication
 

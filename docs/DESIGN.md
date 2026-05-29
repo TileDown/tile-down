@@ -118,8 +118,8 @@ with dependency-injected registries and protocol boundaries.
 | ID | Requirement | Current status | Verified by |
 |---|---|---|---|
 | F1 | Markdown body parses into source-ordered Markdown and tile blocks | implemented | `TileTileTests` |
-| F2 | Tile tree serializes to canonical Markdown | planned | serializer tests when implemented |
-| F3 | Parse, serialize, parse returns the same tile semantics | planned | round-trip tests when implemented |
+| F2 | Tile tree serializes to canonical Markdown | implemented for tile blocks; Markdown blocks pass through verbatim (full normalization needs a structural Markdown model) | `TileTileTests` |
+| F3 | Parse, serialize, parse returns the same tile semantics | implemented | `TileTileTests` (PutGet/PutPut) |
 | F4 | A page renders through a Mustache-style template to HTML | implemented | `TileSiteTests` |
 | F5 | Unknown tile types preserve source data and render diagnostics | implemented for rendering | `TileTileTests` |
 | F6 | Output escaping prevents script injection through text fields | implemented for Markdown, templates, and service-form runtime config | unit tests |
@@ -213,7 +213,7 @@ Not implemented yet:
 
 | Area | Missing piece |
 |---|---|
-| Canonical source | canonical Markdown serializer and parse/serialize/parse law tests |
+| Canonical source | full Markdown-syntax normalization (the tile-block serializer and parse/serialize/parse law tests are implemented; normalizing Markdown syntax needs a structural Markdown model) |
 | Output | derived JSON output and output renderer registry |
 | Site config | config file loading, output config, and template/theme config (service binding values exist; no file format yet) |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
@@ -1152,6 +1152,7 @@ Completed slices:
 | `service-form` generated HTML/CSS/browser-JS renderer | implemented in `TileServiceForm` |
 | `service-form` tile renderer adapter and registry wiring | implemented via `TileKit.ServiceForm.TileRenderer` and a `TileKit.Service.ContractResolving` seam |
 | Service binding config and file-backed contract resolver | implemented via `TileKit.Service.Binding` and `TileKit.Service.LocalFileContractResolver` in `TileServiceImpl` |
+| Canonical tile serializer and round-trip law tests | implemented via `TileKit.Tile.DirectiveSerializer`; PutGet and PutPut hold at the tile-tree level |
 
 Near-term slices are tracked in [NEXT_STEPS.md](NEXT_STEPS.md). The service-form
 domain logic now renders through the tile registry without `TileSite` depending
@@ -1163,10 +1164,16 @@ Service bindings are modeled by `TileKit.Service.Binding`, and
 contract from a binding's local file. Bindings are still direct values; the CLI's
 resolver stays empty until a config file format can populate it.
 
+The tile-block canonical serializer (`TileKit.Tile.DirectiveSerializer`) is the
+`put` half of the round-trip; it preserves unknown tile types and properties and
+satisfies the semantic round-trip (PutGet/PutPut) at the tile-tree level. Markdown
+blocks pass through verbatim until a structural Markdown model lands.
+
 Next major design milestones:
 
 1. Add JSON output as a derived renderer, not a source format.
-2. Add canonical Markdown serialization.
+2. Add a structural Markdown model so Markdown syntax can be normalized (the
+   remaining half of canonical serialization).
 3. Add asset declarations and asset behavior registry.
 4. Add `init`, `serve`, `watch`, and optional proxy support.
 
