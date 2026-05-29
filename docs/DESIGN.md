@@ -6,7 +6,7 @@
 | **Created** | 2026-05-29 |
 | **Last revised** | 2026-05-29 |
 | **Tracking issue** | none |
-| **Companion docs** | [CONVENTIONS.md](CONVENTIONS.md), [rules](rules/README.md), [research](research/) |
+| **Companion docs** | [CONVENTIONS.md](CONVENTIONS.md), [rules](rules/README.md), [research](research/), [architecture decisions](decisions/tiledown-architecture.md) |
 
 ---
 
@@ -176,21 +176,128 @@ filesystem/clock/decoder/renderer dependencies, constructs registries, and calls
 
 ## 6. Package Design
 
-Start with one package under `Packages/`, one library target, and one executable
-target:
+Tiledown uses one package under `Packages/`, with focused SPM targets inside
+that single manifest:
 
 ```text
 Packages/
   Package.swift
   Sources/
+    TileCore/
+    TileContent/
+    TileMarkdown/
+    TileSite/
+    TileSource/
+    TileTemplate/
     TileKit/
+    TileSiteImpl/
     TiledownCLI/
   Tests/
+    TileCoreTests/
+    TileContentTests/
+    TileMarkdownTests/
+    TileSiteTests/
+    TileSourceTests/
+    TileTemplateTests/
     TileKitTests/
+    TileSiteImplTests/
 ```
 
-Use internal namespaces before splitting modules. Add more modules only when
-import boundaries become real.
+This is a multi-target package, not separate Swift packages. The intent is
+clear import boundaries and isolated tests without fragmenting the workspace.
+
+### 6.1 Target Roles
+
+`TileCore` is deliberately small. It owns the root `TileKit` namespace and tiny
+shared product metadata. It must not become a second god package.
+
+Domain targets are able-bodied. They own their contracts, value types, and pure
+logic:
+
+| Target | Owns |
+|---|---|
+| `TileContent` | `TileKit.Content` records, field values, conditions, sort orders, queries, and query execution |
+| `TileMarkdown` | `TileKit.Markdown` rendering contract and basic Markdown-to-HTML renderer |
+| `TileSource` | `TileKit.Source` documents, front matter parsing, content discovery, and source parser contracts |
+| `TileTemplate` | `TileKit.Template` context values, renderer contract, and Mustache-style renderer |
+| `TileSite` | `TileKit.Site` build requests/results, page context, generator orchestration, and filesystem protocol |
+
+Implementation targets are meatless adapters. They contain concrete I/O or
+integration code only when that code is not pure domain logic. Today that means:
+
+| Target | Owns |
+|---|---|
+| `TileSiteImpl` | local filesystem I/O through `TileKit.Site.LocalFileSystem` |
+
+`TileKit` is a facade target. It re-exports the domain targets and the current
+implementation adapter so consumers can import one module while the internal
+dependency graph stays explicit.
+
+`TiledownCLI` is the composition root. It parses arguments, creates concrete
+implementations, and passes them into domain types through protocols and
+initializers.
+
+### 6.2 Dependency Graph
+
+Current dependency flow:
+
+```text
+TileCore
+  ^
+  |
+  +-- TileContent
+  +-- TileMarkdown
+  +-- TileSource
+  +-- TileTemplate
+  |
+  +-- TileSite ----> TileMarkdown
+        |            TileSource
+        |            TileTemplate
+        v
+      TileSiteImpl
+
+TileKit facade -> TileCore, domain targets, TileSiteImpl
+TiledownCLI    -> TileKit
+```
+
+Allowed imports are tracked in
+[package-import-contract-status.md](package-import-contract-status.md).
+
+### 6.3 Split Rules
+
+- Do not make `TileCore` a dumping ground. Move code into the most specific
+  domain target unless it is truly root-level shared metadata or a namespace
+  anchor.
+- Do not create an `Impl` target for pure logic. Parser logic, query logic,
+  renderers, and context preparation belong in domain targets unless they wrap a
+  concrete external integration.
+- `Impl` targets are for concrete adapters: filesystem, network transport,
+  service clients, clocks, process execution, or future platform-specific
+  integrations.
+- Domain targets may depend on `TileCore`. A domain target may depend on another
+  domain target only when its public API genuinely composes that domain, as
+  `TileSite` currently composes `TileMarkdown`, `TileSource`, and `TileTemplate`.
+- The CLI and future app targets are composition roots. They may import the
+  facade or concrete implementations and wire dependencies together.
+
+### 6.4 Future Target Growth
+
+The current split covers the code that exists. Future namespaces should become
+future targets when they gain real code:
+
+| Future target | Trigger |
+|---|---|
+| `TileTile` | tile model, definitions, renderers, registry, and typed directive parsing |
+| `TileService` | service manifests, operation schemas, auth exposure, availability, and generated service-form contracts |
+| `TileAsset` | asset declarations, asset collection, copy behavior, and future transforms |
+| `TileOutput` | HTML, JSON, RSS, and other output renderer contracts |
+| `TileDiagnostics` | structured warnings, build errors, and diagnostic sinks when diagnostics need their own API |
+
+Do not put future tile, service, asset, output, or diagnostics code into
+`TileCore` just because it is shared. Put it in a focused target and depend on
+that target explicitly. Create an implementation target only for concrete
+adapters such as HTTP clients, filesystem writers, service proxies, process
+runners, or platform-specific backends.
 
 Initial namespaces:
 
@@ -307,14 +414,19 @@ pipeline.
 
 ## 9. Tiles and Functions
 
+Tiles are typed document nodes, not string replacements. A tile definition is
+the unit of validation, rendering, assets, and runtime capability.
+
 Tile definitions declare:
 
 - type id
 - accepted properties
+- canonical property order
 - validation rules
 - renderer
 - required CSS and JS assets
 - capability mode
+- unknown-property preservation policy
 - diagnostics
 
 Capability modes:
@@ -331,12 +443,102 @@ The first service-backed generic tile is `service-form`. It reads a service
 manifest operation and generates input fields, validation, service calls, output
 fields, formatting, and availability states.
 
+### 9.1 Tile Families
+
+Plan for these tile families so early boundaries do not assume only text pages:
+
+| Family | Examples | Capability pressure |
+|---|---|---|
+| Core content | heading, paragraph, rich text, list, quote, code, table, callout, details | `static` |
+| Page structure | section, columns, grid, cards, hero, tabs, accordion, divider | `static`, sometimes `local` |
+| Navigation | nav, breadcrumbs, table of contents, pagination, previous/next, sitemap entry | `static`, `build` |
+| Media | image, figure, gallery, carousel, audio, video, YouTube, Vimeo, PDF, iframe | `static`, sometimes `remote` |
+| Data display | metric, chart, data table, CSV viewer, JSON viewer, timeline, calendar, map | `static`, `build`, `local`, `remote` |
+| Diagrams | Mermaid, Graphviz-like diagram, sequence chart, flowchart | `build`, `local` |
+| Forms and actions | contact form, email response, newsletter signup, RSVP, survey, poll, quiz, calculator, estimate form, booking widget | `local`, `remote`, `proxy`, `build` |
+| Local interaction | local poll, filter, sort, search, bookmarks, checklist, theme toggle, local notes | `local` |
+| Remote interaction | comments, reactions, ratings, global poll, service-call form, lookup, personalized result | `remote`, `proxy` |
+| Commerce and funding | product card, buy button, donation button, checkout link | `static`, `remote` |
+| Build-time import | RSS import, GitHub release list, YouTube metadata, API-to-static table, chart precompute | `build` |
+| SEO and metadata | Open Graph, JSON-LD, canonical URL, feed, robots, sitemap | `static`, `build` |
+| Diagnostics | unsupported tile, missing service, schema mismatch, unavailable endpoint | generated fallback and build diagnostic |
+
+Most named tiles are skins over a smaller set of mechanics: render structured
+content, embed a trusted external surface, store local browser state, fetch
+public data, call a private service through a proxy, or run a build-time
+function and bake the result into HTML.
+
+### 9.2 First Tile Slices
+
+Implement generic mechanics first, then named tiles:
+
+| Slice | Notes |
+|---|---|
+| `service-form` | schema-driven generated form and result view |
+| `youtube-video` | safe iframe embed, privacy-enhanced URL by default |
+| `poll` | local mode first, remote and proxy later |
+| `email-response` | proxy only because provider credentials are secret |
+| `comments` | remote for public widget providers, proxy for private APIs |
+| `chart` | static or build-time data first, local JS rendering later |
+
+Later tiles can specialize the same mechanics: quiz, survey, lookup, estimate,
+calendar, search, reactions, ratings, and booking widgets.
+
+### 9.3 Tile Rendering Contract
+
+A tile renderer returns deterministic render output:
+
+- HTML fragment.
+- CSS asset declarations.
+- JS asset declarations for `local`, `remote`, and `proxy` modes.
+- JSON configuration data for browser runtime tiles.
+- Service requirements for `remote`, `proxy`, and `build` modes.
+- Diagnostics for invalid properties, unsupported modes, missing services, or
+  unsafe credential exposure.
+
+HTML returned by a remote service is rejected by default. If a future tile allows
+remote HTML, it must be a separate high-trust capability with sanitization and
+content-security guidance.
+
 ---
 
 ## 10. Services and Secrets
 
 Service-backed tiles use provider-neutral manifests. Tiledown does not care
 whether the backend is Hummingbird, Vapor, serverless, or a third-party API.
+
+Markdown names a tile, service id, operation id, mode, and presentation
+overrides. Site config maps the service id to a manifest URL and auth policy.
+The manifest describes operations with JSON Schema inputs and outputs plus
+Tiledown UI hints. The generator emits deterministic HTML, CSS, and small
+browser JavaScript for interactive modes.
+
+Example tile:
+
+```markdown
+:::tile service-form
+id: price-calculator
+service: calculator
+operation: positive-decimal-calculation
+mode: proxy
+submitLabel: Calculate
+:::
+```
+
+Example service binding:
+
+```yaml
+services:
+  calculator:
+    manifest: https://calc.example.com/tiledown/service.json
+    mode: proxy
+    proxyRoute: /_td/services/calculator
+    availability: required
+    auth:
+      type: bearer
+      valueFromEnv: CALCULATOR_API_KEY
+      exposure: server
+```
 
 The manifest declares:
 
@@ -350,20 +552,184 @@ The manifest declares:
 - error format
 - cache policy
 
+Minimum manifest fields:
+
+| Field | Purpose |
+|---|---|
+| `id` | stable service id |
+| `name` | human-readable service name |
+| `version` | service contract version |
+| `health` | availability check endpoint and timeout |
+| `operations` | callable operations |
+| `operations[].id` | stable operation id used by the tile |
+| `operations[].modes` | supported `remote`, `proxy`, or `build` modes |
+| `operations[].transport` | HTTP method, path, content type, and response type |
+| `operations[].inputSchema` | JSON Schema for accepted input |
+| `operations[].inputUi` | generator hints for controls, labels, order, and units |
+| `operations[].outputSchema` | JSON Schema for returned output |
+| `operations[].outputUi` | generator hints for formatting and result layout |
+| `operations[].auth` | required auth scheme and exposure |
+| `operations[].errors` | error format, preferably Problem Details JSON |
+| `operations[].cache` | whether results can be cached and for how long |
+
+JSON Schema 2020-12 is the normative contract for inputs and outputs. UI hints
+are presentation only. If an input fails schema validation, the value is invalid
+even if a UI hint would have rendered it.
+
+OpenAPI can be supported later, but the Tiledown manifest remains the primary
+contract consumed by the generator. OpenAPI describes HTTP APIs; Tiledown also
+needs rendering, capability, availability, cache, and auth exposure decisions.
+
+For exact decimal values, use strings with a semantic hint rather than floating
+point numbers:
+
+```json
+{
+  "type": "string",
+  "pattern": "^(?=.*[1-9])(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+  "x-tiledownType": "positiveDecimal"
+}
+```
+
+If precision does not matter, use JSON Schema numbers:
+
+```json
+{
+  "type": "number",
+  "exclusiveMinimum": 0
+}
+```
+
+Client-side validation is only a user experience improvement. The service must
+validate again.
+
+### 10.1 Generated Service Runtime
+
+For `service-form`, the generator produces:
+
+- A stable root element with `data-td-tile-id`, `data-td-service`, and
+  `data-td-operation`.
+- A form with generated controls from `inputSchema` plus `inputUi`.
+- Accessible labels and validation messages.
+- A result region with generated fields from `outputSchema` plus `outputUi`.
+- Loading, success, unavailable, validation, and error states.
+- CSS scoped by a stable tile class.
+- A JS module that reads JSON configuration, validates user input, performs the
+  call for `remote` or `proxy`, and renders typed output.
+
+For proxy mode, generated browser JavaScript calls the site proxy:
+
+```text
+POST /_td/services/calculator/positive-decimal-calculation
+```
+
+For remote mode, generated browser JavaScript calls the service endpoint
+directly, with only public credentials if any are declared. For build mode, the
+Swift generator calls the operation during generation and writes the result into
+static HTML. Build mode only works when all required inputs are known at build
+time.
+
+Avoid embedding dynamic config by string interpolation into JavaScript source.
+Prefer a JSON data island:
+
+```html
+<script type="application/json" data-td-config="price-calculator">
+{"service":"calculator","operation":"positive-decimal-calculation","mode":"proxy"}
+</script>
+```
+
+The JS runtime parses that JSON.
+
+### 10.2 Generated Controls and Outputs
+
+Schema to control mapping:
+
+| Schema shape | Generated control |
+|---|---|
+| `string` | text input |
+| `string`, `format: email` | email input |
+| `string`, `format: uri` | URL input |
+| `string`, `x-tiledownType: decimal` | text input with decimal input mode |
+| `number` or `integer` | number input |
+| `number`, `exclusiveMinimum: 0` | number input with positive validation |
+| `boolean` | checkbox or toggle |
+| `enum` | select, radio group, or segmented control |
+| `array` | repeatable field or multi-select |
+| `object` | fieldset or nested group |
+| `oneOf` | mode selector with conditional fields |
+
+Use `inputUi` to choose between equivalent controls. For example, an enum can be
+a select for many values or radio buttons for a short list.
+
+Output formatting mapping:
+
+| Output type | Generated presentation |
+|---|---|
+| decimal string | formatted number text |
+| number | formatted number, currency, percent, or unit value |
+| boolean | status text or icon slot |
+| string | escaped text |
+| markdown string | parsed through the trusted Markdown pipeline only if explicitly allowed |
+| URL string | link, image, video, or iframe depending on declared media type |
+| array of objects | table, list, cards, or chart source |
+| object | result card or named field group |
+| problem details | error state |
+
+### 10.3 Availability
+
+Tiledown checks availability in two places:
+
+1. Build time: fetch the manifest and optionally call the health endpoint.
+2. Runtime: generated JavaScript handles fetch errors, timeouts, invalid
+   responses, and service-declared Problem Details.
+
+Recommended build policy:
+
+```yaml
+services:
+  calculator:
+    manifest: https://calc.example.com/tiledown/service.json
+    availability: required
+```
+
+Allowed values:
+
+| Value | Build behavior |
+|---|---|
+| `required` | fail if manifest or health check fails |
+| `optional` | warn and render fallback |
+| `unchecked` | do not call during build |
+
+The manifest should be cacheable with HTTP caching. Add a lockfile later if
+reproducible builds need pinned manifest versions.
+
+### 10.4 Credentials
+
 Secrets never appear in Markdown, generated HTML, generated JavaScript, or
 browser storage.
 
 Credential exposure:
 
-| Exposure | Browser output allowed? |
-|---|---|
-| `none` | no credential |
-| `browser` | yes, intentionally public |
-| `server` | no |
-| `build` | no |
+| Exposure | Can be emitted to browser? | Use case |
+|---|---|---|
+| `none` | no | public service |
+| `browser` | yes, intentionally public | public widget key restricted by origin |
+| `server` | no | bearer token, secret API key, private webhook |
+| `build` | no | build-time fetch or precompute |
 
 The library does not read environment variables directly. The CLI or an injected
 secret resolver provides typed credentials to the generator.
+
+Rules:
+
+- Do not use `apiKey` in tile Markdown because it does not say whether a value is
+  safe to ship.
+- Use `publicKey` only for intentionally public browser credentials.
+- Use `secretRef` or `valueFromEnv` only for server-side or build-time secrets.
+- `mode: proxy` means the generated page calls a public proxy endpoint, never the
+  private third-party API directly.
+- `mode: build` may read secrets from the build environment, but the rendered
+  output must not contain them.
 
 ---
 
@@ -486,7 +852,32 @@ definitions in process at build time.
 
 ---
 
-## 17. Open Questions and Risks
+## 17. Design Decisions
+
+Detailed decisions live in
+[tiledown-architecture.md](decisions/tiledown-architecture.md). The current
+accepted decisions are:
+
+| ID | Decision |
+|---|---|
+| D1 | Product name is Tiledown, CLI command is `tiledown`, engine library facade is `TileKit` |
+| D2 | Markdown is canonical on disk; JSON is derived |
+| D3 | Toucan is a parity reference, not a compatibility or naming contract |
+| D4 | Swift is used for generator and tooling; JavaScript is emitted only for browser tile runtimes |
+| D5 | Engine targets macOS and Linux |
+| D6 | One `Packages/Package.swift` contains many focused targets |
+| D7 | `TileCore` stays tiny; domain targets own real contracts and pure logic |
+| D8 | `Impl` targets are thin concrete adapters only |
+| D9 | `TileKit` remains a facade import for consumers |
+| D10 | Cross-target and external collaborators are injected through protocols and initializers |
+| D11 | Service-backed tiles use provider-neutral manifests, not backend-specific code |
+| D12 | Tile capability modes are explicit: `static`, `local`, `remote`, `proxy`, and `build` |
+| D13 | Secret credentials never enter Markdown or generated browser output |
+| D14 | First interactive mechanics are `service-form`, local poll, YouTube embed, email response, comments, and chart |
+
+---
+
+## 18. Open Questions and Risks
 
 ### Open
 
@@ -508,7 +899,7 @@ definitions in process at build time.
 
 ---
 
-## 18. Future Work
+## 19. Future Work
 
 - Native macOS and iOS visual editor over the tile model.
 - Built-in tiles for poll, YouTube, comments, email response, charts, and
@@ -519,12 +910,13 @@ definitions in process at build time.
 
 ---
 
-## 19. References
+## 20. References
 
 ### Internal
 
 - [CONVENTIONS.md](CONVENTIONS.md)
 - [Rules index](rules/README.md)
+- [Architecture decisions](decisions/tiledown-architecture.md)
 - [Markdown source model research](research/2026-05-29-1654-markdown-tile-source-model.md)
 - [Tile function source evaluation](research/2026-05-29-1718-tile-functions-source-evaluation.md)
 - [Tile catalog and service contract](research/2026-05-29-1728-tile-catalog-service-contract.md)
