@@ -68,7 +68,7 @@ Current source targets are:
 | `TileContent` | content records, values, queries, conditions, sorting, and query execution |
 | `TileMarkdown` | Markdown rendering contract and basic HTML renderer |
 | `TileService` | provider manifests, service operation contracts, capability inventory, and validation |
-| `TileServiceForm` | binding between service-form tile requests and service contract operations |
+| `TileServiceForm` | binding between service-form tile requests, service contract operations, and generated browser output |
 | `TileSource` | source documents, front matter parsing, content discovery, and source parser contracts |
 | `TileTemplate` | template context, values, rendering contract, and Mustache-style renderer |
 | `TileTile` | typed tile blocks, source-ordered properties, directive parser, and typed tile requests |
@@ -172,6 +172,11 @@ does not import `TileService`; later composition binds the request to a
 `TileKit.ServiceForm.Binder` performs that composition. It rejects mismatched
 service ids, missing operations, unsupported modes, and direct browser `remote`
 mode when the operation requires non-browser credentials.
+
+`TileKit.ServiceForm.Renderer` performs the first generated-output pass for
+browser runtime forms. It emits deterministic HTML, a JSON data island, scoped
+CSS, and browser JavaScript for `remote` and `proxy` modes. It rejects `build`,
+`local`, and `static` until those modes have dedicated execution paths.
 
 Generation then produces:
 

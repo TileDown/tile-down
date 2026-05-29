@@ -9,18 +9,20 @@ struct TileKitFacadeTests {
         let markdownRenderer = TileKit.Markdown.BasicHTMLRenderer()
         let manifestValidator = TileKit.Service.ManifestValidator()
         let serviceFormBinder = TileKit.ServiceForm.Binder()
+        let serviceFormRenderer = TileKit.ServiceForm.Renderer()
         let tileParser = TileKit.Tile.DirectiveParser()
+        let serviceFormBinding = try serviceFormBinder.bind(
+            serviceFormRequest(),
+            to: serviceContract(),
+        )
+        let serviceFormOutput = try serviceFormRenderer.render(serviceFormBinding)
 
         #expect(TileKit.Product.commandName == "tiledown")
         #expect(queryRunner.run(.init(), records: []) == [])
         #expect(markdownRenderer.renderHTML("# Hello") == "<h1>Hello</h1>")
         #expect(manifestValidator.validate(typeformManifest()).isEmpty)
-        #expect(
-            try serviceFormBinder.bind(
-                serviceFormRequest(),
-                to: serviceContract(),
-            ).operation.id == "positive-decimal-calculation",
-        )
+        #expect(serviceFormBinding.operation.id == "positive-decimal-calculation")
+        #expect(serviceFormOutput.html.contains(#"data-td-service-form-root"#))
         #expect(try tileParser.parseBlocks("Text") == [.markdown("Text")])
     }
 
