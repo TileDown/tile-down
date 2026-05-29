@@ -4,12 +4,7 @@
 # Enforces github-discipline.md Rule 5.1 (no AI attribution) and
 # Rule 5.2 (no em dashes U+2014) at the commit boundary.
 #
-# Install (per repo):
-#   ln -s ../../../mihaela-agents/templates/git-hooks/commit-msg-style-check \
-#         .git/hooks/commit-msg
-# or copy:
-#   cp <path-to>/commit-msg-style-check .git/hooks/commit-msg
-#   chmod +x .git/hooks/commit-msg
+# Install (per repo): git config core.hooksPath .githooks
 #
 # Portable: uses only BSD-compatible grep (no -P, no \x escapes in patterns).
 
