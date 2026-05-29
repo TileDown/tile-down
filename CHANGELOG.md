@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `TileKit.Tile.DirectiveSerializer`: serializes the parsed tile block tree back
+  to Tiledown Markdown (tile blocks in one canonical form, preserving unknown tile
+  types and properties; Markdown blocks verbatim), the `put` inverse of the
+  directive parser. Round-trip law tests assert the research's semantic invariant:
+  PutGet (`parse(serialize(parse(x))) == parse(x)`) and PutPut (canonical output is
+  a fixed point). Byte identity is not a goal.
+
 ## [0.1.0] - 2026-05-29
 
 ### Added
