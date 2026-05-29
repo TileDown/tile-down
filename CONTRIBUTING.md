@@ -15,9 +15,16 @@ HTML and JS that run in the visitor's browser. JS is allowed for that purpose an
 that purpose only. It is not used for build logic, tooling, or anything that could
 be Swift instead.
 
+## Project status
+
+Tiledown is at the documentation and design stage. The engine package is not yet
+committed, so the `swift` commands below describe the intended workflow once the
+package lands; they will not run against the repo until then. The architecture is
+in [`docs/DESIGN.md`](docs/DESIGN.md).
+
 ## Getting started
 
-Requires a recent Swift toolchain (Swift 6.1+).
+Will require a recent Swift toolchain (Swift 6.1+). Once the package is in:
 
 ```sh
 swift build

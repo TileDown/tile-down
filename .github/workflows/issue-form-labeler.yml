@@ -25,8 +25,9 @@ jobs:
         run: |
           priority=$(printf '%s' "$BODY" \
             | awk '/^### Priority/{getline; while ($0 ~ /^[[:space:]]*$/) getline; print; exit}')
+          # Add-only: a maintainer may set priority by hand (per the label
+          # policy), so this never removes the label, only applies it when the
+          # reporter chose High.
           if printf '%s' "$priority" | grep -qi 'high'; then
             gh issue edit "$NUMBER" --repo "$REPO" --add-label "priority: high"
-          else
-            gh issue edit "$NUMBER" --repo "$REPO" --remove-label "priority: high" || true
           fi
