@@ -69,6 +69,8 @@ private struct Command {
             ),
             markdownParser: TileKit.Source.FrontMatterParser(),
             markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            tileParser: TileKit.Tile.DirectiveParser(),
+            tileRegistry: TileKit.Tile.Registry(),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )

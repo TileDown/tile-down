@@ -176,6 +176,7 @@ let targets: [Target] = {
             "TileMarkdown",
             "TileSource",
             "TileTemplate",
+            "TileTile",
         ],
         swiftSettings: swiftSettings,
     )
@@ -187,6 +188,7 @@ let targets: [Target] = {
             "TileSite",
             "TileSource",
             "TileTemplate",
+            "TileTile",
         ],
         swiftSettings: swiftSettings,
     )

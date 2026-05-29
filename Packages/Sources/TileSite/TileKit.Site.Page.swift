@@ -8,6 +8,8 @@ public extension TileKit.Site {
         public var slug: String
         public var document: TileKit.Source.Document
         public var html: String
+        public var css: String
+        public var javascript: String
 
         public init(
             sourcePath: String,
@@ -15,12 +17,16 @@ public extension TileKit.Site {
             slug: String,
             document: TileKit.Source.Document,
             html: String,
+            css: String = "",
+            javascript: String = "",
         ) {
             self.sourcePath = sourcePath
             self.outputPath = outputPath
             self.slug = slug
             self.document = document
             self.html = html
+            self.css = css
+            self.javascript = javascript
         }
     }
 }

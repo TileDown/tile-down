@@ -4,6 +4,7 @@ import TileMarkdown
 @testable import TileSite
 import TileSource
 import TileTemplate
+import TileTile
 
 @Suite("Site generator")
 struct SiteGeneratorTests {
@@ -25,13 +26,7 @@ struct SiteGeneratorTests {
             ],
         )
 
-        let generator = TileKit.Site.Generator(
-            fileSystem: fileSystem,
-            markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
-            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
-            contentDiscovery: TileKit.Source.IndexContentDiscovery(),
-        )
+        let generator = makeGenerator(fileSystem: fileSystem)
 
         let result = try generator.build(
             .init(
@@ -78,13 +73,7 @@ struct SiteGeneratorTests {
             ],
         )
 
-        let generator = TileKit.Site.Generator(
-            fileSystem: fileSystem,
-            markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
-            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
-            contentDiscovery: TileKit.Source.IndexContentDiscovery(),
-        )
+        let generator = makeGenerator(fileSystem: fileSystem)
 
         let result = try generator.buildContent(
             .init(
@@ -105,6 +94,89 @@ struct SiteGeneratorTests {
                 navigation + #"<title>Blog</title><h1>Blog</h1>"#,
         )
         #expect(fileSystem.files["dist/blog/draft/index.html"] == nil)
+    }
+
+    @Test("renders tile directives through injected registry")
+    func rendersTileDirectivesThroughInjectedRegistry() throws {
+        let template = [
+            #"<style>{{{ page.assets.css }}}</style>"#,
+            #"{{{ page.contents.html }}}"#,
+            #"<script>{{{ page.assets.javascript }}}</script>"#,
+        ].joined()
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                ---
+                # Home
+
+                :::tile promo
+                id: launch
+                :::
+
+                After.
+                """,
+                "templates/page.html": template,
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(
+                renderers: [
+                    "promo": PromoRenderer(),
+                ],
+            ),
+        )
+
+        _ = try generator.build(
+            .init(
+                sourcePath: "content/index.md",
+                templatePath: "templates/page.html",
+                outputPath: "dist/index.html",
+            ),
+        )
+
+        #expect(
+            fileSystem.files["dist/index.html"] == """
+            <style>.promo { color: #0f766e; }</style><h1>Home</h1>
+            <aside data-promo="launch">Promo launch</aside>
+            <p>After.</p><script>console.log("promo");</script>
+            """,
+        )
+    }
+
+    private func makeGenerator(
+        fileSystem: MemoryFileSystem,
+        tileRegistry: TileKit.Tile.Registry = .init(),
+    ) -> TileKit.Site.Generator {
+        .init(
+            fileSystem: fileSystem,
+            markdownParser: TileKit.Source.FrontMatterParser(),
+            markdownRenderer: TileKit.Markdown.BasicHTMLRenderer(),
+            tileParser: TileKit.Tile.DirectiveParser(),
+            tileRegistry: tileRegistry,
+            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
+            contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+        )
+    }
+}
+
+private struct PromoRenderer: TileKit.Tile.Rendering {
+    func render(
+        _ tile: TileKit.Tile.Instance,
+    ) -> TileKit.Tile.Rendered {
+        let id: String = if case let .string(value) = tile.property(named: "id") {
+            value
+        } else {
+            "unknown"
+        }
+
+        return .init(
+            html: #"<aside data-promo="\#(id)">Promo \#(id)</aside>"#,
+            css: ".promo { color: #0f766e; }",
+            javascript: #"console.log("promo");"#,
+        )
     }
 }
 
