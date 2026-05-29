@@ -1,0 +1,33 @@
+name: Issue form labeler
+
+# Form dropdown selections render as TEXT in the issue body, they do not apply as
+# labels on their own. This workflow reads the Priority field and applies the
+# `priority: high` label when High is selected. Kind labels (bug / enhancement)
+# are applied by the form templates themselves.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply priority label from the form
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BODY: ${{ github.event.issue.body }}
+          NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          priority=$(printf '%s' "$BODY" \
+            | awk '/^### Priority/{getline; while ($0 ~ /^[[:space:]]*$/) getline; print; exit}')
+          # Add-only: a maintainer may set priority by hand (per the label
+          # policy), so this never removes the label, only applies it when the
+          # reporter chose High.
+          if printf '%s' "$priority" | grep -qi 'high'; then
+            gh issue edit "$NUMBER" --repo "$REPO" --add-label "priority: high"
+          fi
