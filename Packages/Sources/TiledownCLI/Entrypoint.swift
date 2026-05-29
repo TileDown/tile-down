@@ -27,6 +27,8 @@ private struct Command {
             try build()
         case "build-site":
             try buildSite()
+        case "json":
+            try json()
         default:
             throw CommandError.invalidArguments
         }
@@ -64,6 +66,33 @@ private struct Command {
         )
     }
 
+    private func json() throws {
+        guard arguments.count == 3 else {
+            throw CommandError.invalidArguments
+        }
+
+        let fileSystem = TileKit.Site.LocalFileSystem(
+            fileManager: .default,
+        )
+        let source = try fileSystem.readTextFile(at: arguments[1])
+        let document = try TileKit.Source.FrontMatterParser().parse(source)
+        let blocks = try TileKit.Tile.DirectiveParser().parseBlocks(document.body)
+
+        let artifact = try makeOutputRegistry().render(
+            .init(
+                frontMatter: document.frontMatter,
+                blocks: blocks,
+                slug: "",
+            ),
+            format: TileKit.Output.JSONRenderer.formatID,
+        )
+
+        try fileSystem.writeTextFile(
+            artifact.contents,
+            at: arguments[2],
+        )
+    }
+
     private func makeGenerator() -> TileKit.Site.Generator {
         .init(
             fileSystem: TileKit.Site.LocalFileSystem(
@@ -76,6 +105,11 @@ private struct Command {
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )
+    }
+
+    private func makeOutputRegistry() -> TileKit.Output.Registry {
+        TileKit.Output.Registry()
+            .registering(TileKit.Output.JSONRenderer())
     }
 
     private func makeTileRegistry() -> TileKit.Tile.Registry {
@@ -104,6 +138,7 @@ private enum CommandError: Error, CustomStringConvertible {
             usage:
               tiledown build <source.md> <template.html> <output.html>
               tiledown build-site <content-dir> <template.html> <output-dir>
+              tiledown json <source.md> <output.json>
             """
         }
     }
