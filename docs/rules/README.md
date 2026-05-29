@@ -1,0 +1,60 @@
+# Tiledown Coding Rules
+
+The conventions Tiledown follows. Each file is one rule area. New code matches
+these; read the surrounding files too, since consistency with existing code
+outranks personal preference.
+
+[`docs/CONVENTIONS.md`](../CONVENTIONS.md) is the short overview. This folder is
+the full set.
+
+## Always relevant (engine, today)
+
+- [engineering.md](engineering.md) - the engineering bar: progressive
+  architecture, impossible states unrepresentable, testable by design.
+- [code-style.md](code-style.md) - namespacing discipline, file naming,
+  one-type-per-file.
+- [namespacing.md](namespacing.md) - caseless `enum` vs `struct` vs `class` for
+  namespace anchors.
+- [dependency-injection.md](dependency-injection.md) - no singletons, inject every
+  collaborator through `init`, protocol seams.
+- [point-free-dependencies.md](point-free-dependencies.md) - the Dependencies
+  library for injectable, testable dependencies.
+- [concurrency.md](concurrency.md) - Swift 6 strict concurrency: `Sendable`,
+  actors, `@MainActor`.
+- [cross-platform.md](cross-platform.md) - Apple platforms and Linux; keep the
+  core platform-neutral so it runs on iOS.
+- [linux-server.md](linux-server.md) - server-side operational rules for the
+  `serve` command and any networking.
+- [testing.md](testing.md) - Swift Testing, `@Test` / `#expect`, test isolation.
+- [testing-discipline.md](testing-discipline.md) - run the suite on every code
+  change; write tests where none exist.
+- [verification.md](verification.md) - no completion claim without fresh command
+  output.
+- [systematic-debugging.md](systematic-debugging.md) - reproduce, isolate,
+  explain, fix.
+- [documentation.md](documentation.md) - DocC catalogs and `///` requirements.
+- [file-naming.md](file-naming.md) - filename conventions.
+- [folder-grouping.md](folder-grouping.md) - when to flatten one-file folders.
+
+## Git and process
+
+- [commits.md](commits.md) - Conventional Commits format.
+- [git-discipline.md](git-discipline.md) - issues, labels, PRs, branches, commits,
+  remotes.
+
+## The planned native macOS and iOS editor
+
+- [views.md](views.md) - SwiftUI view architecture and identity.
+- [view-models.md](view-models.md) - ViewModel responsibilities and patterns.
+- [components.md](components.md) - the component system.
+- [colors.md](colors.md) - the color system.
+- [fonts.md](fonts.md) - font registration in SPM packages.
+
+## If Tiledown grows into multiple packages
+
+- [package-structure.md](package-structure.md) - workspace and package layout.
+- [package-architecture.md](package-architecture.md) - single-responsibility
+  packages with unidirectional dependencies.
+- [package-import-contract.md](package-import-contract.md) - per-package allowed
+  imports.
+- [shared-protocols.md](shared-protocols.md) - the cross-package protocol seam.

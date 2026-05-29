@@ -5,6 +5,9 @@ testable, and portable. Read this before opening a PR. When in doubt, read the
 surrounding files and match what is already there: consistency with existing code
 outranks personal preference.
 
+This page is the overview. The full per-area rules live in
+[`docs/rules/`](rules/) (index at [`docs/rules/README.md`](rules/README.md)).
+
 ## Language
 
 Swift for everything. The single exception is JavaScript, and only where it is
