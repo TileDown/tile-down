@@ -11,6 +11,11 @@ public extension TileKit.Output {
     /// each tile's page-local CSS and JavaScript into the artifact's assets. It
     /// renders the body fragment only; wrapping that fragment in a page template
     /// with cross-page context is the site generator's job, not the output seam's.
+    ///
+    /// Tile CSS is deduplicated (identical fragments are emitted once per page) and
+    /// wrapped in a `theme` cascade layer, with the canonical layer order
+    /// `reset, theme, tile-override` declared up front. Every tile rule therefore
+    /// sits inside a layer, so unlayered styles cannot silently outrank the theme.
     struct HTMLRenderer: Rendering {
         /// The output format id this renderer produces.
         public static let formatID = "html"
@@ -44,7 +49,7 @@ public extension TileKit.Output {
                 case let .tile(tile):
                     let rendered = try tileRegistry.render(tile)
                     html.append(rendered.html)
-                    Self.appendNonEmpty(rendered.css, to: &css)
+                    Self.appendUnique(rendered.css, to: &css)
                     Self.appendNonEmpty(rendered.javascript, to: &javascript)
                 }
             }
@@ -53,10 +58,40 @@ public extension TileKit.Output {
                 contents: html.joined(separator: "\n"),
                 fileExtension: "html",
                 assets: .init(
-                    css: css.joined(separator: "\n"),
+                    css: Self.layeredCSS(css),
                     javascript: javascript.joined(separator: "\n"),
                 ),
             )
+        }
+
+        /// Wraps the deduplicated tile CSS in the `theme` cascade layer and declares
+        /// the canonical layer order. Returns an empty string when there is no CSS,
+        /// so a page without styled tiles emits no stray layer statement.
+        private static func layeredCSS(
+            _ fragments: [String],
+        ) -> String {
+            guard !fragments.isEmpty else {
+                return ""
+            }
+
+            let body = fragments.joined(separator: "\n")
+            return """
+            @layer reset, theme, tile-override;
+            @layer theme {
+            \(body)
+            }
+            """
+        }
+
+        private static func appendUnique(
+            _ value: String,
+            to values: inout [String],
+        ) {
+            guard !value.isEmpty, !values.contains(value) else {
+                return
+            }
+
+            values.append(value)
         }
 
         private static func appendNonEmpty(
