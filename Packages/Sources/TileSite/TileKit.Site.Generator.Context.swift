@@ -9,14 +9,15 @@ extension TileKit.Site.Generator {
         sitePaths: TileKit.Site.GeneratedSitePaths,
     ) -> TileKit.Template.Context {
         var result = stringValues(page.document.frontMatter)
+        let posts = TileKit.Site.PostSelection.posts(
+            in: pages,
+            postsDirectory: configuration.postsDirectory,
+        )
         result["site"] = siteValue(
             configuration,
             sitePaths: sitePaths,
             sections: sections(pages),
-            posts: TileKit.Site.PostSelection.posts(
-                in: pages,
-                postsDirectory: configuration.postsDirectory,
-            ),
+            posts: posts,
             title: siteTitle(
                 configuration: configuration,
                 pages: pages,
@@ -25,6 +26,7 @@ extension TileKit.Site.Generator {
         result["page"] = pageValue(
             page,
             baseURL: configuration.baseURL,
+            posts: pagePosts(for: page, among: posts),
         )
         result["pages"] = .list(
             pages.map { page in
@@ -74,8 +76,24 @@ extension TileKit.Site.Generator {
                         )
                     },
                 ),
+                "tags": .list(tagContexts(posts: posts, baseURL: configuration.baseURL)),
             ],
         )
+    }
+
+    /// The site-wide tag contexts for `site.tags`: every distinct tag with its
+    /// name, URL, and post count, ordered by slug.
+    func tagContexts(
+        posts: [TileKit.Site.Page],
+        baseURL: String,
+    ) -> [TileKit.Template.Context] {
+        TileKit.Site.Tags.allTags(among: posts).map { tag in
+            [
+                "name": .string(tag.label),
+                "url": .string(url(for: "tags/" + tag.slug, baseURL: baseURL)),
+                "count": .string(String(tag.count)),
+            ]
+        }
     }
 
     /// The literal appearance to pin on `<html data-theme>` for forced modes
@@ -146,13 +164,38 @@ extension TileKit.Site.Generator {
     func pageValue(
         _ page: TileKit.Site.Page,
         baseURL: String = "",
+        posts: [TileKit.Site.Page] = [],
     ) -> TileKit.Template.Value {
-        .object(
-            pageContext(
-                page,
-                baseURL: baseURL,
-            ),
+        var context = pageContext(
+            page,
+            baseURL: baseURL,
         )
+        context["posts"] = .list(
+            posts.map { post in
+                pageContext(
+                    post,
+                    baseURL: baseURL,
+                )
+            },
+        )
+        return .object(context)
+    }
+
+    /// The posts a page lists. A tag page (carrying a `tag` marker) lists only
+    /// the posts with that tag; every other page is given all posts and the
+    /// template decides whether to show them (via `postList`).
+    func pagePosts(
+        for page: TileKit.Site.Page,
+        among posts: [TileKit.Site.Page],
+    ) -> [TileKit.Site.Page] {
+        guard let tag = page.document.frontMatter["tag"], !tag.isEmpty else {
+            return posts
+        }
+        return posts.filter { post in
+            TileKit.Site.Tags.tags(of: post).contains { candidate in
+                TileKit.Site.Tags.slug(for: candidate) == tag
+            }
+        }
     }
 
     func pageContext(
@@ -171,6 +214,14 @@ extension TileKit.Site.Generator {
             [
                 "html": .string(page.html),
             ],
+        )
+        context["tags"] = .list(
+            TileKit.Site.Tags.tags(of: page).map { tag in
+                [
+                    "name": .string(tag),
+                    "url": .string(url(for: "tags/" + TileKit.Site.Tags.slug(for: tag), baseURL: baseURL)),
+                ]
+            },
         )
         context["assets"] = assetsValue(page)
         return context
