@@ -21,6 +21,10 @@ public extension TileKit.Site {
         public var feed: Feed?
         /// How the site offers dark and light appearance. Defaults to `.toggle`.
         public var appearance: Appearance
+        /// The content directory whose dated pages count as posts for the listing
+        /// (`site.posts`) and the RSS feed. A slug-style path with no surrounding
+        /// slashes (e.g. `posts`, `blog`, `writing/notes`). Defaults to `posts`.
+        public var postsDirectory: String
 
         public init(
             title: String = "",
@@ -29,6 +33,7 @@ public extension TileKit.Site {
             socialLinks: [SocialLink] = [],
             feed: Feed? = nil,
             appearance: Appearance = .toggle,
+            postsDirectory: String = "posts",
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -36,6 +41,7 @@ public extension TileKit.Site {
             self.socialLinks = socialLinks
             self.feed = feed
             self.appearance = appearance
+            self.postsDirectory = postsDirectory
         }
     }
 }

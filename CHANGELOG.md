@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Configurable posts directory: `postsDir` in `tiledown.yml` selects which
+  content directory's dated pages count as posts for both the listing
+  (`site.posts`) and the RSS feed. Defaults to `posts`; a site that keeps posts
+  under `blog/` sets `postsDir: blog`. Surrounding slashes are trimmed. The feed
+  and listing share the setting, so they always agree on what is a post. (#48)
+
 - Browser tests: an end-to-end Playwright suite (`Packages/Tests/Browser/`)
   builds a fixture site and drives it in a real Chromium, asserting the rendered
   output that the Swift unit tests cannot reach: table alignment, image loading,

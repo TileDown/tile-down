@@ -222,6 +222,7 @@ private extension TileKit.Site.Generator {
                 ),
                 baseURL: configuration.baseURL,
                 pages: pages,
+                postsDirectory: configuration.postsDirectory,
             ),
             at: outputPath,
         )
