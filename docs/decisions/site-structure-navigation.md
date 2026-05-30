@@ -65,10 +65,12 @@ consumers that do not exist.
 
 - **Strategy, as named template bundles** for **layouts** (top-nav vs left-sidebar
   are interchangeable arrangements of the same regions). An SSG's layout is
-  templates, not Swift that emits HTML, so a layout is a *bundle of templates* and
-  the Strategy is *which bundle*, riding the existing `TileKit.Template.Rendering`
-  seam. Earned when the **second** layout (left-sidebar) is added; the first
-  (top-nav) ships as a plain template bundle with no selection abstraction.
+  templates, not Swift that emits HTML, so a layout is a *template* and the Strategy
+  is *which one*, riding the existing `TileKit.Template.Rendering` seam. Realized at
+  the second layout: with both `topNav` and `leftSidebar` shipped, the
+  `TileKit.Site.Layout` enum is the selection. It is a **closed enum, not an open
+  protocol**, because the engine deliberately ships a curated few layouts; a custom
+  layout is a user-supplied template (a separate mechanism), not a new Strategy.
 - **Composite** for the content tree (leaf = page, composite = section). Earned by
   the second hierarchy consumer: breadcrumbs or nested/dropdown menus.
 - **Abstract Factory** for a **theme** as a bundle (template set plus stylesheet).
@@ -86,10 +88,10 @@ be bundled into the sections slice.
 ## Sequencing
 
 1. **Sections** (this doc's slice): `site.sections` derived from pages. No pattern.
-2. **Top-nav layout**: one built-in template bundle consuming `site.sections`. Still
-   no Strategy (one layout).
-3. **Left-sidebar layout**: the second layout, which earns the layout Strategy and
-   the theme-supplies-templates pipeline change.
+2. **Top-nav layout**: `Layout.topNav`, a built-in template consuming `site.sections`.
+3. **Left-sidebar layout**: `Layout.leftSidebar`, the second layout, which realizes
+   the selection as the closed `Layout` enum. (Done.) The theme-supplies-templates
+   pipeline change (`TemplateSource`, wiring layouts into the CLI) is the next step.
 4. **Presentation track** (default theme content, then switching): orthogonal, on
    its own `--td-*` contract, slots in anytime.
 5. Gated later: Composite (breadcrumbs, nesting), Abstract Factory (named themes),
