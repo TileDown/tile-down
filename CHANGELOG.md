@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Site navigation: templates can build a menu from `site.sections`, the site's top-level
+  sections (each section's `index.md` landing page, i.e. the depth-1 pages), ordered by a
+  front-matter `weight` (pages without a weight sort last, then alphabetically by title,
+  then by slug for a fully deterministic order).
+  The root page is the home page, not a section. The engine derives sections (the content
+  tree is encoded in slugs) because logic-less Mustache cannot filter or sort. See
+  [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
+
 - Site-level shared stylesheet: a multi-page build now collects every tile's CSS into one
   `styles.css` at the output root, deduplicated across the whole site, so a tile type used
   on many pages emits its CSS once (not per page). `TileKit.Output.Stylesheet` carries the

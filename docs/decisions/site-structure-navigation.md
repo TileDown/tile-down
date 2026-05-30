@@ -97,7 +97,8 @@ be bundled into the sections slice.
 
 ## Open sub-decisions
 
-- The `weight` front-matter field name and its default ordering (alphabetical by
-  what: slug or title).
+- ~~The `weight` front-matter field name and its default ordering.~~ Settled with
+  the sections slice: the field is `weight` (Hugo-style), pages without it sort last,
+  and the tiebreak is alphabetical by title (falling back to slug).
 - Whether `site.sections` marks the current section active (derivable from slug
-  prefix; add when a layout needs it).
+  prefix; add when a layout needs it). Still open.
