@@ -1,6 +1,7 @@
 import Testing
 import TileCore
 import TileMarkdown
+import TileOutput
 import TileService
 import TileServiceForm
 import TileSite
@@ -167,9 +168,11 @@ struct SiteGeneratorServiceFormTests {
         .init(
             fileSystem: fileSystem,
             markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
             tileParser: TileKit.Tile.DirectiveParser(),
-            tileRegistry: tileRegistry,
+            htmlRenderer: TileKit.Output.HTMLRenderer(
+                markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
+                tileRegistry: tileRegistry,
+            ),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )
