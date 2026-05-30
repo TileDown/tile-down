@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The post listing (`site.posts`) and the RSS feed now share one post-selection
+  helper, so they never diverge on what counts as a post. A post must have a
+  `date` that parses as `yyyy-MM-dd`; a page with a missing or malformed date is
+  excluded from both (previously it could appear in the listing but not the
+  feed). (#39)
+
 ### Added
 
 - Configurable posts directory: `postsDir` in `tiledown.yml` selects which

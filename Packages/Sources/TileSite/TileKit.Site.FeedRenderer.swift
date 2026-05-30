@@ -15,14 +15,17 @@ public extension TileKit.Site {
             postsDirectory: String = "posts",
         ) -> String {
             let title = feed.title.isEmpty ? siteTitle : feed.title
-            let items = postPages(pages, postsDirectory: postsDirectory)
-                .map { page in
-                    feedItemXML(
-                        page: page,
-                        baseURL: baseURL,
-                    )
-                }
-                .joined(separator: "\n")
+            let items = TileKit.Site.PostSelection.posts(
+                in: pages,
+                postsDirectory: postsDirectory,
+            )
+            .map { page in
+                feedItemXML(
+                    page: page,
+                    baseURL: baseURL,
+                )
+            }
+            .joined(separator: "\n")
 
             return """
             <?xml version="1.0" encoding="UTF-8"?>
@@ -63,25 +66,6 @@ public extension TileKit.Site {
             """
         }
 
-        private func postPages(
-            _ pages: [Page],
-            postsDirectory: String,
-        ) -> [Page] {
-            pages
-                .filter { page in
-                    page.slug.hasPrefix(postsDirectory + "/")
-                        && page.document.frontMatter["date"].flatMap(rssDate) != nil
-                }
-                .sorted { first, second in
-                    let firstDate = first.document.frontMatter["date"] ?? ""
-                    let secondDate = second.document.frontMatter["date"] ?? ""
-                    if firstDate != secondDate {
-                        return firstDate > secondDate
-                    }
-                    return first.slug < second.slug
-                }
-        }
-
         private func url(
             for slug: String,
         ) -> String {
@@ -103,12 +87,7 @@ public extension TileKit.Site {
         private func rssDate(
             _ value: String,
         ) -> String? {
-            let input = DateFormatter()
-            input.locale = Locale(identifier: "en_US_POSIX")
-            input.timeZone = TimeZone(secondsFromGMT: 0)
-            input.dateFormat = "yyyy-MM-dd"
-
-            guard let date = input.date(from: value) else {
+            guard let date = TileKit.Site.PostSelection.parsedDate(value) else {
                 return nil
             }
 
