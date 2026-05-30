@@ -123,18 +123,37 @@ private extension TileKit.Site.Generator {
         let locations = contentDiscovery.discover(
             relativePaths: relativePaths,
         )
-        return try locations.map { location in
-            try loadPage(
-                sourcePath: join(
-                    request.contentRootPath,
-                    location.sourceRelativePath,
-                ),
-                outputPath: outputPath(
-                    outputRootPath: request.outputRootPath,
+        return try locations
+            .map { location in
+                try loadPage(
+                    sourcePath: join(
+                        request.contentRootPath,
+                        location.sourceRelativePath,
+                    ),
+                    outputPath: outputPath(
+                        outputRootPath: request.outputRootPath,
+                        slug: location.slug,
+                    ),
                     slug: location.slug,
-                ),
-                slug: location.slug,
-            )
+                )
+            }
+            // Drafts are excluded from the whole build, no page, no listing, no
+            // feed, since every downstream output derives from this array.
+            .filter { page in
+                !isDraft(page)
+            }
+    }
+
+    /// Whether a page is a draft, from a truthy `draft` front-matter value.
+    /// Unset or any non-truthy value publishes as normal.
+    func isDraft(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        switch page.document.frontMatter["draft"]?.lowercased() {
+        case "true", "yes":
+            true
+        default:
+            false
         }
     }
 

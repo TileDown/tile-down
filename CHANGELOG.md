@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Drafts: a page with `draft: true` in its front matter is excluded from the
+  whole build, no output file, and absent from navigation, the post listing, and
+  the feed. Unset or any non-truthy value publishes as normal. (#42)
+
 - `appearance` site setting: choose how the site offers dark and light. `toggle`
   (default) shows a control that follows the OS until the visitor picks, then
   remembers it; `auto` follows the OS with no control; `light` and `dark` pin one
