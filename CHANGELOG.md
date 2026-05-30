@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Asset copying no longer clobbers generated output or publishes build inputs.
+  A content file whose destination collides with a generated page, stylesheet,
+  or feed is skipped, and `tiledown.yml`/`tiledown.yaml` and `.DS_Store` are
+  never copied into the output.
+- Identical tile JavaScript is now deduplicated per page (mirroring tile CSS), so
+  a runtime that binds every instance by a shared selector is emitted once and
+  does not double-bind when the same tile type repeats on a page.
+- The RSS feed strips XML-1.0-illegal control characters from post content and
+  metadata, so a stray control byte in a post no longer makes the whole feed
+  not-well-formed.
+
 ### Added
 
 - Two built-in demo tiles. `callout` is a static titled box (HTML plus themed

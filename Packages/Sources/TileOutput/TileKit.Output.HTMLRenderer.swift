@@ -56,7 +56,10 @@ public extension TileKit.Output {
                     case .overriding:
                         Self.appendUnique(rendered.css, to: &overriding)
                     }
-                    Self.appendNonEmpty(rendered.javascript, to: &javascript)
+                    // Dedup identical JS, mirroring CSS: a tile type's runtime is
+                    // emitted once per page, so a script that binds every instance
+                    // by a shared selector does not double-bind when a tile repeats.
+                    Self.appendUnique(rendered.javascript, to: &javascript)
                 }
             }
 
@@ -75,17 +78,6 @@ public extension TileKit.Output {
             to values: inout [String],
         ) {
             guard !value.isEmpty, !values.contains(value) else {
-                return
-            }
-
-            values.append(value)
-        }
-
-        private static func appendNonEmpty(
-            _ value: String,
-            to values: inout [String],
-        ) {
-            guard !value.isEmpty else {
                 return
             }
 

@@ -55,6 +55,44 @@ struct SiteAssetCopyTests {
         #expect(fileSystem.files["dist/posts/post/draft.md"] == nil)
     }
 
+    @Test("does not copy build inputs or clobber generated output")
+    func skipsConfigMetadataAndCollisions() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                ---
+                # Home
+                """,
+                // Build input the CLI reads; must not be published.
+                "content/tiledown.yml": "title: Demo",
+                // OS metadata; must not be published.
+                "content/.DS_Store": "junk",
+                // A content file whose path collides with a generated output.
+                // It must not overwrite the generated page.
+                "content/index.html": "HAND-WRITTEN",
+                "templates/page.html": "GENERATED {{{ contents }}}",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        // The generated page survives; the colliding content file did not win.
+        #expect(fileSystem.files["dist/index.html"]?.contains("GENERATED") == true)
+        #expect(fileSystem.files["dist/index.html"] != "HAND-WRITTEN")
+        // Build inputs are not published.
+        #expect(fileSystem.files["dist/tiledown.yml"] == nil)
+        #expect(fileSystem.files["dist/.DS_Store"] == nil)
+    }
+
     @Test("runs the injected image checker over image assets")
     func runsImageChecker() throws {
         let fileSystem = MemoryFileSystem(

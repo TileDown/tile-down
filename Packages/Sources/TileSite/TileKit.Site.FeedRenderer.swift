@@ -122,19 +122,39 @@ public extension TileKit.Site {
         private func cdata(
             _ content: String,
         ) -> String {
-            let safe = content.replacingOccurrences(of: "]]>", with: "]]]]><![CDATA[>")
+            let safe = Self.xmlLegal(content)
+                .replacingOccurrences(of: "]]>", with: "]]]]><![CDATA[>")
             return "<![CDATA[\(safe)]]>"
         }
 
         private func xmlEscaped(
             _ value: String,
         ) -> String {
-            value
+            Self.xmlLegal(value)
                 .replacingOccurrences(of: "&", with: "&amp;")
                 .replacingOccurrences(of: "<", with: "&lt;")
                 .replacingOccurrences(of: ">", with: "&gt;")
                 .replacingOccurrences(of: "\"", with: "&quot;")
                 .replacingOccurrences(of: "'", with: "&apos;")
+        }
+
+        /// Drops characters that are illegal in XML 1.0 regardless of escaping or
+        /// CDATA wrapping: the C0 control range except tab, newline, and carriage
+        /// return. One such byte (a stray form feed or NUL pasted into a post)
+        /// would otherwise make the whole feed not-well-formed.
+        private static func xmlLegal(
+            _ value: String,
+        ) -> String {
+            String(value.unicodeScalars.filter { scalar in
+                switch scalar.value {
+                case 0x9, 0xA, 0xD:
+                    true
+                case 0x0 ... 0x1F:
+                    false
+                default:
+                    true
+                }
+            })
         }
     }
 }
