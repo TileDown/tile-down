@@ -107,30 +107,34 @@ private struct Command {
     }
 
     private func buildSite() throws {
-        guard arguments.count == 3 || arguments.count == 4 else {
+        // Pull the optional --drafts flag out so the rest parse positionally.
+        let includeDrafts = arguments.contains("--drafts")
+        let positional = arguments.filter { $0 != "--drafts" }
+        guard positional.count == 3 || positional.count == 4 else {
             throw CommandError.invalidArguments
         }
 
         let generator = makeGenerator()
         let configurationFile = try loadConfigurationFile(
-            contentRootPath: arguments[1],
+            contentRootPath: positional[1],
         )
         let template: TileKit.Site.TemplateSource
         let outputRootPath: String
-        if arguments.count == 3 {
+        if positional.count == 3 {
             template = .layout(configurationFile.layout)
-            outputRootPath = arguments[2]
+            outputRootPath = positional[2]
         } else {
-            template = .file(path: arguments[2])
-            outputRootPath = arguments[3]
+            template = .file(path: positional[2])
+            outputRootPath = positional[3]
         }
 
         _ = try generator.buildContent(
             .init(
-                contentRootPath: arguments[1],
+                contentRootPath: positional[1],
                 template: template,
                 outputRootPath: outputRootPath,
                 configuration: configurationFile.configuration,
+                includeDrafts: includeDrafts,
             ),
         )
     }
@@ -248,12 +252,13 @@ private enum CommandError: Error, CustomStringConvertible {
             """
             usage:
               tiledown build <source.md> <template.html> <output.html>
-              tiledown build-site <content-dir> <output-dir>
-              tiledown build-site <content-dir> <template.html> <output-dir>
+              tiledown build-site [--drafts] <content-dir> <output-dir>
+              tiledown build-site [--drafts] <content-dir> <template.html> <output-dir>
               tiledown json <source.md> <output.json>
               tiledown fmt [--write | --check] <source.md>
 
             build-site reads optional tiledown.yml settings from <content-dir>.
+            --drafts includes draft: true pages, for local preview.
             """
         }
     }
