@@ -108,6 +108,11 @@ struct SiteFeedTests {
         #expect(!feed.contains("/posts/</link>"))
         #expect(!feed.contains("Draft Post"))
         #expect(!feed.contains("Undated Post"))
+        // The feed carries the whole rendered post body, not just the summary,
+        // through the content extension in a CDATA section.
+        #expect(feed.contains(#"xmlns:content="http://purl.org/rss/1.0/modules/content/""#))
+        #expect(feed.contains("<content:encoded><![CDATA[<h1>First</h1>"))
+        #expect(feed.contains("<content:encoded><![CDATA[<h1>Second</h1>"))
     }
 
     @Test("rejects feed paths outside the output directory")

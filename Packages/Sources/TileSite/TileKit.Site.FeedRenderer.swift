@@ -24,7 +24,7 @@ public extension TileKit.Site {
 
             return """
             <?xml version="1.0" encoding="UTF-8"?>
-            <rss version="2.0">
+            <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
             <channel>
             <title>\(xmlEscaped(title))</title>
             <link>\(xmlEscaped(absoluteURL(baseURL: baseURL, path: "/")))</link>
@@ -56,6 +56,7 @@ public extension TileKit.Site {
             <link>\(xmlEscaped(absolutePath))</link>
             <guid>\(xmlEscaped(absolutePath))</guid>
             \(pubDateXML)<description>\(xmlEscaped(description))</description>
+            <content:encoded>\(cdata(page.html))</content:encoded>
             </item>
             """
         }
@@ -113,6 +114,16 @@ public extension TileKit.Site {
             output.timeZone = TimeZone(secondsFromGMT: 0)
             output.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
             return output.string(from: date)
+        }
+
+        /// Wraps content in a CDATA section so HTML passes through verbatim. Any
+        /// embedded `]]>` is split across two sections, the standard way to keep
+        /// a literal terminator from closing the block early.
+        private func cdata(
+            _ content: String,
+        ) -> String {
+            let safe = content.replacingOccurrences(of: "]]>", with: "]]]]><![CDATA[>")
+            return "<![CDATA[\(safe)]]>"
         }
 
         private func xmlEscaped(
