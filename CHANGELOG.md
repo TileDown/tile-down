@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Full-text RSS: each feed item now carries the whole rendered post body in a
+  `<content:encoded>` element (CDATA), not just the front-matter summary, so
+  readers show the complete article. The feed declares the
+  `content` namespace; `<description>` remains the summary.
+
 - Asset copying: `tiledown build-site` now copies every non-Markdown file under
   the content root verbatim into the output, preserving its relative path. One
   rule serves both a site-level `assets/` tree and a page-local file beside its
