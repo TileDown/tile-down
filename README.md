@@ -12,13 +12,21 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 Tiledown is at version `0.1.0` and is **not yet a usable static site generator.**
 Do not adopt it for a real site.
 
-What works today is a thin vertical slice: the engine builds, and the CLI can turn
-a single Markdown file (or a folder of `index.md` files) into HTML through a
-Mustache-style template. There is **no** project scaffolding, config loading, dev
-server, watch mode, asset pipeline, JSON output, or canonical Markdown serializer
-yet, and most tile types are not implemented. The internals for typed tiles and
-service-backed forms exist and are tested, but they are not wired into a usable
-authoring workflow.
+What works today is a real but partial slice. The engine builds, and the CLI can
+build a single Markdown file (or a folder of `index.md` files) into HTML through a
+Mustache-style template, emit derived JSON of the parsed tile tree (`tiledown
+json`), and rewrite a document to its canonical form (`tiledown fmt`). Markdown is
+real CommonMark via [swift-markdown](https://github.com/apple/swift-markdown). Tile
+CSS is wrapped in CSS cascade layers and deduplicated into one shared site
+stylesheet, and site-wide configuration (title, base URL) reaches templates as
+`site.*`.
+
+Still missing before it is a usable static site generator: project scaffolding
+(`tiledown init`), config-file loading, a dev server and watch mode, the site theme
+and its theme properties (in progress), named tile types (`youtube-video`, `poll`,
+and the rest), and a full asset pipeline (transforms, minification). The internals
+for typed tiles and a service-backed form exist and are tested, but only the
+service-form tile is wired in; the rest are not yet a usable authoring workflow.
 
 The architecture and the planned road are real and written down:
 
@@ -53,14 +61,25 @@ Build one page from Markdown and a template:
 swift run tiledown build source.md template.html out.html
 ```
 
-Build a content directory (each `index.md` becomes a slugged `index.html`):
+Build a content directory (each `index.md` becomes a slugged `index.html`, and a
+shared `styles.css` is written once for the whole site):
 
 ```sh
 swift run tiledown build-site content/ template.html dist/
 ```
 
-That is the whole user-facing surface right now. Markdown support is limited to
-headings, paragraphs, and escaped text; templates are a Mustache-style subset.
+Emit derived JSON of the parsed tile tree, or rewrite a document to canonical form:
+
+```sh
+swift run tiledown json source.md out.json
+swift run tiledown fmt source.md            # prints canonical form to stdout
+swift run tiledown fmt --write source.md    # rewrites in place
+swift run tiledown fmt --check source.md    # non-zero exit if not canonical
+```
+
+That is the user-facing surface right now. Markdown is CommonMark (headings,
+paragraphs, emphasis, strong, inline and fenced code, links, images, lists, block
+quotes), with raw HTML escaped; templates are a Mustache-style subset.
 
 ## Build and test
 
