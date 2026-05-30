@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Two built-in demo tiles. `callout` is a static titled box (HTML plus themed
+  CSS, no runtime) and `counter` is a `local`-mode button that counts clicks in
+  the browser, demonstrating a tile that emits scoped JavaScript. Both are
+  registered by the CLI. The built-in layouts now emit a page's collected tile
+  JavaScript in a `<script>` before `</body>`, so a `local` tile actually runs.
+
 - Post listing: a page with `postList: true` in its front matter renders a card
   list of the site's posts after its content, in both built-in layouts. Each card
   is a thumbnail (the post's `image`) on the left with the title, date, and
