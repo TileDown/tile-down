@@ -1,0 +1,9 @@
+title: Minimal Site
+layout: top-nav
+theme: system
+rss: true
+rssPath: feed.xml
+rssTitle: Minimal Site
+rssDescription: Notes from the minimal Tiledown demo.
+social.github: https://github.com/TileDown/tile-down
+social.linkedin: https://www.linkedin.com/
