@@ -277,3 +277,57 @@ private struct PromoRenderer: TileKit.Tile.Rendering {
         )
     }
 }
+
+extension SiteGeneratorTests {
+    @Test("excludes draft pages from the build by default")
+    func excludesDrafts() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/published/index.md": "---\ntitle: Live\ndate: 2026-05-20\n---\n# Live",
+                "content/posts/wip/index.md": "---\ntitle: WIP\ndate: 2026-05-21\ndraft: true\n---\n# WIP",
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+
+        let result = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        // The draft produces no page anywhere in the output.
+        #expect(fileSystem.files["dist/posts/wip/index.html"] == nil)
+        #expect(!result.outputPaths.contains("dist/posts/wip/index.html"))
+        // The published post still builds.
+        #expect(fileSystem.files["dist/posts/published/index.html"] != nil)
+    }
+
+    @Test("includeDrafts builds draft pages for preview")
+    func includeDraftsPreview() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/wip/index.md": "---\ntitle: WIP\ndate: 2026-05-21\ndraft: true\n---\n# WIP",
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+
+        let result = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+                includeDrafts: true,
+            ),
+        )
+
+        // With includeDrafts the draft is built like any other page.
+        #expect(fileSystem.files["dist/posts/wip/index.html"] != nil)
+        #expect(result.outputPaths.contains("dist/posts/wip/index.html"))
+    }
+}
