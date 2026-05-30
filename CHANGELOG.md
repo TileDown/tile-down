@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Post listing: a page with `postList: true` in its front matter renders a card
+  list of the site's posts after its content, in both built-in layouts. Each card
+  is a thumbnail (the post's `image`) on the left with the title, date, and
+  description on the right. Templates get `site.posts`, every page under `posts/`
+  with a `date`, newest first (the same selection the RSS feed uses). The hero on
+  a post and the thumbnail in the listing are now capped in size by the theme so
+  an image no longer renders full-bleed.
+
 ### Changed
 
 - Mustache sections over a missing key now render nothing (falsey), per the

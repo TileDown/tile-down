@@ -13,6 +13,7 @@ extension TileKit.Site.Generator {
             configuration,
             sitePaths: sitePaths,
             sections: sections(pages),
+            posts: posts(pages),
             title: siteTitle(
                 configuration: configuration,
                 pages: pages,
@@ -39,6 +40,7 @@ extension TileKit.Site.Generator {
         _ configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
         sections: [TileKit.Site.Page],
+        posts: [TileKit.Site.Page],
         title: String,
     ) -> TileKit.Template.Value {
         .object(
@@ -57,8 +59,38 @@ extension TileKit.Site.Generator {
                         )
                     },
                 ),
+                "posts": .list(
+                    posts.map { post in
+                        pageContext(
+                            post,
+                            baseURL: configuration.baseURL,
+                        )
+                    },
+                ),
             ],
         )
+    }
+
+    /// The site's posts for listing: every page under `posts/` with a parseable
+    /// `date`, newest first (ties broken by slug). The `posts/` section landing
+    /// page itself (slug `posts`) is not a post. Mirrors the feed's selection so
+    /// a listing and the RSS feed agree on what counts as a post.
+    func posts(
+        _ pages: [TileKit.Site.Page],
+    ) -> [TileKit.Site.Page] {
+        pages
+            .filter { page in
+                page.slug.hasPrefix("posts/")
+                    && page.document.frontMatter["date"] != nil
+            }
+            .sorted { first, second in
+                let firstDate = first.document.frontMatter["date"] ?? ""
+                let secondDate = second.document.frontMatter["date"] ?? ""
+                if firstDate != secondDate {
+                    return firstDate > secondDate
+                }
+                return first.slug < second.slug
+            }
     }
 
     func siteTitle(
