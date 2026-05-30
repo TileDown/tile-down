@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tile CSS is now wrapped in CSS cascade layers and deduplicated. `TileKit.Output.HTMLRenderer`
+  emits the canonical layer order `@layer reset, theme, tile-override;` and places tile
+  component CSS inside the `theme` layer, so no tile rule can sit unlayered and silently
+  outrank the theme. Identical CSS fragments are emitted once per page (a tile type repeated
+  on a page no longer duplicates its CSS). See
+  [docs/decisions/theming.md](docs/decisions/theming.md) and
+  [docs/research/theming-styling-api.md](docs/research/theming-styling-api.md).
+
 - HTML rendering now flows through the output renderer seam: `TileKit.Output.HTMLRenderer`
   is the first output renderer (beside `TileKit.Output.JSONRenderer`), projecting a
   parsed document's block tree to body HTML and collecting page-local CSS and

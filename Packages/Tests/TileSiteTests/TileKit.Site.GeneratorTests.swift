@@ -140,7 +140,10 @@ struct SiteGeneratorTests {
 
         #expect(
             fileSystem.files["dist/index.html"] == """
-            <style>.promo { color: #0f766e; }</style><h1>Home</h1>
+            <style>@layer reset, theme, tile-override;
+            @layer theme {
+            .promo { color: #0f766e; }
+            }</style><h1>Home</h1>
             <aside data-promo="launch">Promo launch</aside>
             <p>After.</p><script>console.log("promo");</script>
             """,
