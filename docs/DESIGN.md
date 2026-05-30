@@ -1200,12 +1200,14 @@ and properties), `TileKit.Markdown.CommonMarkFormatter` canonicalizes prose, and
 point; once canonical, the tile tree round-trips (PutGet/PutPut). Custom
 ordered-list start is normalized away (a documented profile property).
 
-Next major design milestones:
+JSON output now ships as a derived renderer (`TileKit.Output.JSONRenderer`, not a
+source format), and `tiledown fmt` exposes the canonical serialization through
+`TileKit.Site.DocumentFormatter`. Next major design milestones:
 
-1. Add JSON output as a derived renderer, not a source format.
-2. Expose canonical serialization through a `tiledown fmt` command (formatter).
-3. Add asset declarations and asset behavior registry.
-4. Add `init`, `serve`, `watch`, and optional proxy support.
+1. Route HTML through the `TileKit.Output.Registry` as an output renderer, then add
+   RSS or feed renderers.
+2. Add asset declarations and asset behavior registry.
+3. Add `init`, `serve`, `watch`, and optional proxy support.
 
 ---
 
