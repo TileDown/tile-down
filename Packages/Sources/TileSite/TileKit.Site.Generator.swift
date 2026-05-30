@@ -12,6 +12,7 @@ public extension TileKit.Site {
         private let htmlRenderer: any TileKit.Output.Rendering
         private let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
+        private let imageChecker: any ImageChecking
 
         public init(
             fileSystem: any FileSystem,
@@ -20,6 +21,7 @@ public extension TileKit.Site {
             htmlRenderer: any TileKit.Output.Rendering,
             templateRenderer: any TileKit.Template.Rendering,
             contentDiscovery: any TileKit.Source.ContentDiscovering,
+            imageChecker: any ImageChecking = PassthroughImageChecker(),
         ) {
             self.fileSystem = fileSystem
             self.markdownParser = markdownParser
@@ -27,6 +29,7 @@ public extension TileKit.Site {
             self.htmlRenderer = htmlRenderer
             self.templateRenderer = templateRenderer
             self.contentDiscovery = contentDiscovery
+            self.imageChecker = imageChecker
         }
 
         public func build(
@@ -59,6 +62,8 @@ public extension TileKit.Site {
         ) throws -> ContentBuildResult {
             let pages = try loadPages(request)
             let template = try template(from: request.template)
+
+            try runImageCheck(request: request)
 
             var outputPaths: [String] = []
             let stylesheetPath = try writeSharedStylesheet(
@@ -93,6 +98,11 @@ public extension TileKit.Site {
                 outputPaths.append(page.outputPath)
             }
 
+            try copyAssets(
+                request: request,
+                outputPaths: &outputPaths,
+            )
+
             return .init(outputPaths: outputPaths)
         }
     }
@@ -123,6 +133,57 @@ private extension TileKit.Site.Generator {
                 slug: location.slug,
             )
         }
+    }
+
+    /// Copies every non-Markdown content file verbatim into the output,
+    /// preserving its relative path. Markdown is always source: an `index.md`
+    /// becomes a page and any other `.md` is ignored, so neither is copied. One
+    /// rule covers both a page-local image sitting next to its `index.md` and a
+    /// site-level `assets/` tree, so a Markdown image resolves once its file
+    /// lands in the output.
+    func copyAssets(
+        request: TileKit.Site.ContentBuildRequest,
+        outputPaths: inout [String],
+    ) throws {
+        let relativePaths = try fileSystem.listFilesRecursively(
+            at: request.contentRootPath,
+        )
+        for relativePath in relativePaths where isAsset(relativePath) {
+            let destination = join(request.outputRootPath, relativePath)
+            try fileSystem.copyFile(
+                from: join(request.contentRootPath, relativePath),
+                to: destination,
+            )
+            outputPaths.append(destination)
+        }
+    }
+
+    func isAsset(
+        _ path: String,
+    ) -> Bool {
+        let lowercased = path.lowercased()
+        return !lowercased.hasSuffix(".md") && !lowercased.hasSuffix(".markdown")
+    }
+
+    /// Runs the injected image-checking pass over the content's image assets.
+    /// The default checker does nothing; a real one can reject a build here.
+    func runImageCheck(
+        request: TileKit.Site.ContentBuildRequest,
+    ) throws {
+        let relativePaths = try fileSystem.listFilesRecursively(
+            at: request.contentRootPath,
+        )
+        try imageChecker.check(
+            imagePaths: relativePaths.filter(isImage),
+        )
+    }
+
+    func isImage(
+        _ path: String,
+    ) -> Bool {
+        let imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"]
+        let lowercased = path.lowercased()
+        return imageExtensions.contains { lowercased.hasSuffix($0) }
     }
 
     func template(

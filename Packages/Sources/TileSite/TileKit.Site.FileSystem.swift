@@ -14,5 +14,14 @@ public extension TileKit.Site {
             _ contents: String,
             at path: String,
         ) throws
+
+        /// Copies a file's bytes verbatim, creating any missing parent
+        /// directories and overwriting an existing destination. This is the
+        /// binary-safe path the text helpers cannot serve, used to copy assets
+        /// such as images into the generated site.
+        func copyFile(
+            from sourcePath: String,
+            to destinationPath: String,
+        ) throws
     }
 }

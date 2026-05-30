@@ -62,6 +62,24 @@ public extension TileKit.Site {
             )
         }
 
+        public func copyFile(
+            from sourcePath: String,
+            to destinationPath: String,
+        ) throws {
+            let destinationURL = URL(fileURLWithPath: destinationPath)
+            try fileManager.createDirectory(
+                at: destinationURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true,
+            )
+            if fileManager.fileExists(atPath: destinationPath) {
+                try fileManager.removeItem(at: destinationURL)
+            }
+            try fileManager.copyItem(
+                at: URL(fileURLWithPath: sourcePath),
+                to: destinationURL,
+            )
+        }
+
         private func relativePath(
             for fileURL: URL,
             rootURL: URL,
