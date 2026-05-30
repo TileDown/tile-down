@@ -37,6 +37,15 @@ struct TileOutputHTMLRendererTests {
         }
     }
 
+    /// A tile that rejects the theme and emits into the tile-override layer.
+    private struct OverrideTile: TileKit.Tile.Rendering {
+        func render(
+            _ tile: TileKit.Tile.Instance,
+        ) -> TileKit.Tile.Rendered {
+            .init(html: "<i>\(tile.typeID)</i>", css: ".z {}", cssPosture: .overriding)
+        }
+    }
+
     /// A tile renderer with no assets, to exercise the empty-skip path.
     private struct PlainTile: TileKit.Tile.Rendering {
         func render(
@@ -112,6 +121,57 @@ struct TileOutputHTMLRendererTests {
         let artifact = try renderer(tileRegistry: registry).render(document)
         // ".x {}" appears once (deduped), ".y {}" kept, both inside the theme layer.
         #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer theme {\n.x {}\n.y {}\n}")
+    }
+
+    @Test("an overriding tile's css lands in the tile-override layer")
+    func overridePosture() throws {
+        let registry = TileKit.Tile.Registry(renderers: ["custom": OverrideTile()])
+        let document = TileKit.Output.Document(
+            blocks: [.tile(.init(typeID: "custom", properties: []))],
+        )
+
+        let artifact = try renderer(tileRegistry: registry).render(document)
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer tile-override {\n.z {}\n}")
+    }
+
+    @Test("identical overriding css is deduplicated within the tile-override layer")
+    func overrideDedup() throws {
+        let registry = TileKit.Tile.Registry(renderers: ["custom": OverrideTile()])
+        let document = TileKit.Output.Document(
+            blocks: [
+                .tile(.init(typeID: "custom", properties: [])),
+                .tile(.init(typeID: "custom", properties: [])),
+            ],
+        )
+
+        let artifact = try renderer(tileRegistry: registry).render(document)
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer tile-override {\n.z {}\n}")
+    }
+
+    @Test("themed and overriding css go to their own layers in order")
+    func themedAndOverrideLayers() throws {
+        let registry = TileKit.Tile.Registry(
+            renderers: ["box": AssetTile(), "custom": OverrideTile()],
+        )
+        let document = TileKit.Output.Document(
+            blocks: [
+                .tile(.init(typeID: "box", properties: [])),
+                .tile(.init(typeID: "custom", properties: [])),
+            ],
+        )
+
+        let artifact = try renderer(tileRegistry: registry).render(document)
+        #expect(
+            artifact.assets.css == """
+            @layer reset, theme, tile-override;
+            @layer theme {
+            .x {}
+            }
+            @layer tile-override {
+            .z {}
+            }
+            """,
+        )
     }
 
     @Test("skips empty assets so blank fragments are not joined in")

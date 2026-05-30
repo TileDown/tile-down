@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tiles can now reject the site theme. `TileKit.Tile.Rendered` carries a
+  `TileKit.Tile.StylePosture` (`themed` by default, or `overriding`), and
+  `TileKit.Output.HTMLRenderer` places `themed` CSS in the `theme` layer and
+  `overriding` CSS in the later `tile-override` layer, which wins over the theme
+  regardless of specificity. Existing tiles are unaffected (posture defaults to
+  `themed`). See [docs/decisions/theming.md](docs/decisions/theming.md).
+
 - Tile CSS is now wrapped in CSS cascade layers and deduplicated. `TileKit.Output.HTMLRenderer`
   emits the canonical layer order `@layer reset, theme, tile-override;` and places tile
   component CSS inside the `theme` layer, so no tile rule can sit unlayered and silently
