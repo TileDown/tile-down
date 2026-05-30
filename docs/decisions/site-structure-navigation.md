@@ -82,9 +82,10 @@ consumers that do not exist.
 
 The user no longer has to supply a single template for a content build. The
 content-build request carries a `TileKit.Site.TemplateSource`, either a custom file
-(`.file(path:)`) or a built-in layout (`.layout(Layout)`). The CLI uses
-`.layout(.topNav)` for `tiledown build-site <content-dir> <output-dir>`, while
-the three-path form remains the custom-template override.
+(`.file(path:)`) or a built-in layout (`.layout(Layout)`). The CLI uses the
+configured built-in layout for `tiledown build-site <content-dir> <output-dir>`,
+defaulting to `.layout(.topNav)`, while the three-path form remains the
+custom-template override.
 
 ## Sequencing
 
@@ -93,8 +94,9 @@ the three-path form remains the custom-template override.
 3. **Left-sidebar layout**: `Layout.leftSidebar`, the second layout, which realizes
    the selection as the closed `Layout` enum. (Done.)
 4. **Presentation track** (default theme content, then switching): orthogonal, on
-   its own `--td-*` contract. The standard theme is now the default.
-5. Gated later: Composite (breadcrumbs, nesting), Abstract Factory (named themes),
+   its own `--td-*` contract. The standard theme is the default, and the `system`
+   theme is selectable through `tiledown.yml`.
+5. Gated later: Composite (breadcrumbs, nesting), Abstract Factory (theme bundles),
    Visitor (sitemap).
 
 ## Open sub-decisions

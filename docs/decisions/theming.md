@@ -148,8 +148,10 @@ entirely (the engine can strip or reject it), and the documented escape hatch is
   the theme and theme-property model, and the asset behavior registry.
 - `TileKit.Output.Assets` (today `{ css, javascript }` raw strings) evolves so CSS
   carries its layer placement instead of being a flat concatenated string.
-- The site composition root injects the theme (base + theme properties) once per page; the
-  template links or inlines it (delivery mechanism is a separate, smaller choice).
+- The site composition root injects the theme (base + theme properties) once per
+  page; the template links or inlines it (delivery mechanism is a separate,
+  smaller choice). `Theme.standard` and `Theme.system` are the current built-in
+  themes.
 
 ## Evidence base
 

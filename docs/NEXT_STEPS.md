@@ -24,10 +24,14 @@ The repository currently has:
 - Site generation that renders Markdown blocks and tile blocks in source order.
 - Built-in `topNav` and `leftSidebar` layouts, selected through
   `TileKit.Site.TemplateSource`.
-- The built-in `standard` theme, applied by default through
+- The built-in `standard` and `system` themes, applied through
   `TileKit.Site.Configuration`.
 - `tiledown build-site <content-dir> <output-dir>`, which uses the built-in
-  top-nav layout and standard theme without requiring a template file.
+  top-nav layout and standard theme without requiring a template file, and reads
+  optional `tiledown.yml` settings from the content root.
+- RSS feed output for dated pages under `posts/` when enabled in `tiledown.yml`.
+- `Examples/minimal-site/`, a small content-only demo with about, contact, posts,
+  footer social links, the `system` theme, and RSS.
 - Page-local tile CSS and browser JavaScript exposed to templates.
 - Service manifest and service operation contract models.
 - `service-form` request validation, binding, and generated browser output for
