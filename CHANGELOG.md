@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Minimal demo site support: `tiledown build-site` now reads an optional
+  `tiledown.yml` or `tiledown.yaml` file from the content root. The flat config
+  format supports `title`, `baseURL`, `layout`, `theme`, `rss`, RSS metadata, and
+  `social.*` footer links. Built-in layouts render footer social links, an RSS
+  link, and a "Built with TileKit" footer credit. When RSS is enabled, content
+  builds write `feed.xml` from dated pages under `posts/`. The new
+  `TileKit.Site.Theme.system` theme provides a crisp platform-native light and
+  dark design. A minimal example site lives in `Examples/minimal-site/`.
+
 - CLI site builds now work without a hand-written template:
   `tiledown build-site <content-dir> <output-dir>` uses the built-in top-nav
   layout and the standard theme by default, producing a styled, navigable site

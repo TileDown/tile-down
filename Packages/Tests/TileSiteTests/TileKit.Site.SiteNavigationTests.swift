@@ -139,6 +139,37 @@ extension SiteGeneratorTests {
         #expect(home.contains(#"<main class="td-main"><h1>Welcome</h1>"#))
         #expect(home.contains(#"<footer class="td-footer">"#))
     }
+
+    @Test("built-in layouts apply baseURL to home and section links")
+    func builtInLayoutBaseURLLinks() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Welcome",
+                "content/about/index.md": "---\ntitle: About\nweight: 1\n---\n# About us",
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    title: "My Site",
+                    baseURL: "https://example.com/docs",
+                ),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<a class="td-brand" href="https://example.com/docs/">My Site</a>"#))
+        #expect(
+            home.contains(
+                #"<nav class="td-nav"><a class="td-nav-link" href="https://example.com/docs/about/">About</a></nav>"#,
+            ),
+        )
+    }
 }
 
 extension SiteGeneratorTests {
@@ -198,5 +229,33 @@ extension SiteGeneratorTests {
         // The theme always produces a stylesheet, so the page links it even with no tiles.
         let home = try #require(fileSystem.files["dist/index.html"])
         #expect(home.contains(#"<link rel="stylesheet" href="/styles.css">"#))
+    }
+
+    @Test("the system theme is composed into the shared stylesheet")
+    func systemThemeStylesheet() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    title: "My Site",
+                    theme: .system,
+                ),
+            ),
+        )
+
+        let css = try #require(fileSystem.files["dist/styles.css"])
+        #expect(css.contains("--td-bg: #f5f5f7;"))
+        #expect(css.contains("--td-accent: #0066cc;"))
+        #expect(css.contains(#"[data-theme="dark"]"#))
+        #expect(css.contains(".td-footer-inner {"))
     }
 }
