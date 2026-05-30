@@ -98,9 +98,11 @@ public extension TileKit.Site {
         .td-header, .td-main, .td-content { max-width: var(--td-measure); margin-inline: auto; padding-inline: var(--td-space); }
         .td-header { display: flex; align-items: center; justify-content: space-between; gap: var(--td-space); padding-block: 1.25rem; border-bottom: 1px solid var(--td-border); }
         .td-brand { font-weight: 700; font-size: 1.25rem; color: var(--td-ink); text-decoration: none; }
-        .td-nav { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+        .td-nav { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
         .td-nav a, .td-footer a { color: var(--td-muted); text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover { color: var(--td-ink); }
+        .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.35rem 0.6rem; font: inherit; line-height: 1; }
+        .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { padding-block: 2.5rem; }
         .td-main h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-block: 0 1rem; }
         .td-main h2 { font-size: 1.5rem; margin-block: 2.5rem 0.75rem; }
@@ -180,6 +182,8 @@ public extension TileKit.Site {
         .td-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.85rem; }
         .td-nav a, .td-footer a, .td-sidebar-nav a { color: var(--td-muted); font-size: 0.9rem; text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover, .td-sidebar-nav a:hover { color: var(--td-accent); }
+        .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.4rem 0.65rem; font: inherit; font-size: 0.9rem; line-height: 1; }
+        .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { max-width: var(--td-measure); margin-inline: auto; padding: 5rem var(--td-space) 4rem; }
         .td-main h1 { max-width: 12ch; margin-block: 0 1.2rem; font-size: clamp(3rem, 11vw, 5.8rem); font-weight: 700; line-height: 0.98; letter-spacing: 0; }
         .td-main h2 { margin-block: 3rem 0.85rem; font-size: 1.55rem; line-height: 1.16; letter-spacing: 0; }

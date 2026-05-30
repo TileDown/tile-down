@@ -138,6 +138,9 @@ extension SiteGeneratorTests {
         #expect(home.contains(#"<nav class="td-nav"><a class="td-nav-link" href="/about/">About</a></nav>"#))
         #expect(home.contains(#"<main class="td-main"><h1>Welcome</h1>"#))
         #expect(home.contains(#"<footer class="td-footer">"#))
+        // A dark/light theme toggle and the no-flash script that wires it.
+        #expect(home.contains(#"data-td-theme-toggle"#))
+        #expect(home.contains("localStorage.getItem('td-theme')"))
     }
 
     @Test("built-in layouts apply baseURL to home and section links")
