@@ -174,10 +174,11 @@ CSS deduplication and cascade-layer wrapping are now done (first slice):
 `TileKit.Output.HTMLRenderer` deduplicates identical tile CSS fragments and wraps
 them in a `theme` cascade layer under the canonical order
 `@layer reset, theme, tile-override;`, per [docs/decisions/theming.md](decisions/theming.md).
-Still to do below: the structured tile styling output (`TileKit.Tile.Rendered.css`
-string becomes a keyed, posture-tagged asset so a tile can emit into the
-`tile-override` layer), the site theme plus design tokens, and JavaScript
-deduplication.
+The tile styling posture is now done too: `TileKit.Tile.Rendered` carries a
+`TileKit.Tile.StylePosture` (`themed` default, or `overriding`), and the renderer
+routes overriding CSS into the `tile-override` layer. Still to do below: an explicit
+per-tile dedup key (CSS is currently deduped by content), the site theme plus design
+tokens, and JavaScript deduplication.
 
 Goal: move from raw page-local CSS and JavaScript strings toward explicit asset
 declarations.
