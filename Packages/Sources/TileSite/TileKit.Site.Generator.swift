@@ -138,9 +138,10 @@ private extension TileKit.Site.Generator {
                 )
             }
             // Drafts are excluded from the whole build, no page, no listing, no
-            // feed, since every downstream output derives from this array.
+            // feed, since every downstream output derives from this array. A
+            // preview build (--drafts) keeps them.
             .filter { page in
-                !isDraft(page)
+                request.includeDrafts || !isDraft(page)
             }
     }
 
