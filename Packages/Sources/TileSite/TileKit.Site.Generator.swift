@@ -43,6 +43,7 @@ public extension TileKit.Site {
                 pages: [page],
                 template: template,
                 configuration: request.configuration,
+                stylesheetPath: "",
             )
 
             try fileSystem.writeTextFile(
@@ -78,12 +79,20 @@ public extension TileKit.Site {
             let template = try fileSystem.readTextFile(at: request.templatePath)
 
             var outputPaths: [String] = []
+            let stylesheetPath = try writeSharedStylesheet(
+                pages: pages,
+                outputRootPath: request.outputRootPath,
+                configuration: request.configuration,
+                outputPaths: &outputPaths,
+            )
+
             for page in pages {
                 let output = try render(
                     page: page,
                     pages: pages,
                     template: template,
                     configuration: request.configuration,
+                    stylesheetPath: stylesheetPath,
                 )
                 try fileSystem.writeTextFile(
                     output,
@@ -93,6 +102,47 @@ public extension TileKit.Site {
             }
 
             return .init(outputPaths: outputPaths)
+        }
+
+        private static let sharedStylesheetFileName = "styles.css"
+
+        /// Merges every page's CSS into one site stylesheet, writes it to the output
+        /// root, records it in `outputPaths`, and returns the URL to link it from
+        /// each page. Returns "" and writes nothing when no page has any CSS, so a
+        /// site without styled tiles emits no stray stylesheet.
+        private func writeSharedStylesheet(
+            pages: [Page],
+            outputRootPath: String,
+            configuration: Configuration,
+            outputPaths: inout [String],
+        ) throws -> String {
+            let stylesheet = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
+                result.merging(page.stylesheet)
+            }
+            guard !stylesheet.isEmpty else {
+                return ""
+            }
+
+            let outputPath = join(outputRootPath, Self.sharedStylesheetFileName)
+            try fileSystem.writeTextFile(
+                stylesheet.text(),
+                at: outputPath,
+            )
+            outputPaths.append(outputPath)
+            return stylesheetURL(
+                baseURL: configuration.baseURL,
+                fileName: Self.sharedStylesheetFileName,
+            )
+        }
+
+        private func stylesheetURL(
+            baseURL: String,
+            fileName: String,
+        ) -> String {
+            guard !baseURL.isEmpty else {
+                return "/" + fileName
+            }
+            return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
         }
 
         private func loadPage(
@@ -116,7 +166,7 @@ public extension TileKit.Site {
                 slug: slug,
                 document: document,
                 html: artifact.contents,
-                css: artifact.assets.css,
+                stylesheet: artifact.assets.stylesheet,
                 javascript: artifact.assets.javascript,
             )
         }
@@ -126,6 +176,7 @@ public extension TileKit.Site {
             pages: [Page],
             template: String,
             configuration: Configuration,
+            stylesheetPath: String,
         ) throws -> String {
             try templateRenderer.render(
                 template: template,
@@ -133,6 +184,7 @@ public extension TileKit.Site {
                     page: page,
                     pages: pages,
                     configuration: configuration,
+                    stylesheetPath: stylesheetPath,
                 ),
             )
         }
@@ -141,65 +193,18 @@ public extension TileKit.Site {
             page: Page,
             pages: [Page],
             configuration: Configuration,
+            stylesheetPath: String,
         ) -> TileKit.Template.Context {
             var result = stringValues(page.document.frontMatter)
-            result["site"] = siteValue(configuration)
+            result["site"] = siteValue(
+                configuration,
+                stylesheetPath: stylesheetPath,
+            )
             result["page"] = pageValue(page)
             result["pages"] = .list(pages.map(pageContext))
             result["contents"] = .string(page.html)
             result["assets"] = assetsValue(page)
             return result
-        }
-
-        private func siteValue(
-            _ configuration: Configuration,
-        ) -> TileKit.Template.Value {
-            .object(
-                [
-                    "title": .string(configuration.title),
-                    "baseURL": .string(configuration.baseURL),
-                ],
-            )
-        }
-
-        private func pageValue(
-            _ page: Page,
-        ) -> TileKit.Template.Value {
-            .object(pageContext(page))
-        }
-
-        private func pageContext(
-            _ page: Page,
-        ) -> TileKit.Template.Context {
-            var context = stringValues(page.document.frontMatter)
-            context["slug"] = .string(page.slug)
-            context["url"] = .string(url(for: page.slug))
-            context["contents"] = .object(
-                [
-                    "html": .string(page.html),
-                ],
-            )
-            context["assets"] = assetsValue(page)
-            return context
-        }
-
-        private func assetsValue(
-            _ page: Page,
-        ) -> TileKit.Template.Value {
-            .object(
-                [
-                    "css": .string(page.css),
-                    "javascript": .string(page.javascript),
-                ],
-            )
-        }
-
-        private func stringValues(
-            _ values: [String: String],
-        ) -> TileKit.Template.Context {
-            values.reduce(into: [:]) { result, item in
-                result[item.key] = .string(item.value)
-            }
         }
 
         private func join(
@@ -229,6 +234,63 @@ public extension TileKit.Site {
             for slug: String,
         ) -> String {
             slug.isEmpty ? "/" : "/" + slug + "/"
+        }
+    }
+}
+
+// MARK: - Template context
+
+private extension TileKit.Site.Generator {
+    func siteValue(
+        _ configuration: TileKit.Site.Configuration,
+        stylesheetPath: String,
+    ) -> TileKit.Template.Value {
+        .object(
+            [
+                "title": .string(configuration.title),
+                "baseURL": .string(configuration.baseURL),
+                "stylesheetPath": .string(stylesheetPath),
+            ],
+        )
+    }
+
+    func pageValue(
+        _ page: TileKit.Site.Page,
+    ) -> TileKit.Template.Value {
+        .object(pageContext(page))
+    }
+
+    func pageContext(
+        _ page: TileKit.Site.Page,
+    ) -> TileKit.Template.Context {
+        var context = stringValues(page.document.frontMatter)
+        context["slug"] = .string(page.slug)
+        context["url"] = .string(url(for: page.slug))
+        context["contents"] = .object(
+            [
+                "html": .string(page.html),
+            ],
+        )
+        context["assets"] = assetsValue(page)
+        return context
+    }
+
+    func assetsValue(
+        _ page: TileKit.Site.Page,
+    ) -> TileKit.Template.Value {
+        .object(
+            [
+                "css": .string(page.stylesheet.text()),
+                "javascript": .string(page.javascript),
+            ],
+        )
+    }
+
+    func stringValues(
+        _ values: [String: String],
+    ) -> TileKit.Template.Context {
+        values.reduce(into: [:]) { result, item in
+            result[item.key] = .string(item.value)
         }
     }
 }
