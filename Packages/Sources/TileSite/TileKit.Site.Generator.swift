@@ -1,5 +1,5 @@
 import TileCore
-import TileMarkdown
+import TileOutput
 import TileSource
 import TileTemplate
 import TileTile
@@ -8,26 +8,23 @@ public extension TileKit.Site {
     struct Generator {
         private let fileSystem: any FileSystem
         private let markdownParser: any TileKit.Source.MarkdownParsing
-        private let markdownRenderer: any TileKit.Markdown.Rendering
         private let tileParser: any TileKit.Tile.Parsing
-        private let tileRegistry: TileKit.Tile.Registry
+        private let htmlRenderer: any TileKit.Output.Rendering
         private let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
 
         public init(
             fileSystem: any FileSystem,
             markdownParser: any TileKit.Source.MarkdownParsing,
-            markdownRenderer: any TileKit.Markdown.Rendering,
             tileParser: any TileKit.Tile.Parsing,
-            tileRegistry: TileKit.Tile.Registry,
+            htmlRenderer: any TileKit.Output.Rendering,
             templateRenderer: any TileKit.Template.Rendering,
             contentDiscovery: any TileKit.Source.ContentDiscovering,
         ) {
             self.fileSystem = fileSystem
             self.markdownParser = markdownParser
-            self.markdownRenderer = markdownRenderer
             self.tileParser = tileParser
-            self.tileRegistry = tileRegistry
+            self.htmlRenderer = htmlRenderer
             self.templateRenderer = templateRenderer
             self.contentDiscovery = contentDiscovery
         }
@@ -103,48 +100,22 @@ public extension TileKit.Site {
         ) throws -> Page {
             let source = try fileSystem.readTextFile(at: sourcePath)
             let document = try markdownParser.parse(source)
-            let rendered = try renderBody(document.body)
+            let blocks = try tileParser.parseBlocks(document.body)
+            let artifact = try htmlRenderer.render(
+                .init(
+                    frontMatter: document.frontMatter,
+                    blocks: blocks,
+                    slug: slug,
+                ),
+            )
             return .init(
                 sourcePath: sourcePath,
                 outputPath: outputPath,
                 slug: slug,
                 document: document,
-                html: rendered.html,
-                css: rendered.css,
-                javascript: rendered.javascript,
-            )
-        }
-
-        private func renderBody(
-            _ markdown: String,
-        ) throws -> TileKit.Tile.Rendered {
-            let blocks = try tileParser.parseBlocks(markdown)
-            var html: [String] = []
-            var css: [String] = []
-            var javascript: [String] = []
-
-            for block in blocks {
-                switch block {
-                case let .markdown(markdown):
-                    html.append(markdownRenderer.renderHTML(markdown))
-                case let .tile(tile):
-                    let rendered = try tileRegistry.render(tile)
-                    html.append(rendered.html)
-                    append(
-                        rendered.css,
-                        to: &css,
-                    )
-                    append(
-                        rendered.javascript,
-                        to: &javascript,
-                    )
-                }
-            }
-
-            return .init(
-                html: html.joined(separator: "\n"),
-                css: css.joined(separator: "\n"),
-                javascript: javascript.joined(separator: "\n"),
+                html: artifact.contents,
+                css: artifact.assets.css,
+                javascript: artifact.assets.javascript,
             )
         }
 
@@ -235,17 +206,6 @@ public extension TileKit.Site {
         ) -> String {
             let path = slug.isEmpty ? "index.html" : slug + "/index.html"
             return join(outputRootPath, path)
-        }
-
-        private func append(
-            _ value: String,
-            to values: inout [String],
-        ) {
-            guard !value.isEmpty else {
-                return
-            }
-
-            values.append(value)
         }
 
         private func url(

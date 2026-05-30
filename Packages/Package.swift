@@ -143,6 +143,7 @@ let targets: [Target] = {
         name: "TileOutput",
         dependencies: [
             "TileCore",
+            "TileMarkdown",
             "TileTile",
         ],
         swiftSettings: swiftSettings,
@@ -151,6 +152,7 @@ let targets: [Target] = {
         name: "TileOutputTests",
         dependencies: [
             "TileCore",
+            "TileMarkdown",
             "TileOutput",
             "TileTile",
         ],
@@ -201,6 +203,7 @@ let targets: [Target] = {
         dependencies: [
             "TileCore",
             "TileMarkdown",
+            "TileOutput",
             "TileSource",
             "TileTemplate",
             "TileTile",
@@ -212,6 +215,7 @@ let targets: [Target] = {
         dependencies: [
             "TileCore",
             "TileMarkdown",
+            "TileOutput",
             "TileService",
             "TileServiceForm",
             "TileSite",
