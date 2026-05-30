@@ -1,0 +1,8 @@
+# Fixture site for the browser test suite. Small and self-contained; it exists
+# only to exercise the features the Playwright checks assert against.
+title: Browser Fixture
+theme: standard
+appearance: toggle
+rss: true
+rssTitle: Browser Fixture
+rssDescription: A fixture site for the browser test suite.
