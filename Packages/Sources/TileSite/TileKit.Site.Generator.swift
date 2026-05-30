@@ -42,6 +42,7 @@ public extension TileKit.Site {
                 page: page,
                 pages: [page],
                 template: template,
+                configuration: request.configuration,
             )
 
             try fileSystem.writeTextFile(
@@ -82,6 +83,7 @@ public extension TileKit.Site {
                     page: page,
                     pages: pages,
                     template: template,
+                    configuration: request.configuration,
                 )
                 try fileSystem.writeTextFile(
                     output,
@@ -123,12 +125,14 @@ public extension TileKit.Site {
             page: Page,
             pages: [Page],
             template: String,
+            configuration: Configuration,
         ) throws -> String {
             try templateRenderer.render(
                 template: template,
                 context: context(
                     page: page,
                     pages: pages,
+                    configuration: configuration,
                 ),
             )
         }
@@ -136,13 +140,26 @@ public extension TileKit.Site {
         private func context(
             page: Page,
             pages: [Page],
+            configuration: Configuration,
         ) -> TileKit.Template.Context {
             var result = stringValues(page.document.frontMatter)
+            result["site"] = siteValue(configuration)
             result["page"] = pageValue(page)
             result["pages"] = .list(pages.map(pageContext))
             result["contents"] = .string(page.html)
             result["assets"] = assetsValue(page)
             return result
+        }
+
+        private func siteValue(
+            _ configuration: Configuration,
+        ) -> TileKit.Template.Value {
+            .object(
+                [
+                    "title": .string(configuration.title),
+                    "baseURL": .string(configuration.baseURL),
+                ],
+            )
         }
 
         private func pageValue(

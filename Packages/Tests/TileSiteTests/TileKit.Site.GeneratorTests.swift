@@ -9,6 +9,31 @@ import TileTile
 
 @Suite("Site generator")
 struct SiteGeneratorTests {
+    @Test("exposes site configuration to templates under site")
+    func exposesSiteConfiguration() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "# Hi",
+                "templates/page.html": "{{{ site.title }}} | {{{ site.baseURL }}}",
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.build(
+            .init(
+                sourcePath: "content/index.md",
+                templatePath: "templates/page.html",
+                outputPath: "dist/index.html",
+                configuration: .init(
+                    title: "My Site",
+                    baseURL: "https://example.com",
+                ),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/index.html"] == "My Site | https://example.com")
+    }
+
     @Test("builds one page from markdown and a template")
     func buildsOnePage() throws {
         let fileSystem = MemoryFileSystem(
