@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tags: a post declares `tags: swift, ios` in its front matter and the generator
+  synthesizes a listing page per tag at `/tags/<tag>/` showing only that tag's
+  posts, newest first, reusing the post-listing card UI. Tags are exposed to
+  templates as `site.tags` (name, url, count) and per-post `tags` (name, url). A
+  post with no tags appears on no tag page; tag slugs are lowercased and
+  hyphenated. (#50)
+
 - Configurable posts directory: `postsDir` in `tiledown.yml` selects which
   content directory's dated pages count as posts for both the listing
   (`site.posts`) and the RSS feed. Defaults to `posts`; a site that keeps posts

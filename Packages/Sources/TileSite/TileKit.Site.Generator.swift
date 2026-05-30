@@ -62,7 +62,16 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let pages = try loadPages(request)
+            let contentPages = try loadPages(request)
+            let posts = TileKit.Site.PostSelection.posts(
+                in: contentPages,
+                postsDirectory: request.configuration.postsDirectory,
+            )
+            let pages = contentPages + tagPages(
+                among: posts,
+                outputRootPath: request.outputRootPath,
+            )
+            try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 
             try runImageCheck(request: request)
