@@ -41,4 +41,14 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
     ) throws {
         files[path] = contents
     }
+
+    func copyFile(
+        from sourcePath: String,
+        to destinationPath: String,
+    ) throws {
+        guard let file = files[sourcePath] else {
+            throw Error.missingFile(sourcePath)
+        }
+        files[destinationPath] = file
+    }
 }

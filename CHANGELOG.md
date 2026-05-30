@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Asset copying: `tiledown build-site` now copies every non-Markdown file under
+  the content root verbatim into the output, preserving its relative path. One
+  rule serves both a site-level `assets/` tree and a page-local file beside its
+  `index.md`, so a Markdown image such as `![logo](/assets/images/logo.png)`
+  resolves once its file lands in the output. Markdown stays source: an
+  `index.md` becomes a page and any other `.md` is ignored, neither is copied.
+  `TileKit.Site.FileSystem` gains a binary-safe `copyFile(from:to:)`.
+
+- Image-checking pass: the generator runs an injected
+  `TileKit.Site.ImageChecking` over the content's image assets on every build.
+  The default `TileKit.Site.PassthroughImageChecker` accepts everything, so the
+  step is inert until a real checker (missing references, oversize files,
+  missing alt text) replaces it. A checker can reject a build by throwing.
+
 - Minimal demo site support: `tiledown build-site` now reads an optional
   `tiledown.yml` or `tiledown.yaml` file from the content root. The flat config
   format supports `title`, `baseURL`, `layout`, `theme`, `rss`, RSS metadata, and
