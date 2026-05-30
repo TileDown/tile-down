@@ -215,7 +215,7 @@ Not implemented yet:
 |---|---|
 | Canonical source | full document round-trip is implemented (tiles + prose normalized to one canonical form); a typed in-memory prose tree for the future editor and richer JSON is not built (prose round-trips through canonical strings, not stored AST nodes) |
 | Output | HTML and JSON both render through the `TileKit.Output.Rendering` seam (`TileKit.Output.HTMLRenderer` and `JSONRenderer`); RSS or feed renderers are not done |
-| Site config | config file loading, output config, and template/theme config (service binding values exist; no file format yet) |
+| Site config | config file loading, output config, and template/theme config (`TileKit.Site.Configuration` and service binding values exist as direct values; no file format yet) |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |

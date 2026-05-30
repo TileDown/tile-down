@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Site-wide configuration: `TileKit.Site.Configuration` (`title`, `baseURL`) is carried
+  on the build requests and exposed to templates under `site` (`site.title`,
+  `site.baseURL`). The first-class site-scoped counterpart to per-page front matter, the
+  foundation for site-level assets and theming (#17). Carried as direct values; loading
+  it from a config file is a later concern.
+
 - Tiles can now reject the site theme. `TileKit.Tile.Rendered` carries a
   `TileKit.Tile.StylePosture` (`themed` by default, or `overriding`), and
   `TileKit.Output.HTMLRenderer` places `themed` CSS in the `theme` layer and
