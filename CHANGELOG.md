@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Browser tests: an end-to-end Playwright suite (`Packages/Tests/Browser/`)
+  builds a fixture site and drives it in a real Chromium, asserting the rendered
+  output that the Swift unit tests cannot reach: table alignment, image loading,
+  the client-side counter tile, the dark/light toggle and its persistence, draft
+  exclusion, slug overrides, the post listing, and the RSS feed. It is a
+  documented exception to the Swift-only rule (Playwright has no Swift binding)
+  and ships as test tooling, never in the product. (#23)
+
 - Slug override: a non-empty `slug` value in a page's front matter overrides the
   folder-derived slug, deciding the output path the page publishes under.
   Surrounding slashes are trimmed, so `slug: /custom/` and `slug: custom` agree,
