@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- GFM tables: pipe tables render to a real `<table>` with `<thead>`/`<tbody>`
+  and per-column alignment from the `:--`/`--:`/`:-:` markers (emitted as inline
+  `text-align`, so alignment works without theme CSS). Cells render inline
+  markup; both built-in themes style tables. (#43)
+
 - Drafts: a page with `draft: true` in its front matter is excluded from the
   whole build, no output file, and absent from navigation, the post listing, and
   the feed. Unset or any non-truthy value publishes as normal. The

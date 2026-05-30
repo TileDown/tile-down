@@ -160,4 +160,51 @@ struct CommonMarkRendererTests {
             ) == "<ul><li><p>a</p>\n<p>b</p></li></ul>",
         )
     }
+
+    @Test("renders a GFM table with header, body, and column alignment")
+    func rendersGFMTable() {
+        #expect(
+            renderer.renderHTML(
+                """
+                | Name | Score | Grade |
+                | :--- | ----: | :---: |
+                | Ann  |    90 | A     |
+                """,
+            ) == "<table><thead><tr>"
+                + #"<th style="text-align:left">Name</th>"#
+                + #"<th style="text-align:right">Score</th>"#
+                + #"<th style="text-align:center">Grade</th>"#
+                + "</tr></thead><tbody><tr>"
+                + #"<td style="text-align:left">Ann</td>"#
+                + #"<td style="text-align:right">90</td>"#
+                + #"<td style="text-align:center">A</td>"#
+                + "</tr></tbody></table>",
+        )
+    }
+
+    @Test("a table with no alignment markers emits cells without style")
+    func rendersTableWithoutAlignment() {
+        let html = renderer.renderHTML(
+            """
+            | A | B |
+            | - | - |
+            | 1 | 2 |
+            """,
+        )
+        #expect(html.contains("<table><thead><tr><th>A</th><th>B</th></tr></thead>"))
+        #expect(html.contains("<tbody><tr><td>1</td><td>2</td></tr></tbody></table>"))
+        #expect(!html.contains("text-align"))
+    }
+
+    @Test("table cells render inline markup")
+    func rendersTableCellInlineMarkup() {
+        let html = renderer.renderHTML(
+            """
+            | Link |
+            | ---- |
+            | [x](https://example.com) |
+            """,
+        )
+        #expect(html.contains(#"<td><a href="https://example.com">x</a></td>"#))
+    }
 }
