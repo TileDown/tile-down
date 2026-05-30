@@ -115,6 +115,35 @@ struct SiteFeedTests {
         #expect(feed.contains("<content:encoded><![CDATA[<h1>Second</h1>"))
     }
 
+    @Test("strips XML-illegal control characters from feed content")
+    func stripsIllegalControlCharacters() throws {
+        var files = feedFixtureFiles()
+        // A form feed (U+000C) and a NUL (U+0000) in the body are illegal in
+        // XML 1.0 even inside CDATA; one such byte would break the whole feed.
+        files["content/posts/first/index.md"] = """
+        ---
+        title: First Post
+        date: 2026-05-28
+        description: The first post.
+        ---
+        Bad bytes:\u{000C} and\u{0000} here.
+        """
+        let fileSystem = MemoryFileSystem(files: files)
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: feedConfiguration(),
+            ),
+        )
+
+        let feed = try #require(fileSystem.files["dist/feed.xml"])
+        #expect(!feed.unicodeScalars.contains { $0.value == 0x0C })
+        #expect(!feed.unicodeScalars.contains { $0.value == 0x00 })
+    }
+
     @Test("rejects feed paths outside the output directory")
     func rejectsEscapingFeedPath() {
         let fileSystem = MemoryFileSystem(

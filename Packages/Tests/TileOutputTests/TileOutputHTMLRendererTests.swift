@@ -99,10 +99,11 @@ struct TileOutputHTMLRendererTests {
         )
 
         let artifact = try renderer(tileRegistry: registry).render(document)
-        // The two tiles' identical CSS is deduplicated to one rule inside the theme
-        // layer; JavaScript is not deduplicated (it can be per instance).
+        // The two tiles' identical CSS and JavaScript are each deduplicated to one
+        // copy: a tile type's runtime that binds every instance by a shared
+        // selector is emitted once, so it does not double-bind on repeat.
         #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer theme {\n.x {}\n}")
-        #expect(artifact.assets.javascript == "go()\ngo()")
+        #expect(artifact.assets.javascript == "go()")
     }
 
     @Test("keeps distinct tile css while collapsing duplicates")

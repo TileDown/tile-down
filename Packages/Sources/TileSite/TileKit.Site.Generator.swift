@@ -6,13 +6,15 @@ import TileTile
 
 public extension TileKit.Site {
     struct Generator {
-        private let fileSystem: any FileSystem
+        // Visible to the same-module asset/image extension in
+        // TileKit.Site.Generator.Assets.swift; not part of the public API.
+        let fileSystem: any FileSystem
         private let markdownParser: any TileKit.Source.MarkdownParsing
         private let tileParser: any TileKit.Tile.Parsing
         private let htmlRenderer: any TileKit.Output.Rendering
         private let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
-        private let imageChecker: any ImageChecking
+        let imageChecker: any ImageChecking
 
         public init(
             fileSystem: any FileSystem,
@@ -100,6 +102,7 @@ public extension TileKit.Site {
 
             try copyAssets(
                 request: request,
+                generated: Set(outputPaths),
                 outputPaths: &outputPaths,
             )
 
@@ -133,57 +136,6 @@ private extension TileKit.Site.Generator {
                 slug: location.slug,
             )
         }
-    }
-
-    /// Copies every non-Markdown content file verbatim into the output,
-    /// preserving its relative path. Markdown is always source: an `index.md`
-    /// becomes a page and any other `.md` is ignored, so neither is copied. One
-    /// rule covers both a page-local image sitting next to its `index.md` and a
-    /// site-level `assets/` tree, so a Markdown image resolves once its file
-    /// lands in the output.
-    func copyAssets(
-        request: TileKit.Site.ContentBuildRequest,
-        outputPaths: inout [String],
-    ) throws {
-        let relativePaths = try fileSystem.listFilesRecursively(
-            at: request.contentRootPath,
-        )
-        for relativePath in relativePaths where isAsset(relativePath) {
-            let destination = join(request.outputRootPath, relativePath)
-            try fileSystem.copyFile(
-                from: join(request.contentRootPath, relativePath),
-                to: destination,
-            )
-            outputPaths.append(destination)
-        }
-    }
-
-    func isAsset(
-        _ path: String,
-    ) -> Bool {
-        let lowercased = path.lowercased()
-        return !lowercased.hasSuffix(".md") && !lowercased.hasSuffix(".markdown")
-    }
-
-    /// Runs the injected image-checking pass over the content's image assets.
-    /// The default checker does nothing; a real one can reject a build here.
-    func runImageCheck(
-        request: TileKit.Site.ContentBuildRequest,
-    ) throws {
-        let relativePaths = try fileSystem.listFilesRecursively(
-            at: request.contentRootPath,
-        )
-        try imageChecker.check(
-            imagePaths: relativePaths.filter(isImage),
-        )
-    }
-
-    func isImage(
-        _ path: String,
-    ) -> Bool {
-        let imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"]
-        let lowercased = path.lowercased()
-        return imageExtensions.contains { lowercased.hasSuffix($0) }
     }
 
     func template(
@@ -342,21 +294,6 @@ private extension TileKit.Site.Generator {
                 sitePaths: sitePaths,
             ),
         )
-    }
-
-    private func join(
-        _ parent: String,
-        _ child: String,
-    ) -> String {
-        guard !parent.isEmpty else {
-            return child
-        }
-
-        if parent.hasSuffix("/") {
-            return parent + child
-        }
-
-        return parent + "/" + child
     }
 
     private func outputPath(
