@@ -13,7 +13,10 @@ extension TileKit.Site.Generator {
             configuration,
             sitePaths: sitePaths,
             sections: sections(pages),
-            posts: posts(pages, postsDirectory: configuration.postsDirectory),
+            posts: TileKit.Site.PostSelection.posts(
+                in: pages,
+                postsDirectory: configuration.postsDirectory,
+            ),
             title: siteTitle(
                 configuration: configuration,
                 pages: pages,
@@ -73,30 +76,6 @@ extension TileKit.Site.Generator {
                 ),
             ],
         )
-    }
-
-    /// The site's posts for listing: every page under the posts directory
-    /// (`posts/` by default, configurable via `postsDir`) with a parseable
-    /// `date`, newest first (ties broken by slug). The section landing page
-    /// itself (the bare directory slug) is not a post. Mirrors the feed's
-    /// selection so a listing and the RSS feed agree on what counts as a post.
-    func posts(
-        _ pages: [TileKit.Site.Page],
-        postsDirectory: String,
-    ) -> [TileKit.Site.Page] {
-        pages
-            .filter { page in
-                page.slug.hasPrefix(postsDirectory + "/")
-                    && page.document.frontMatter["date"] != nil
-            }
-            .sorted { first, second in
-                let firstDate = first.document.frontMatter["date"] ?? ""
-                let secondDate = second.document.frontMatter["date"] ?? ""
-                if firstDate != secondDate {
-                    return firstDate > secondDate
-                }
-                return first.slug < second.slug
-            }
     }
 
     /// The literal appearance to pin on `<html data-theme>` for forced modes
