@@ -228,6 +228,14 @@ private struct Command {
                 serviceForm,
                 for: TileKit.Tile.ServiceFormRequest.typeID,
             )
+            .registering(
+                TileKit.Tile.CalloutRenderer(),
+                for: TileKit.Tile.CalloutRenderer.typeID,
+            )
+            .registering(
+                TileKit.Tile.CounterRenderer(),
+                for: TileKit.Tile.CounterRenderer.typeID,
+            )
     }
 }
 
