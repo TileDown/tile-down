@@ -1,11 +1,11 @@
-# Decision: theming via CSS cascade layers and design tokens
+# Decision: theming via CSS cascade layers and theme properties
 
 How Tiledown gives a site one consistent look while letting an individual tile
 override it.
 
 **Status: decided in principle (2026-05-30), validated by research; several
 sub-decisions are open pending a design pass.** The core mechanism (cascade
-layers for precedence, design tokens for values) is settled and matches current
+layers for precedence, theme properties for values) is settled and matches current
 web-platform best practice. The tile-facing API, the layer set, and the asset
 machinery are not built yet; they land with the future `TileAsset` target and
 [NEXT_STEPS](../NEXT_STEPS.md) step 5 (asset declarations and deduplication).
@@ -18,10 +18,10 @@ Theming is opinionated **per site, not per page**: one theme is authored for the
 whole site and applied to every page.
 
 - **Level 1, the theme (site-wide).** The CSS that exists for every page: a base
-  (reset, typography, layout) plus design tokens. Its job is consistency. The
+  (reset, typography, layout) plus theme properties. Its job is consistency. The
   theme is **forced onto tiles by default**, so a plain tile is not a snowflake.
 - **Level 2, per-tile CSS.** Each tile renderer contributes CSS. By default a
-  tile defers to the theme (it styles structure and reads theme tokens). A tile
+  tile defers to the theme (it styles structure and reads theme properties). A tile
   **may reject the theme and impose its own** look when it genuinely needs to.
 
 So: a default-on site theme with a per-tile opt-out. The theme wins unless a tile
@@ -30,7 +30,7 @@ explicitly takes the wheel.
 ## The decision: two orthogonal mechanisms
 
 Precedence and values are separate problems and get separate mechanisms. Cascade
-layers decide *who wins*; design tokens carry *what the values are*. Conflating
+layers decide *who wins*; theme properties carry *what the values are*. Conflating
 them is the usual source of theming pain.
 
 ### 1. Precedence: CSS cascade layers
@@ -59,10 +59,10 @@ later `tile-override` layer, which wins without any specificity arithmetic.
 Cascade layers were added to CSS Cascading and Inheritance Level 5 for precisely
 this case. They are Baseline (widely available) since 2022.
 
-### 2. Values: design tokens
+### 2. Values: theme properties
 
 Tiles must be theme-agnostic, so they never hardcode a palette; they read
-**design tokens** (CSS custom properties). Tokens are two-tier:
+**theme properties** (CSS custom properties). They are two-tier:
 
 - **Primitives**: raw values (`--td-gray-900: #1c1917`).
 - **Semantic aliases**: theme-agnostic names tiles actually use
@@ -77,12 +77,12 @@ to a selector, not a layer**:
 @media (prefers-color-scheme: dark) { :root { /* dark defaults */ } }
 ```
 
-Reskinning the whole site is then a change to token values in one place, and
+Reskinning the whole site is then a change to theme-property values in one place, and
 every tile follows because it only ever referenced the aliases.
 
 The W3C Design Tokens (DTCG) format is a JSON *interchange* format that emits no
 CSS; it delegates output to tools like Style Dictionary. Tiledown owns its
-token-to-CSS emission regardless, so DTCG is only relevant later for import
+theme-property-to-CSS emission regardless, so DTCG is only relevant later for import
 interop.
 
 ## Two load-bearing constraints
@@ -135,7 +135,7 @@ entirely (the engine can strip or reject it), and the documented escape hatch is
 - **Browser-support floor.** An unsupported `@layer` block is dropped *entirely*,
   which would drop the theme. Lean: accept the Baseline-2022 floor for a
   GitHub-Pages target rather than ship a non-layered fallback. Decide explicitly.
-- **Token source format.** Emit `--td-*` custom properties from an internal model
+- **Theme-property source format.** Emit `--td-*` custom properties from an internal model
   now; consider DTCG-JSON import later only if interop is wanted.
 - **Asset declarations and dedup.** This rides on NEXT_STEPS step 5: a tile
   declares a named, keyed CSS asset so identical tile CSS is emitted once per
@@ -145,10 +145,10 @@ entirely (the engine can strip or reject it), and the documented escape hatch is
 ## How it lands in the architecture
 
 - A future `TileAsset` target owns asset declarations, dedup, the layer wrapping,
-  the theme/token model, and the asset behavior registry.
+  the theme and theme-property model, and the asset behavior registry.
 - `TileKit.Output.Assets` (today `{ css, javascript }` raw strings) evolves so CSS
   carries its layer placement instead of being a flat concatenated string.
-- The site composition root injects the theme (base + tokens) once per page; the
+- The site composition root injects the theme (base + theme properties) once per page; the
   template links or inlines it (delivery mechanism is a separate, smaller choice).
 
 ## Evidence base
@@ -159,15 +159,15 @@ The full cited research (three verified passes) is in
 The decision rests on web-platform primary sources: the W3C CSS Cascading and
 Inheritance Level 5 spec, MDN and Chrome for Developers documentation on
 `@layer`, the W3C Design Tokens draft, Open Props (which confirms the two-tier
-token model and selector-scoped theme switching "rather than using layers"), and
+theme-property model and selector-scoped theme switching "rather than using layers"), and
 the Astro styling docs (for the source-order-scoping contrast).
 
-There is **no peer-reviewed literature** on theming, design tokens, or cascade
+There is **no peer-reviewed literature** on theming, theme properties, or cascade
 layers; they are too new and too much an engineering practice. Real formal-CSS
 academic work exists (Cassius, OOPSLA 2016; layout verification, PLDI 2018;
 automated CSS-rule analysis, ICSE 2012; Genevès and Layaïda's formal CSS
 analysis) but it concerns *verifying* CSS layout and detecting dead or duplicate
 rules, not theming-system design. The "structure vs skin" idea behind the
-token/component split is OOCSS industry lore. The front-end interview canon for
+theme-property/component split is OOCSS industry lore. The front-end interview canon for
 "design a dark-mode system" matches this decision: `:root` custom properties, a
-`[data-theme]` attribute, and token tiers.
+`[data-theme]` attribute, and theme-property tiers.
