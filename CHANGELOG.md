@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Site-level shared stylesheet: a multi-page build now collects every tile's CSS into one
+  `styles.css` at the output root, deduplicated across the whole site, so a tile type used
+  on many pages emits its CSS once (not per page). `TileKit.Output.Stylesheet` carries the
+  per-layer CSS fragments and merges across pages; `TileKit.Output.Assets` exposes it (with a
+  computed `css` for the inline form). The stylesheet path is exposed to templates as
+  `site.stylesheetPath` (baseURL-joined) for a `<link>`. Single-page `build` still inlines.
+  Part of #17.
+
 - Site-wide configuration: `TileKit.Site.Configuration` (`title`, `baseURL`) is carried
   on the build requests and exposed to templates under `site` (`site.title`,
   `site.baseURL`). The first-class site-scoped counterpart to per-page front matter, the

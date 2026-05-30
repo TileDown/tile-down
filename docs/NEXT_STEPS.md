@@ -170,10 +170,12 @@ with schema).
 
 ### 5. Add asset declarations and deduplication
 
-CSS deduplication and cascade-layer wrapping are now done (first slice):
-`TileKit.Output.HTMLRenderer` deduplicates identical tile CSS fragments and wraps
-them in a `theme` cascade layer under the canonical order
-`@layer reset, theme, tile-override;`, per [docs/decisions/theming.md](decisions/theming.md).
+CSS deduplication and cascade-layer wrapping are done at two altitudes:
+per-page dedup and the cascade-layer order live in `TileKit.Output.HTMLRenderer`
+(it produces a `TileKit.Output.Stylesheet` of deduplicated fragments per layer),
+and cross-page dedup lives in `TileKit.Site.Generator`, which merges every page's
+stylesheet into one shared `styles.css` at the output root and links it from each
+page via `site.stylesheetPath`, per [docs/decisions/theming.md](decisions/theming.md).
 The tile styling posture is now done too: `TileKit.Tile.Rendered` carries a
 `TileKit.Tile.StylePosture` (`themed` default, or `overriding`), and the renderer
 routes overriding CSS into the `tile-override` layer. Still to do below: an explicit

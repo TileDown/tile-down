@@ -71,6 +71,44 @@ struct SiteGeneratorTests {
         )
     }
 
+    @Test("collects tile css into one shared stylesheet linked from every page")
+    func sharedStylesheet() throws {
+        let template = [
+            #"<link rel="stylesheet" href="{{ site.stylesheetPath }}">"#,
+            #"{{{ page.contents.html }}}"#,
+        ].joined()
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "# Home\n\n:::tile promo\nid: a\n:::",
+                "content/blog/index.md": "# Blog\n\n:::tile promo\nid: b\n:::",
+                "templates/page.html": template,
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(renderers: ["promo": PromoRenderer()]),
+        )
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                templatePath: "templates/page.html",
+                outputRootPath: "dist",
+            ),
+        )
+
+        // The promo CSS is written once for the whole site despite two pages.
+        #expect(
+            fileSystem.files["dist/styles.css"]
+                == "@layer reset, theme, tile-override;\n@layer theme {\n.promo { color: #0f766e; }\n}",
+        )
+        // Every page links the shared stylesheet and inlines no tile CSS.
+        let home = try #require(fileSystem.files["dist/index.html"])
+        let blog = try #require(fileSystem.files["dist/blog/index.html"])
+        #expect(home.contains(#"<link rel="stylesheet" href="/styles.css">"#))
+        #expect(blog.contains(#"<link rel="stylesheet" href="/styles.css">"#))
+    }
+
     @Test("builds content directory pages from index markdown files")
     func buildsContentDirectoryPages() throws {
         let template = [
@@ -120,6 +158,33 @@ struct SiteGeneratorTests {
                 navigation + #"<title>Blog</title><h1>Blog</h1>"#,
         )
         #expect(fileSystem.files["dist/blog/draft/index.html"] == nil)
+        // No styled tiles, so no shared stylesheet is written.
+        #expect(fileSystem.files["dist/styles.css"] == nil)
+    }
+
+    @Test("the shared stylesheet link is prefixed by the configured base URL")
+    func sharedStylesheetUsesBaseURL() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "# Home\n\n:::tile promo\nid: a\n:::",
+                "templates/page.html": #"<link href="{{ site.stylesheetPath }}">"#,
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(renderers: ["promo": PromoRenderer()]),
+        )
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                templatePath: "templates/page.html",
+                outputRootPath: "dist",
+                configuration: .init(baseURL: "https://example.com"),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/index.html"] == #"<link href="https://example.com/styles.css">"#)
     }
 
     @Test("renders tile directives through injected registry")

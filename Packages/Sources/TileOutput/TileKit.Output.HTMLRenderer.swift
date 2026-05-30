@@ -64,33 +64,10 @@ public extension TileKit.Output {
                 contents: html.joined(separator: "\n"),
                 fileExtension: "html",
                 assets: .init(
-                    css: Self.layeredCSS(themed: themed, overriding: overriding),
+                    stylesheet: .init(themed: themed, overriding: overriding),
                     javascript: javascript.joined(separator: "\n"),
                 ),
             )
-        }
-
-        /// Wraps the deduplicated tile CSS in cascade layers under the canonical
-        /// order `reset, theme, tile-override`. Themed CSS goes in the `theme` layer,
-        /// rejecting CSS in the later `tile-override` layer. Returns an empty string
-        /// when there is no CSS, so a page without styled tiles emits no stray layer
-        /// statement.
-        private static func layeredCSS(
-            themed: [String],
-            overriding: [String],
-        ) -> String {
-            guard !themed.isEmpty || !overriding.isEmpty else {
-                return ""
-            }
-
-            var result = "@layer reset, theme, tile-override;"
-            if !themed.isEmpty {
-                result += "\n@layer theme {\n\(themed.joined(separator: "\n"))\n}"
-            }
-            if !overriding.isEmpty {
-                result += "\n@layer tile-override {\n\(overriding.joined(separator: "\n"))\n}"
-            }
-            return result
         }
 
         private static func appendUnique(
