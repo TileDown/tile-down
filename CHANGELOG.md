@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mustache sections over a missing key now render nothing (falsey), per the
+  Mustache spec, instead of throwing. This makes an optional field such as
+  `page.image` safe in a shared layout. A missing plain interpolation
+  (`{{ x }}`) still throws, since that is an authoring error.
+
 ### Added
+
+- Post hero images: a page with an `image` front-matter value renders it as a
+  hero at the top of the content in both built-in layouts (`<img class="td-hero">`).
+  A page without `image` is unchanged.
 
 - Full-text RSS: each feed item now carries the whole rendered post body in a
   `<content:encoded>` element (CDATA), not just the front-matter summary, so

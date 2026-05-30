@@ -140,8 +140,12 @@ public extension TileKit.Template {
             body: String,
             scopes: [Context],
         ) throws -> String {
+            // A missing section key is falsey, per Mustache: the section renders
+            // nothing. This is what makes an optional field like `page.image`
+            // safe in a shared layout. A missing plain interpolation still
+            // throws, since that is an authoring error, not an optional.
             guard let value = Self.lookup(key, scopes: scopes) else {
-                throw SimpleMustacheRendererError.missingValue(key)
+                return ""
             }
 
             switch value {
