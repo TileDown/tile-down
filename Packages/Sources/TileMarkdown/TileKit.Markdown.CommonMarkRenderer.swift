@@ -147,6 +147,47 @@ private struct HTMLVisitor: MarkupVisitor {
         "<hr>"
     }
 
+    mutating func visitTable(
+        _ table: Table,
+    ) -> String {
+        var html = "<table><thead><tr>"
+        for (column, cell) in table.head.cells.enumerated() {
+            html += "<th\(alignmentAttribute(table, column: column))>\(render(cell.children))</th>"
+        }
+        html += "</tr></thead><tbody>"
+        for row in table.body.rows {
+            html += "<tr>"
+            for (column, cell) in row.cells.enumerated() {
+                html += "<td\(alignmentAttribute(table, column: column))>\(render(cell.children))</td>"
+            }
+            html += "</tr>"
+        }
+        html += "</tbody></table>"
+        return html
+    }
+
+    /// The ` style="text-align:..."` attribute for a column, or "" when the
+    /// column has no alignment marker. Alignment is semantic to the table, so it
+    /// is emitted inline and renders correctly without any theme CSS.
+    private func alignmentAttribute(
+        _ table: Table,
+        column: Int,
+    ) -> String {
+        guard column < table.columnAlignments.count,
+              let alignment = table.columnAlignments[column]
+        else {
+            return ""
+        }
+        switch alignment {
+        case .left:
+            return " style=\"text-align:left\""
+        case .center:
+            return " style=\"text-align:center\""
+        case .right:
+            return " style=\"text-align:right\""
+        }
+    }
+
     mutating func visitLineBreak(
         _: LineBreak,
     ) -> String {
