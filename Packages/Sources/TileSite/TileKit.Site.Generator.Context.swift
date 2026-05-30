@@ -50,6 +50,10 @@ extension TileKit.Site.Generator {
                 "homeURL": .string(url(for: "", baseURL: configuration.baseURL)),
                 "stylesheetPath": .string(sitePaths.stylesheetPath),
                 "feedPath": .string(sitePaths.feedPath),
+                // Forced light/dark sets data-theme on <html>; empty for toggle/auto.
+                "appearanceForced": .string(forcedAppearance(configuration.appearance)),
+                // Non-empty only in toggle mode, gating the button and its script.
+                "appearanceToggle": .string(configuration.appearance == .toggle ? "true" : ""),
                 "socialLinks": .list(configuration.socialLinks.map(socialLinkContext)),
                 "sections": .list(
                     sections.map { section in
@@ -91,6 +95,22 @@ extension TileKit.Site.Generator {
                 }
                 return first.slug < second.slug
             }
+    }
+
+    /// The literal appearance to pin on `<html data-theme>` for forced modes
+    /// (`light`/`dark`), or "" for `toggle`/`auto` where the document is not
+    /// pinned (the script or the OS decides).
+    func forcedAppearance(
+        _ appearance: TileKit.Site.Appearance,
+    ) -> String {
+        switch appearance {
+        case .light:
+            "light"
+        case .dark:
+            "dark"
+        case .toggle, .auto:
+            ""
+        }
     }
 
     func siteTitle(

@@ -39,11 +39,11 @@ public extension TileKit.Site {
 
         private static let topNavTemplate = """
         <!doctype html>
-        <html lang="en">
+        <html lang="en"{{#site.appearanceForced}} data-theme="{{ site.appearanceForced }}"{{/site.appearanceForced}}>
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script>
+        {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
           // Apply a saved choice before paint so there is no flash. With no saved
@@ -61,7 +61,7 @@ public extension TileKit.Site {
             });
           });
         })();
-        </script>
+        </script>{{/site.appearanceToggle}}
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
@@ -70,7 +70,7 @@ public extension TileKit.Site {
         <header class="td-header">
         <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
         <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
-        <button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>
+        {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </header>
         <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}{{#page.postList}}<ul class="td-posts">{{#site.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}</div></li>{{/site.posts}}</ul>{{/page.postList}}</main>
         <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">Tiledown</a></span></div></footer>
@@ -81,11 +81,11 @@ public extension TileKit.Site {
 
         private static let leftSidebarTemplate = """
         <!doctype html>
-        <html lang="en">
+        <html lang="en"{{#site.appearanceForced}} data-theme="{{ site.appearanceForced }}"{{/site.appearanceForced}}>
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script>
+        {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
           // Apply a saved choice before paint so there is no flash. With no saved
@@ -103,7 +103,7 @@ public extension TileKit.Site {
             });
           });
         })();
-        </script>
+        </script>{{/site.appearanceToggle}}
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
@@ -112,7 +112,7 @@ public extension TileKit.Site {
         <aside class="td-sidebar">
         <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
         <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
-        <button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>
+        {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </aside>
         <div class="td-content">
         <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}{{#page.postList}}<ul class="td-posts">{{#site.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}</div></li>{{/site.posts}}</ul>{{/page.postList}}</main>

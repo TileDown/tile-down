@@ -61,4 +61,27 @@ struct SiteConfigurationFileTests {
 
         #expect(file.configuration.feed == nil)
     }
+
+    @Test("appearance defaults to toggle and parses every mode")
+    func appearance() throws {
+        let defaultFile = try TileKit.Site.ConfigurationFile.parse("title: Demo")
+        #expect(defaultFile.configuration.appearance == .toggle)
+
+        for (value, expected): (String, TileKit.Site.Appearance) in [
+            ("toggle", .toggle),
+            ("auto", .auto),
+            ("light", .light),
+            ("dark", .dark),
+        ] {
+            let file = try TileKit.Site.ConfigurationFile.parse("appearance: \(value)")
+            #expect(file.configuration.appearance == expected)
+        }
+    }
+
+    @Test("an unknown appearance is a typed error")
+    func unknownAppearance() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.unknownAppearance("sepia")) {
+            try TileKit.Site.ConfigurationFile.parse("appearance: sepia")
+        }
+    }
 }

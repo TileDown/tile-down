@@ -47,6 +47,8 @@ public extension TileKit.Site {
                     result.layout = try layout(named: item.value)
                 case "theme":
                     result.configuration.theme = try theme(named: item.value)
+                case "appearance":
+                    result.configuration.appearance = try appearance(named: item.value)
                 default:
                     throw ConfigurationFileError.unknownKey(item.key)
                 }
@@ -176,6 +178,15 @@ public extension TileKit.Site {
             default:
                 throw ConfigurationFileError.unknownTheme(name)
             }
+        }
+
+        private static func appearance(
+            named name: String,
+        ) throws -> Appearance {
+            guard let appearance = Appearance(rawValue: name) else {
+                throw ConfigurationFileError.unknownAppearance(name)
+            }
+            return appearance
         }
 
         private static func boolean(

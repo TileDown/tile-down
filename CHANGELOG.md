@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `appearance` site setting: choose how the site offers dark and light. `toggle`
+  (default) shows a control that follows the OS until the visitor picks, then
+  remembers it; `auto` follows the OS with no control; `light` and `dark` pin one
+  appearance and emit no toggle. Set it in `tiledown.yml` as `appearance: <mode>`.
+  Forced modes set `data-theme` on the document; `toggle` emits the button and
+  its no-flash script only when selected.
+
 ### Fixed
 
 - Asset copying no longer clobbers generated output or publishes build inputs.

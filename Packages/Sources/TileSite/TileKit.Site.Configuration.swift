@@ -19,6 +19,8 @@ public extension TileKit.Site {
         public var socialLinks: [SocialLink]
         /// RSS feed settings. When present, content builds emit a feed.
         public var feed: Feed?
+        /// How the site offers dark and light appearance. Defaults to `.toggle`.
+        public var appearance: Appearance
 
         public init(
             title: String = "",
@@ -26,12 +28,14 @@ public extension TileKit.Site {
             theme: Theme? = .standard,
             socialLinks: [SocialLink] = [],
             feed: Feed? = nil,
+            appearance: Appearance = .toggle,
         ) {
             self.title = title
             self.baseURL = baseURL
             self.theme = theme
             self.socialLinks = socialLinks
             self.feed = feed
+            self.appearance = appearance
         }
     }
 }
