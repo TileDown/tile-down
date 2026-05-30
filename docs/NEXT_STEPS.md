@@ -22,6 +22,12 @@ The repository currently has:
 - `TileKit.Tile.Registry`, `TileKit.Tile.Rendering`, and
   `TileKit.Tile.Rendered`.
 - Site generation that renders Markdown blocks and tile blocks in source order.
+- Built-in `topNav` and `leftSidebar` layouts, selected through
+  `TileKit.Site.TemplateSource`.
+- The built-in `standard` theme, applied by default through
+  `TileKit.Site.Configuration`.
+- `tiledown build-site <content-dir> <output-dir>`, which uses the built-in
+  top-nav layout and standard theme without requiring a template file.
 - Page-local tile CSS and browser JavaScript exposed to templates.
 - Service manifest and service operation contract models.
 - `service-form` request validation, binding, and generated browser output for
@@ -178,9 +184,9 @@ stylesheet into one shared `styles.css` at the output root and links it from eac
 page via `site.stylesheetPath`, per [docs/decisions/theming.md](decisions/theming.md).
 The tile styling posture is now done too: `TileKit.Tile.Rendered` carries a
 `TileKit.Tile.StylePosture` (`themed` default, or `overriding`), and the renderer
-routes overriding CSS into the `tile-override` layer. Still to do below: an explicit
-per-tile dedup key (CSS is currently deduped by content), the site theme plus its
-theme properties (named CSS custom properties), and JavaScript deduplication.
+routes overriding CSS into the `tile-override` layer. The standard site theme and
+theme properties are done too. Still to do below: an explicit per-tile dedup key
+(CSS is currently deduped by content) and JavaScript deduplication.
 
 Goal: move from raw page-local CSS and JavaScript strings toward explicit asset
 declarations.

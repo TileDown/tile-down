@@ -92,8 +92,9 @@ struct SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
+                configuration: .init(theme: nil),
             ),
         )
 
@@ -142,8 +143,9 @@ struct SiteGeneratorTests {
         let result = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
+                configuration: .init(theme: nil),
             ),
         )
 
@@ -178,7 +180,7 @@ struct SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
                 configuration: .init(baseURL: "https://example.com"),
             ),

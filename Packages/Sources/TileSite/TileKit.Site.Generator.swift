@@ -76,7 +76,7 @@ public extension TileKit.Site {
                     slug: location.slug,
                 )
             }
-            let template = try fileSystem.readTextFile(at: request.templatePath)
+            let template = try template(from: request.template)
 
             var outputPaths: [String] = []
             let stylesheetPath = try writeSharedStylesheet(
@@ -105,6 +105,17 @@ public extension TileKit.Site {
         }
 
         private static let sharedStylesheetFileName = "styles.css"
+
+        private func template(
+            from source: TemplateSource,
+        ) throws -> String {
+            switch source {
+            case let .file(path):
+                try fileSystem.readTextFile(at: path)
+            case let .layout(layout):
+                layout.template
+            }
+        }
 
         /// Merges every page's CSS into one site stylesheet, writes it to the output
         /// root, records it in `outputPaths`, and returns the URL to link it from
@@ -233,6 +244,10 @@ public extension TileKit.Site {
                 configuration,
                 stylesheetPath: stylesheetPath,
                 sections: sections(pages),
+                title: siteTitle(
+                    configuration: configuration,
+                    pages: pages,
+                ),
             )
             result["page"] = pageValue(page)
             result["pages"] = .list(pages.map(pageContext))
@@ -279,15 +294,28 @@ private extension TileKit.Site.Generator {
         _ configuration: TileKit.Site.Configuration,
         stylesheetPath: String,
         sections: [TileKit.Site.Page],
+        title: String,
     ) -> TileKit.Template.Value {
         .object(
             [
-                "title": .string(configuration.title),
+                "title": .string(title),
                 "baseURL": .string(configuration.baseURL),
                 "stylesheetPath": .string(stylesheetPath),
                 "sections": .list(sections.map(pageContext)),
             ],
         )
+    }
+
+    func siteTitle(
+        configuration: TileKit.Site.Configuration,
+        pages: [TileKit.Site.Page],
+    ) -> String {
+        if !configuration.title.isEmpty {
+            return configuration.title
+        }
+        return pages.first { $0.slug.isEmpty }?
+            .document
+            .frontMatter["title"] ?? ""
     }
 
     /// The site's top-level sections for navigation: the depth-1 pages (each

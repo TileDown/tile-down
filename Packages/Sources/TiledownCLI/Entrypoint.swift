@@ -107,17 +107,26 @@ private struct Command {
     }
 
     private func buildSite() throws {
-        guard arguments.count == 4 else {
+        guard arguments.count == 3 || arguments.count == 4 else {
             throw CommandError.invalidArguments
         }
 
         let generator = makeGenerator()
+        let template: TileKit.Site.TemplateSource
+        let outputRootPath: String
+        if arguments.count == 3 {
+            template = .layout(.topNav)
+            outputRootPath = arguments[2]
+        } else {
+            template = .file(path: arguments[2])
+            outputRootPath = arguments[3]
+        }
 
         _ = try generator.buildContent(
             .init(
                 contentRootPath: arguments[1],
-                templatePath: arguments[2],
-                outputRootPath: arguments[3],
+                template: template,
+                outputRootPath: outputRootPath,
             ),
         )
     }
@@ -210,6 +219,7 @@ private enum CommandError: Error, CustomStringConvertible {
             """
             usage:
               tiledown build <source.md> <template.html> <output.html>
+              tiledown build-site <content-dir> <output-dir>
               tiledown build-site <content-dir> <template.html> <output-dir>
               tiledown json <source.md> <output.json>
               tiledown fmt [--write | --check] <source.md>

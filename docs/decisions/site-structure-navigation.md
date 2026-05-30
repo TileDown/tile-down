@@ -78,22 +78,22 @@ consumers that do not exist.
 - **Visitor** for the different nav projections (menu, breadcrumb, sitemap from one
   tree). Earned at the second projection.
 
-## The one real pipeline change (deferred)
+## The one real pipeline change (done)
 
-Today the user supplies a single template. A layout system means the **theme
-supplies the templates** and the user selects or overrides one. That is the largest
-structural change in the epic and is strictly downstream of sections; it must never
-be bundled into the sections slice.
+The user no longer has to supply a single template for a content build. The
+content-build request carries a `TileKit.Site.TemplateSource`, either a custom file
+(`.file(path:)`) or a built-in layout (`.layout(Layout)`). The CLI uses
+`.layout(.topNav)` for `tiledown build-site <content-dir> <output-dir>`, while
+the three-path form remains the custom-template override.
 
 ## Sequencing
 
 1. **Sections** (this doc's slice): `site.sections` derived from pages. No pattern.
 2. **Top-nav layout**: `Layout.topNav`, a built-in template consuming `site.sections`.
 3. **Left-sidebar layout**: `Layout.leftSidebar`, the second layout, which realizes
-   the selection as the closed `Layout` enum. (Done.) The theme-supplies-templates
-   pipeline change (`TemplateSource`, wiring layouts into the CLI) is the next step.
+   the selection as the closed `Layout` enum. (Done.)
 4. **Presentation track** (default theme content, then switching): orthogonal, on
-   its own `--td-*` contract, slots in anytime.
+   its own `--td-*` contract. The standard theme is now the default.
 5. Gated later: Composite (breadcrumbs, nesting), Abstract Factory (named themes),
    Visitor (sitemap).
 
