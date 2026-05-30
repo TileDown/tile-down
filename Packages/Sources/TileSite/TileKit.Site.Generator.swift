@@ -116,16 +116,20 @@ public extension TileKit.Site {
             configuration: Configuration,
             outputPaths: inout [String],
         ) throws -> String {
-            let stylesheet = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
+            let tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
                 result.merging(page.stylesheet)
             }
-            guard !stylesheet.isEmpty else {
+            let css = Self.composeStylesheet(
+                theme: configuration.theme,
+                tiles: tiles,
+            )
+            guard !css.isEmpty else {
                 return ""
             }
 
             let outputPath = join(outputRootPath, Self.sharedStylesheetFileName)
             try fileSystem.writeTextFile(
-                stylesheet.text(),
+                css,
                 at: outputPath,
             )
             outputPaths.append(outputPath)
@@ -133,6 +137,35 @@ public extension TileKit.Site {
                 baseURL: configuration.baseURL,
                 fileName: Self.sharedStylesheetFileName,
             )
+        }
+
+        /// Composes the shared stylesheet from the theme and the merged tile CSS.
+        /// With no theme this is exactly the tile stylesheet; with a theme it adds
+        /// the theme properties (unlayered) and the theme's reset and base styles
+        /// into the `reset` and `theme` cascade layers, beside the tiles.
+        private static func composeStylesheet(
+            theme: Theme?,
+            tiles: TileKit.Output.Stylesheet,
+        ) -> String {
+            guard let theme else {
+                return tiles.text()
+            }
+
+            var result = theme.tokens
+            result += "\n@layer reset, theme, tile-override;"
+            if !theme.reset.isEmpty {
+                result += "\n@layer reset {\n\(theme.reset)\n}"
+            }
+            let themeLayer = ([theme.base] + tiles.themed)
+                .filter { !$0.isEmpty }
+                .joined(separator: "\n")
+            if !themeLayer.isEmpty {
+                result += "\n@layer theme {\n\(themeLayer)\n}"
+            }
+            if !tiles.overriding.isEmpty {
+                result += "\n@layer tile-override {\n\(tiles.overriding.joined(separator: "\n"))\n}"
+            }
+            return result
         }
 
         private func stylesheetURL(

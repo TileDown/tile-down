@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Built-in theme: `TileKit.Site.Theme.standard` is the first built-in theme, a warm,
+  readable design with a centered measure. It defines its semantic theme properties
+  (`--td-*`) twice, a light set on `:root` and a dark set under `prefers-color-scheme:
+  dark` and `[data-theme="dark"]`, so light and dark are a mode of the theme rather than
+  separate themes, plus reset and base styles for the layout regions. A theme is
+  orthogonal to a layout: any layout wears any theme. Set it via `Configuration.theme`
+  (opt-in); the generator composes the theme's properties, reset, and base into the
+  shared stylesheet's cascade layers, so a themed site always emits a `styles.css`. See
+  [docs/decisions/theming.md](docs/decisions/theming.md) and
+  [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
+
 - Built-in layouts: `TileKit.Site.Layout` ships two page layouts, `topNav`
   (horizontal nav across the top) and `leftSidebar` (vertical nav in a left
   sidebar), the two primary placements the research supports. Each is a Mustache
