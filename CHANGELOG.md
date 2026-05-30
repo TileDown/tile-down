@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Built-in top-nav layout: `TileKit.Site.Layout.topNav` is the first built-in page
-  layout, a Mustache template that arranges header, navigation (built from
-  `site.sections`), main content, and a footer, and links the shared stylesheet. A
-  layout is a template, not Swift that emits HTML; with one layout there is no
-  selection mechanism yet (a second layout earns it). Wiring it into the CLI as a
-  default is a follow-up. See [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
+- Built-in layouts: `TileKit.Site.Layout` ships two page layouts, `topNav`
+  (horizontal nav across the top) and `leftSidebar` (vertical nav in a left
+  sidebar), the two primary placements the research supports. Each is a Mustache
+  template that arranges header/sidebar, navigation (built from `site.sections`),
+  main content, and a footer, and links the shared stylesheet. A layout is a
+  template, not Swift that emits HTML; all layouts use the same data and differ only
+  in how they arrange the regions. The closed enum of cases is the selection itself
+  (the engine ships a curated few, not an open extension point). Wiring layout
+  selection into the CLI is a follow-up. See
+  [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
 
 - Site navigation: templates can build a menu from `site.sections`, the site's top-level
   sections (each section's `index.md` landing page, i.e. the depth-1 pages), ordered by a

@@ -141,3 +141,33 @@ extension SiteGeneratorTests {
         #expect(home.contains(#"<footer class="td-footer">"#))
     }
 }
+
+extension SiteGeneratorTests {
+    @Test("the built-in left-sidebar layout puts nav in an aside beside the content")
+    func leftSidebarLayout() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Welcome",
+                "content/about/index.md": "---\ntitle: About\nweight: 1\n---\n# About us",
+                "templates/page.html": TileKit.Site.Layout.leftSidebar.template,
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                templatePath: "templates/page.html",
+                outputRootPath: "dist",
+                configuration: .init(title: "My Site"),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<body class="td-layout-sidebar">"#))
+        #expect(home.contains(#"<aside class="td-sidebar">"#))
+        #expect(home.contains(#"<nav class="td-sidebar-nav"><a class="td-nav-link" href="/about/">About</a></nav>"#))
+        #expect(home.contains(#"<div class="td-content">"#))
+        #expect(home.contains(#"<main class="td-main"><h1>Welcome</h1>"#))
+    }
+}
