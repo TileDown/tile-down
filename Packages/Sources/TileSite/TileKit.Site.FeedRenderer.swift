@@ -2,7 +2,8 @@ import Foundation
 import TileCore
 
 public extension TileKit.Site {
-    /// Renders the site's RSS feed from dated pages under `posts/`.
+    /// Renders the site's RSS feed from dated pages under the site's posts
+    /// directory (`posts/` by default, configurable via `postsDir`).
     struct FeedRenderer: Sendable {
         public init() {}
 
@@ -11,9 +12,10 @@ public extension TileKit.Site {
             siteTitle: String,
             baseURL: String,
             pages: [Page],
+            postsDirectory: String = "posts",
         ) -> String {
             let title = feed.title.isEmpty ? siteTitle : feed.title
-            let items = postPages(pages)
+            let items = postPages(pages, postsDirectory: postsDirectory)
                 .map { page in
                     feedItemXML(
                         page: page,
@@ -63,10 +65,11 @@ public extension TileKit.Site {
 
         private func postPages(
             _ pages: [Page],
+            postsDirectory: String,
         ) -> [Page] {
             pages
                 .filter { page in
-                    page.slug.hasPrefix("posts/")
+                    page.slug.hasPrefix(postsDirectory + "/")
                         && page.document.frontMatter["date"].flatMap(rssDate) != nil
                 }
                 .sorted { first, second in

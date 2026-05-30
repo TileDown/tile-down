@@ -49,6 +49,8 @@ public extension TileKit.Site {
                     result.configuration.theme = try theme(named: item.value)
                 case "appearance":
                     result.configuration.appearance = try appearance(named: item.value)
+                case "postsDir":
+                    result.configuration.postsDirectory = postsDirectory(from: item.value)
                 default:
                     throw ConfigurationFileError.unknownKey(item.key)
                 }
@@ -187,6 +189,22 @@ public extension TileKit.Site {
                 throw ConfigurationFileError.unknownAppearance(name)
             }
             return appearance
+        }
+
+        /// Normalizes a `postsDir` value to a slug-style path: surrounding slashes
+        /// trimmed so `blog`, `/blog`, and `blog/` agree. An empty or slash-only
+        /// value falls back to the default `posts`.
+        private static func postsDirectory(
+            from value: String,
+        ) -> String {
+            var directory = value[...]
+            while directory.hasPrefix("/") {
+                directory = directory.dropFirst()
+            }
+            while directory.hasSuffix("/") {
+                directory = directory.dropLast()
+            }
+            return directory.isEmpty ? "posts" : String(directory)
         }
 
         private static func boolean(

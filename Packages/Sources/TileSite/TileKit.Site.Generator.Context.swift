@@ -13,7 +13,7 @@ extension TileKit.Site.Generator {
             configuration,
             sitePaths: sitePaths,
             sections: sections(pages),
-            posts: posts(pages),
+            posts: posts(pages, postsDirectory: configuration.postsDirectory),
             title: siteTitle(
                 configuration: configuration,
                 pages: pages,
@@ -75,16 +75,18 @@ extension TileKit.Site.Generator {
         )
     }
 
-    /// The site's posts for listing: every page under `posts/` with a parseable
-    /// `date`, newest first (ties broken by slug). The `posts/` section landing
-    /// page itself (slug `posts`) is not a post. Mirrors the feed's selection so
-    /// a listing and the RSS feed agree on what counts as a post.
+    /// The site's posts for listing: every page under the posts directory
+    /// (`posts/` by default, configurable via `postsDir`) with a parseable
+    /// `date`, newest first (ties broken by slug). The section landing page
+    /// itself (the bare directory slug) is not a post. Mirrors the feed's
+    /// selection so a listing and the RSS feed agree on what counts as a post.
     func posts(
         _ pages: [TileKit.Site.Page],
+        postsDirectory: String,
     ) -> [TileKit.Site.Page] {
         pages
             .filter { page in
-                page.slug.hasPrefix("posts/")
+                page.slug.hasPrefix(postsDirectory + "/")
                     && page.document.frontMatter["date"] != nil
             }
             .sorted { first, second in
