@@ -108,6 +108,9 @@ public extension TileKit.Site {
         .td-main h2 { font-size: 1.5rem; margin-block: 2.5rem 0.75rem; }
         .td-main p { margin-block: 0 1.25rem; }
         .td-main img { max-width: 100%; height: auto; border-radius: var(--td-radius); }
+        .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
+        .td-main th, .td-main td { padding: 0.5rem 0.75rem; border: 1px solid var(--td-border); }
+        .td-main thead th { background: var(--td-surface); font-weight: 700; }
         .td-main .td-hero { display: block; width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
         .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.5rem; }
         .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
@@ -196,6 +199,9 @@ public extension TileKit.Site {
         .td-main code { border-radius: 0.4rem; background: var(--td-elevated); padding: 0.12rem 0.28rem; font-size: 0.92em; }
         .td-main pre { overflow: auto; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-elevated); padding: 1rem; box-shadow: var(--td-shadow); }
         .td-main img { display: block; max-width: 100%; height: auto; border-radius: var(--td-radius); box-shadow: var(--td-shadow); }
+        .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
+        .td-main th, .td-main td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--td-border); }
+        .td-main thead th { color: var(--td-ink); font-weight: 700; border-bottom-width: 2px; }
         .td-main .td-hero { width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
         .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.75rem; }
         .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
