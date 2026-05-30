@@ -171,3 +171,35 @@ extension SiteGeneratorTests {
         #expect(home.contains(#"<main class="td-main"><h1>Welcome</h1>"#))
     }
 }
+
+extension SiteGeneratorTests {
+    @Test("a configured theme is composed into the shared stylesheet, written even without tiles")
+    func themedStylesheet() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "templates/page.html": TileKit.Site.Layout.topNav.template,
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                templatePath: "templates/page.html",
+                outputRootPath: "dist",
+                configuration: .init(title: "My Site", theme: .standard),
+            ),
+        )
+
+        let css = try #require(fileSystem.files["dist/styles.css"])
+        #expect(css.contains("--td-bg:"))
+        #expect(css.contains(#"[data-theme="dark"]"#))
+        #expect(css.contains("@layer reset, theme, tile-override;"))
+        #expect(css.contains("@layer theme {"))
+        #expect(css.contains(".td-header {"))
+        // The theme always produces a stylesheet, so the page links it even with no tiles.
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<link rel="stylesheet" href="/styles.css">"#))
+    }
+}
