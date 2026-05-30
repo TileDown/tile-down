@@ -199,6 +199,7 @@ public extension TileKit.Site {
             result["site"] = siteValue(
                 configuration,
                 stylesheetPath: stylesheetPath,
+                sections: sections(pages),
             )
             result["page"] = pageValue(page)
             result["pages"] = .list(pages.map(pageContext))
@@ -244,14 +245,53 @@ private extension TileKit.Site.Generator {
     func siteValue(
         _ configuration: TileKit.Site.Configuration,
         stylesheetPath: String,
+        sections: [TileKit.Site.Page],
     ) -> TileKit.Template.Value {
         .object(
             [
                 "title": .string(configuration.title),
                 "baseURL": .string(configuration.baseURL),
                 "stylesheetPath": .string(stylesheetPath),
+                "sections": .list(sections.map(pageContext)),
             ],
         )
+    }
+
+    /// The site's top-level sections for navigation: the depth-1 pages (each
+    /// section's `index.md` landing page), ordered by a front-matter `weight`
+    /// (pages without a weight sort last, then alphabetically by title or slug).
+    /// The root page (empty slug, the home page) is not a section.
+    func sections(
+        _ pages: [TileKit.Site.Page],
+    ) -> [TileKit.Site.Page] {
+        pages
+            .filter { !$0.slug.isEmpty && !$0.slug.contains("/") }
+            .sorted { first, second in
+                let firstWeight = weight(first)
+                let secondWeight = weight(second)
+                if firstWeight != secondWeight {
+                    return firstWeight < secondWeight
+                }
+                let firstKey = sortKey(first)
+                let secondKey = sortKey(second)
+                if firstKey != secondKey {
+                    return firstKey < secondKey
+                }
+                // Slugs are unique, so this makes the order fully deterministic.
+                return first.slug < second.slug
+            }
+    }
+
+    func weight(
+        _ page: TileKit.Site.Page,
+    ) -> Int {
+        page.document.frontMatter["weight"].flatMap(Int.init) ?? Int.max
+    }
+
+    func sortKey(
+        _ page: TileKit.Site.Page,
+    ) -> String {
+        page.document.frontMatter["title"] ?? page.slug
     }
 
     func pageValue(
