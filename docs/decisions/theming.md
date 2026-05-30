@@ -153,6 +153,9 @@ entirely (the engine can strip or reject it), and the documented escape hatch is
 
 ## Evidence base
 
+The full cited research (three verified passes) is in
+[docs/research/theming-styling-api.md](../research/theming-styling-api.md).
+
 The decision rests on web-platform primary sources: the W3C CSS Cascading and
 Inheritance Level 5 spec, MDN and Chrome for Developers documentation on
 `@layer`, the W3C Design Tokens draft, Open Props (which confirms the two-tier
