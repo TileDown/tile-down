@@ -52,7 +52,7 @@ public extension TileKit.Site {
         <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
         <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
         </header>
-        <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}</main>
+        <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}{{#page.postList}}<ul class="td-posts">{{#site.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}</div></li>{{/site.posts}}</ul>{{/page.postList}}</main>
         <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">TileKit</a></span></div></footer>
         </body>
         </html>
@@ -74,7 +74,7 @@ public extension TileKit.Site {
         <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
         </aside>
         <div class="td-content">
-        <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}</main>
+        <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}{{#page.postList}}<ul class="td-posts">{{#site.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}</div></li>{{/site.posts}}</ul>{{/page.postList}}</main>
         <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">TileKit</a></span></div></footer>
         </div>
         </body>

@@ -106,6 +106,16 @@ public extension TileKit.Site {
         .td-main h2 { font-size: 1.5rem; margin-block: 2.5rem 0.75rem; }
         .td-main p { margin-block: 0 1.25rem; }
         .td-main img { max-width: 100%; height: auto; border-radius: var(--td-radius); }
+        .td-main .td-hero { display: block; width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
+        .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+        .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
+        .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
+        .td-post-body { min-width: 0; }
+        .td-post-title { margin: 0 0 0.25rem; font-size: 1.2rem; }
+        .td-post-title a { color: var(--td-ink); text-decoration: none; }
+        .td-post-date { display: block; color: var(--td-muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .td-post-desc { margin: 0; color: var(--td-muted); }
+        @media (max-width: 36rem) { .td-post-card { grid-template-columns: 1fr; } .td-post-thumb img { width: 100%; height: auto; } }
         .td-footer { border-top: 1px solid var(--td-border); padding-block: 2rem; color: var(--td-muted); }
         .td-footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1rem; max-width: var(--td-measure); margin-inline: auto; padding-inline: var(--td-space); }
         .td-footer-nav, .td-socials { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -182,6 +192,16 @@ public extension TileKit.Site {
         .td-main code { border-radius: 0.4rem; background: var(--td-elevated); padding: 0.12rem 0.28rem; font-size: 0.92em; }
         .td-main pre { overflow: auto; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-elevated); padding: 1rem; box-shadow: var(--td-shadow); }
         .td-main img { display: block; max-width: 100%; height: auto; border-radius: var(--td-radius); box-shadow: var(--td-shadow); }
+        .td-main .td-hero { width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
+        .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+        .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
+        .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }
+        .td-post-body { min-width: 0; }
+        .td-post-title { margin: 0 0 0.25rem; font-size: 1.25rem; }
+        .td-post-title a { color: var(--td-ink); text-decoration: none; }
+        .td-post-date { display: block; color: var(--td-muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .td-post-desc { margin: 0; color: var(--td-muted); }
+        @media (max-width: 36rem) { .td-post-card { grid-template-columns: 1fr; } .td-post-thumb img { width: 100%; height: auto; } }
         .td-footer { border-top: 1px solid var(--td-border); background: var(--td-surface); color: var(--td-muted); }
         .td-footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1rem; max-width: var(--td-measure); margin-inline: auto; padding: 1.5rem var(--td-space); }
         .td-footer-nav, .td-socials { display: flex; flex-wrap: wrap; gap: 0.85rem; }
