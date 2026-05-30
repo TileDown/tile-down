@@ -196,18 +196,18 @@ Implemented as of the current design revision:
 |---|---|
 | Package shape | one Swift package manifest under `Packages/` with focused targets and matching test targets |
 | Facade | `TileKit` re-exports the domain targets and current local filesystem adapter |
-| CLI | `tiledown` builds one page from a custom template, or a content directory from either a custom template or the built-in top-nav layout and standard theme |
+| CLI | `tiledown` builds one page from a custom template, or a content directory from either a custom template or a built-in layout selected by `tiledown.yml` |
 | Source | front matter parsing and index-content discovery |
 | Markdown | CommonMark rendering via swift-markdown (`TileKit.Markdown.CommonMarkRenderer`), raw HTML escaped, not passed through |
 | Templates | Mustache-style rendering, nested values, raw values, list sections, and built-in layout template selection through `TileKit.Site.TemplateSource` |
 | Content | typed records, field values, filters, sorting, offset, limit, and query runner |
 | Tiles | source-ordered directive parser, typed tile values, `service-form` request validation, renderer protocol, render output, registry, and unknown fallback |
-| Site generation | renders Markdown and tile blocks in source order through injected parser and registry values; content builds derive `site.sections`, write a shared stylesheet, and can use built-in layouts |
+| Site generation | renders Markdown and tile blocks in source order through injected parser and registry values; content builds derive `site.sections`, write a shared stylesheet, can use built-in layouts, and can write RSS from `posts/` pages |
 | Services | provider integration manifest models, service operation contracts, capability inventory, validation, and auth exposure models |
 | Service forms | request-to-contract binding, generated HTML/CSS/browser-JS renderer for `remote` and `proxy` modes, and a `TileKit.ServiceForm.TileRenderer` adapter registered in the tile registry |
 | Service resolution | `TileKit.Service.ContractResolving` seam with an in-memory resolver and a file-backed `TileKit.Service.LocalFileContractResolver` |
 | Service bindings | `TileKit.Service.Binding` site config (source, mode, proxy route, availability, declarative auth binding) separate from contracts |
-| Theme | `TileKit.Site.Theme.standard` provides default theme properties, reset, and base CSS for built-in layouts |
+| Theme | `TileKit.Site.Theme.standard` and `TileKit.Site.Theme.system` provide theme properties, reset, and base CSS for built-in layouts |
 | Filesystem | local filesystem adapter isolated in `TileSiteImpl` |
 
 Not implemented yet:
@@ -215,8 +215,8 @@ Not implemented yet:
 | Area | Missing piece |
 |---|---|
 | Canonical source | full document round-trip is implemented (tiles + prose normalized to one canonical form); a typed in-memory prose tree for the future editor and richer JSON is not built (prose round-trips through canonical strings, not stored AST nodes) |
-| Output | HTML and JSON both render through the `TileKit.Output.Rendering` seam (`TileKit.Output.HTMLRenderer` and `JSONRenderer`); RSS or feed renderers are not done |
-| Site config | config file loading and output config (`TileKit.Site.Configuration`, `TemplateSource`, and service binding values exist as direct values; no file format yet) |
+| Output | HTML and JSON both render through the `TileKit.Output.Rendering` seam (`TileKit.Output.HTMLRenderer` and `JSONRenderer`); RSS exists for content builds, not yet as a general output renderer |
+| Site config | flat `tiledown.yml` loading exists for site title, base URL, layout, theme, RSS, and footer social links; service binding config is not loaded from the project file yet |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |

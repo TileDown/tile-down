@@ -14,17 +14,18 @@ Do not adopt it for a real site.
 
 What works today is a real but partial slice. The engine builds, and the CLI can
 build a single Markdown file through a Mustache-style template, or build a folder
-of `index.md` files into a styled site using the built-in top-nav layout and
-standard theme. It can also emit derived JSON of the parsed tile tree (`tiledown
-json`) and rewrite a document to its canonical form (`tiledown fmt`). Markdown is
-real CommonMark via [swift-markdown](https://github.com/apple/swift-markdown).
-Tile CSS is wrapped in CSS cascade layers and deduplicated into one shared site
-stylesheet, and site-wide configuration (title, base URL) plus the shared
-stylesheet path reach templates as `site.*`.
+of `index.md` files into a styled site using a built-in layout and theme selected
+from `tiledown.yml`. It can also emit derived JSON of the parsed tile tree
+(`tiledown json`) and rewrite a document to its canonical form (`tiledown fmt`).
+Markdown is real CommonMark via
+[swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
+CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
+configuration reaches templates as `site.*`, and configured content builds can
+write an RSS feed from pages under `posts/`.
 
 Still missing before it is a usable static site generator: project scaffolding
-(`tiledown init`), config-file loading, a dev server and watch mode, named tile
-types (`youtube-video`, `poll`, and the rest), and a full asset pipeline
+(`tiledown init`), a dev server and watch mode, named tile types (`youtube-video`,
+`poll`, and the rest), and a full asset pipeline
 (transforms, minification). The internals for typed tiles and a service-backed
 form exist and are tested, but only the service-form tile is wired in; the rest
 are not yet a usable authoring workflow.
@@ -70,6 +71,19 @@ written once for the whole site):
 swift run tiledown build-site content/ dist/
 ```
 
+Add `content/tiledown.yml` to select site settings:
+
+```yaml
+title: Minimal Site
+baseURL: https://example.com
+layout: top-nav
+theme: system
+rss: true
+rssPath: feed.xml
+social.github: https://github.com/TileDown/tile-down
+social.linkedin: https://www.linkedin.com/
+```
+
 Or pass a custom template explicitly:
 
 ```sh
@@ -88,6 +102,9 @@ swift run tiledown fmt --check source.md    # non-zero exit if not canonical
 That is the user-facing surface right now. Markdown is CommonMark (headings,
 paragraphs, emphasis, strong, inline and fenced code, links, images, lists, block
 quotes), with raw HTML escaped; templates are a Mustache-style subset.
+
+See [Examples/minimal-site](Examples/minimal-site) for a small site with home,
+about, contact, three posts, footer social links, the `system` theme, and RSS.
 
 ## Build and test
 
