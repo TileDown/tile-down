@@ -39,7 +39,8 @@ public extension TileKit.Output {
             _ document: Document,
         ) throws -> Artifact {
             var html: [String] = []
-            var css: [String] = []
+            var themed: [String] = []
+            var overriding: [String] = []
             var javascript: [String] = []
 
             for block in document.blocks {
@@ -49,7 +50,12 @@ public extension TileKit.Output {
                 case let .tile(tile):
                     let rendered = try tileRegistry.render(tile)
                     html.append(rendered.html)
-                    Self.appendUnique(rendered.css, to: &css)
+                    switch rendered.cssPosture {
+                    case .themed:
+                        Self.appendUnique(rendered.css, to: &themed)
+                    case .overriding:
+                        Self.appendUnique(rendered.css, to: &overriding)
+                    }
                     Self.appendNonEmpty(rendered.javascript, to: &javascript)
                 }
             }
@@ -58,29 +64,33 @@ public extension TileKit.Output {
                 contents: html.joined(separator: "\n"),
                 fileExtension: "html",
                 assets: .init(
-                    css: Self.layeredCSS(css),
+                    css: Self.layeredCSS(themed: themed, overriding: overriding),
                     javascript: javascript.joined(separator: "\n"),
                 ),
             )
         }
 
-        /// Wraps the deduplicated tile CSS in the `theme` cascade layer and declares
-        /// the canonical layer order. Returns an empty string when there is no CSS,
-        /// so a page without styled tiles emits no stray layer statement.
+        /// Wraps the deduplicated tile CSS in cascade layers under the canonical
+        /// order `reset, theme, tile-override`. Themed CSS goes in the `theme` layer,
+        /// rejecting CSS in the later `tile-override` layer. Returns an empty string
+        /// when there is no CSS, so a page without styled tiles emits no stray layer
+        /// statement.
         private static func layeredCSS(
-            _ fragments: [String],
+            themed: [String],
+            overriding: [String],
         ) -> String {
-            guard !fragments.isEmpty else {
+            guard !themed.isEmpty || !overriding.isEmpty else {
                 return ""
             }
 
-            let body = fragments.joined(separator: "\n")
-            return """
-            @layer reset, theme, tile-override;
-            @layer theme {
-            \(body)
+            var result = "@layer reset, theme, tile-override;"
+            if !themed.isEmpty {
+                result += "\n@layer theme {\n\(themed.joined(separator: "\n"))\n}"
             }
-            """
+            if !overriding.isEmpty {
+                result += "\n@layer tile-override {\n\(overriding.joined(separator: "\n"))\n}"
+            }
+            return result
         }
 
         private static func appendUnique(
