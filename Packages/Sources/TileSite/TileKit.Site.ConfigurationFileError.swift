@@ -6,6 +6,7 @@ public extension TileKit.Site {
         case unknownKey(String)
         case unknownLayout(String)
         case unknownTheme(String)
+        case unknownAppearance(String)
         case invalidBoolean(String)
         case invalidPath(String)
 
@@ -19,6 +20,8 @@ public extension TileKit.Site {
                 "Unknown site layout `\(layout)`."
             case let .unknownTheme(theme):
                 "Unknown site theme `\(theme)`."
+            case let .unknownAppearance(appearance):
+                "Unknown site appearance `\(appearance)`. Expected toggle, auto, light, or dark."
             case let .invalidBoolean(value):
                 "Invalid boolean value `\(value)`. Expected `true` or `false`."
             case let .invalidPath(path):
