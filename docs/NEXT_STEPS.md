@@ -150,9 +150,19 @@ prose + tiles into a fixed-point canonical document (`TileSiteTests`,
 `TileMarkdownTests`). Custom ordered-list start is normalized to 1 (swift-markdown
 #76), an accepted profile property documented in `docs/markdown-profile.md`.
 
+The `tiledown fmt` command now exposes this canonical serialization.
+`TileKit.Site.DocumentFormatter` splits the raw front matter off (preserved
+verbatim through the new `TileKit.Source.FrontMatterSplitting` seam, since front
+matter has no canonical serializer yet), canonicalizes the body through
+`DocumentSerializer`, and recomposes; `isCanonical(_:)` is `format(x) == x`, the
+fixed-point law made observable. The CLI prints to stdout by default, `--write`
+rewrites in place, and `--check` is a CI gate (clean non-zero exit when a file is
+not canonical). Covered by `DocumentFormatterTests` (fixed point, front matter
+preserved verbatim, body canonicalized, no-front-matter, malformed front matter
+throws) and `FrontMatterParserTests` (the raw split).
+
 Still open: definition-driven canonical property order (waits on tile definitions
-with schema), and exposing canonical serialization through a `tiledown fmt`
-command.
+with schema).
 
 ### 5. Add asset declarations and deduplication
 

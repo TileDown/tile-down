@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `tiledown fmt` command: rewrites a Tiledown Markdown document to its canonical
+  form, the CLI consumer of the serializer's fixed-point law. `TileKit.Site.DocumentFormatter`
+  splits the raw front matter off (preserved verbatim, since front matter has no
+  canonical serializer yet), canonicalizes the body through
+  `TileKit.Site.DocumentSerializer`, and recomposes; `isCanonical(_:)` is exactly
+  `format(x) == x`. A new `TileKit.Source.FrontMatterSplitting` seam returns the raw
+  split (`TileKit.Source.Split`), and `FrontMatterParser.parse` now decodes that same
+  split, so there is one definition of where front matter ends. The command prints the
+  canonical form to stdout by default, `--write` rewrites in place, and `--check` exits
+  non-zero (cleanly) when a file is not already canonical, for use as a CI gate.
+
 - Derived JSON output: a new `TileOutput` target carrying the output renderer seam
   (DESIGN G7, § 8.3). `TileKit.Output.Rendering` is the renderer Strategy (a
   `formatID` plus `render(_:) -> Artifact`), `TileKit.Output.Registry` is the
