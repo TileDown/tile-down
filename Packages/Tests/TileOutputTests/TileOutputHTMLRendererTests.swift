@@ -28,6 +28,15 @@ struct TileOutputHTMLRendererTests {
         }
     }
 
+    /// A second styled tile with distinct CSS, to prove dedup keys on content.
+    private struct OtherTile: TileKit.Tile.Rendering {
+        func render(
+            _ tile: TileKit.Tile.Instance,
+        ) -> TileKit.Tile.Rendered {
+            .init(html: "<b>\(tile.typeID)</b>", css: ".y {}")
+        }
+    }
+
     /// A tile renderer with no assets, to exercise the empty-skip path.
     private struct PlainTile: TileKit.Tile.Rendering {
         func render(
@@ -81,8 +90,28 @@ struct TileOutputHTMLRendererTests {
         )
 
         let artifact = try renderer(tileRegistry: registry).render(document)
-        #expect(artifact.assets.css == ".x {}\n.x {}")
+        // The two tiles' identical CSS is deduplicated to one rule inside the theme
+        // layer; JavaScript is not deduplicated (it can be per instance).
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer theme {\n.x {}\n}")
         #expect(artifact.assets.javascript == "go()\ngo()")
+    }
+
+    @Test("keeps distinct tile css while collapsing duplicates")
+    func dedupKeepsDistinctCSS() throws {
+        let registry = TileKit.Tile.Registry(
+            renderers: ["box": AssetTile(), "other": OtherTile()],
+        )
+        let document = TileKit.Output.Document(
+            blocks: [
+                .tile(.init(typeID: "box", properties: [])),
+                .tile(.init(typeID: "other", properties: [])),
+                .tile(.init(typeID: "box", properties: [])),
+            ],
+        )
+
+        let artifact = try renderer(tileRegistry: registry).render(document)
+        // ".x {}" appears once (deduped), ".y {}" kept, both inside the theme layer.
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer theme {\n.x {}\n.y {}\n}")
     }
 
     @Test("skips empty assets so blank fragments are not joined in")
@@ -126,6 +155,6 @@ struct TileOutputHTMLRendererTests {
             format: TileKit.Output.HTMLRenderer.formatID,
         )
         #expect(artifact.contents == "<div>box</div>")
-        #expect(artifact.assets.css == ".x {}")
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer theme {\n.x {}\n}")
     }
 }

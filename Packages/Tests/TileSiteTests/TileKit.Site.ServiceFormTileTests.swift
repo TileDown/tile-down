@@ -32,8 +32,9 @@ struct SiteGeneratorServiceFormTests {
         #expect(output.contains(#"data-td-tile-id="price-calculator""#))
         #expect(output.contains(#"data-td-service="calculator""#))
         #expect(output.contains(#"data-td-operation="positive-decimal-calculation""#))
-        // CSS exposed through page.assets.css.
-        #expect(output.contains("<style>.td-service-form"))
+        // CSS exposed through page.assets.css, wrapped in the theme cascade layer.
+        #expect(output.contains("<style>@layer reset, theme, tile-override;"))
+        #expect(output.contains(".td-service-form"))
         // Browser JavaScript exposed through page.assets.javascript.
         #expect(output.contains("fetch(config.endpoint"))
         // No server credential leaks into browser output.
