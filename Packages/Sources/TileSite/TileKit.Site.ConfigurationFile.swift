@@ -1,0 +1,231 @@
+import Foundation
+import TileCore
+
+public extension TileKit.Site {
+    /// The small project configuration file consumed by `build-site`.
+    ///
+    /// This is deliberately a flat YAML subset for now: `key: value`, blank lines,
+    /// and comment lines. The site generator already accepts strongly typed
+    /// values; this type only decodes the project file into those values plus the
+    /// selected built-in layout.
+    struct ConfigurationFile: Equatable, Sendable {
+        public var configuration: Configuration
+        public var layout: Layout
+
+        public init(
+            configuration: Configuration = .init(),
+            layout: Layout = .topNav,
+        ) {
+            self.configuration = configuration
+            self.layout = layout
+        }
+
+        public static func parse(
+            _ source: String,
+        ) throws -> ConfigurationFile {
+            var result = ConfigurationFile()
+            var feed = result.configuration.feed
+            var feedEnabled: Bool?
+
+            for item in try entries(in: source) {
+                if try applySocialLink(item, to: &result) {
+                    continue
+                }
+                if try applyFeedSetting(
+                    item,
+                    feed: &feed,
+                    feedEnabled: &feedEnabled,
+                ) {
+                    continue
+                }
+                switch item.key {
+                case "title":
+                    result.configuration.title = item.value
+                case "baseURL":
+                    result.configuration.baseURL = item.value
+                case "layout":
+                    result.layout = try layout(named: item.value)
+                case "theme":
+                    result.configuration.theme = try theme(named: item.value)
+                default:
+                    throw ConfigurationFileError.unknownKey(item.key)
+                }
+            }
+
+            result.configuration.feed = resolvedFeed(
+                feed,
+                feedEnabled: feedEnabled,
+            )
+            return result
+        }
+
+        private static func applySocialLink(
+            _ item: (key: String, value: String),
+            to result: inout ConfigurationFile,
+        ) throws -> Bool {
+            guard item.key.hasPrefix("social.") else {
+                return false
+            }
+            let label = try socialLabel(for: item.key)
+            result.configuration.socialLinks.append(
+                .init(
+                    label: label,
+                    url: item.value,
+                ),
+            )
+            return true
+        }
+
+        private static func applyFeedSetting(
+            _ item: (key: String, value: String),
+            feed: inout Feed?,
+            feedEnabled: inout Bool?,
+        ) throws -> Bool {
+            switch item.key {
+            case "rss":
+                feedEnabled = try boolean(item.value)
+            case "rssPath":
+                feed = updatingFeed(feed, path: item.value)
+            case "rssTitle":
+                feed = updatingFeed(feed, title: item.value)
+            case "rssDescription":
+                feed = updatingFeed(feed, description: item.value)
+            default:
+                return false
+            }
+            return true
+        }
+
+        private static func resolvedFeed(
+            _ feed: Feed?,
+            feedEnabled: Bool?,
+        ) -> Feed? {
+            switch feedEnabled {
+            case .some(true):
+                feed ?? .init()
+            case .some(false):
+                nil
+            case nil:
+                feed
+            }
+        }
+
+        private static func entries(
+            in source: String,
+        ) throws -> [(key: String, value: String)] {
+            try source
+                .replacingOccurrences(of: "\r\n", with: "\n")
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .enumerated()
+                .compactMap { offset, line in
+                    try entry(
+                        in: String(line),
+                        lineNumber: offset + 1,
+                    )
+                }
+        }
+
+        private static func entry(
+            in line: String,
+            lineNumber: Int,
+        ) throws -> (key: String, value: String)? {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty, !trimmed.hasPrefix("#") else {
+                return nil
+            }
+
+            guard let separatorIndex = line.firstIndex(of: ":") else {
+                throw ConfigurationFileError.invalidLine(lineNumber)
+            }
+
+            let key = String(line[..<separatorIndex])
+                .trimmingCharacters(in: .whitespaces)
+            let value = String(line[line.index(after: separatorIndex)...])
+                .trimmingCharacters(in: .whitespaces)
+
+            guard !key.isEmpty else {
+                throw ConfigurationFileError.invalidLine(lineNumber)
+            }
+
+            return (key, value)
+        }
+
+        private static func layout(
+            named name: String,
+        ) throws -> Layout {
+            switch name {
+            case "top-nav", "topNav":
+                .topNav
+            case "left-sidebar", "leftSidebar":
+                .leftSidebar
+            default:
+                throw ConfigurationFileError.unknownLayout(name)
+            }
+        }
+
+        private static func theme(
+            named name: String,
+        ) throws -> Theme? {
+            switch name {
+            case "standard":
+                .standard
+            case "system":
+                .system
+            case "none", "unstyled":
+                nil
+            default:
+                throw ConfigurationFileError.unknownTheme(name)
+            }
+        }
+
+        private static func boolean(
+            _ value: String,
+        ) throws -> Bool {
+            switch value {
+            case "true", "yes":
+                true
+            case "false", "no":
+                false
+            default:
+                throw ConfigurationFileError.invalidBoolean(value)
+            }
+        }
+
+        private static func updatingFeed(
+            _ existing: Feed?,
+            path: String? = nil,
+            title: String? = nil,
+            description: String? = nil,
+        ) -> Feed {
+            var result = existing ?? .init()
+            if let path {
+                result.path = path
+            }
+            if let title {
+                result.title = title
+            }
+            if let description {
+                result.description = description
+            }
+            return result
+        }
+
+        private static func socialLabel(
+            for key: String,
+        ) throws -> String {
+            let value = String(key.dropFirst("social.".count))
+            guard !value.isEmpty else {
+                throw ConfigurationFileError.unknownKey(key)
+            }
+
+            return switch value {
+            case "github":
+                "GitHub"
+            case "linkedin":
+                "LinkedIn"
+            case let value:
+                value
+            }
+        }
+    }
+}

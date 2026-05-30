@@ -18,6 +18,40 @@ struct TiledownCLITests {
         try assertBuiltInSiteOutput(at: fixture.output)
     }
 
+    @Test("build-site reads tiledown.yml for layout theme footer links and RSS")
+    func buildSiteWithConfigurationFile() throws {
+        let fixture = try makeContentFixture()
+        defer {
+            try? FileManager.default.removeItem(at: fixture.root)
+        }
+        try writeConfiguration(to: fixture.content)
+
+        let result = try runTiledown(
+            arguments: ["build-site", fixture.content.path, fixture.output.path],
+        )
+
+        #expect(result.status == 0, "stderr: \(result.stderr)")
+        let home = try String(
+            contentsOf: fixture.output.appendingPathComponent("index.html"),
+            encoding: .utf8,
+        )
+        let css = try String(
+            contentsOf: fixture.output.appendingPathComponent("styles.css"),
+            encoding: .utf8,
+        )
+        let feed = try String(
+            contentsOf: fixture.output.appendingPathComponent("feed.xml"),
+            encoding: .utf8,
+        )
+
+        #expect(home.contains(#"<body class="td-layout-sidebar">"#))
+        #expect(home.contains(#"<a class="td-brand" href="https://example.com/">Configured Demo</a>"#))
+        #expect(home.contains(#"<a href="https://github.com/TileDown/tile-down">GitHub</a>"#))
+        #expect(home.contains(#"<a href="https://example.com/feed.xml">RSS</a>"#))
+        #expect(css.contains("--td-bg: #f5f5f7;"))
+        #expect(feed.contains("<title>Configured Feed</title>"))
+    }
+
     private func makeContentFixture() throws -> ContentFixture {
         let fileManager = FileManager.default
         let root = fileManager.temporaryDirectory
@@ -65,6 +99,25 @@ struct TiledownCLITests {
         # Blog
         """.write(
             to: blog.appendingPathComponent("index.md"),
+            atomically: true,
+            encoding: .utf8,
+        )
+    }
+
+    private func writeConfiguration(
+        to content: URL,
+    ) throws {
+        try """
+        title: Configured Demo
+        baseURL: https://example.com
+        layout: left-sidebar
+        theme: system
+        rss: true
+        rssTitle: Configured Feed
+        rssDescription: Posts from the configured demo.
+        social.github: https://github.com/TileDown/tile-down
+        """.write(
+            to: content.appendingPathComponent("tiledown.yml"),
             atomically: true,
             encoding: .utf8,
         )

@@ -112,10 +112,13 @@ private struct Command {
         }
 
         let generator = makeGenerator()
+        let configurationFile = try loadConfigurationFile(
+            contentRootPath: arguments[1],
+        )
         let template: TileKit.Site.TemplateSource
         let outputRootPath: String
         if arguments.count == 3 {
-            template = .layout(.topNav)
+            template = .layout(configurationFile.layout)
             outputRootPath = arguments[2]
         } else {
             template = .file(path: arguments[2])
@@ -127,8 +130,26 @@ private struct Command {
                 contentRootPath: arguments[1],
                 template: template,
                 outputRootPath: outputRootPath,
+                configuration: configurationFile.configuration,
             ),
         )
+    }
+
+    private func loadConfigurationFile(
+        contentRootPath: String,
+    ) throws -> TileKit.Site.ConfigurationFile {
+        let fileManager = FileManager.default
+        let root = URL(fileURLWithPath: contentRootPath)
+        for fileName in ["tiledown.yml", "tiledown.yaml"] {
+            let url = root.appendingPathComponent(fileName)
+            guard fileManager.fileExists(atPath: url.path) else {
+                continue
+            }
+            return try TileKit.Site.ConfigurationFile.parse(
+                String(contentsOf: url, encoding: .utf8),
+            )
+        }
+        return .init()
     }
 
     private func json() throws {
@@ -223,6 +244,8 @@ private enum CommandError: Error, CustomStringConvertible {
               tiledown build-site <content-dir> <template.html> <output-dir>
               tiledown json <source.md> <output.json>
               tiledown fmt [--write | --check] <source.md>
+
+            build-site reads optional tiledown.yml settings from <content-dir>.
             """
         }
     }

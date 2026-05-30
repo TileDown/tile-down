@@ -45,14 +45,15 @@ public extension TileKit.Site {
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
+        {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         </head>
         <body>
         <header class="td-header">
-        <a class="td-brand" href="/">{{ site.title }}</a>
+        <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
         <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
         </header>
         <main class="td-main">{{{ page.contents.html }}}</main>
-        <footer class="td-footer"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav></footer>
+        <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">TileKit</a></span></div></footer>
         </body>
         </html>
         """
@@ -65,15 +66,16 @@ public extension TileKit.Site {
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
+        {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         </head>
         <body class="td-layout-sidebar">
         <aside class="td-sidebar">
-        <a class="td-brand" href="/">{{ site.title }}</a>
+        <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
         <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
         </aside>
         <div class="td-content">
         <main class="td-main">{{{ page.contents.html }}}</main>
-        <footer class="td-footer"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav></footer>
+        <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">TileKit</a></span></div></footer>
         </div>
         </body>
         </html>
