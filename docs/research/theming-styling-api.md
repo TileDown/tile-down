@@ -5,6 +5,11 @@ adversarially-verified research passes (web, specs, design systems, peer-reviewe
 literature, books, interviews) on 2026-05-30. Each claim below survived a 3-vote
 verification; sources are primary unless marked otherwise.
 
+Terminology: this document uses the industry term **design tokens** when quoting
+sources. Tiledown's own term for the same thing (named CSS custom properties) is
+**theme properties**, to avoid overloading "token". See
+[docs/decisions/theming.md](../decisions/theming.md).
+
 ## Pass 1: does cascade layers plus design tokens fit best practice?
 
 **Verdict: yes, it is the exact use case CSS Cascading Level 5 added `@layer` for.**

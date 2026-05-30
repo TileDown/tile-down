@@ -179,8 +179,8 @@ page via `site.stylesheetPath`, per [docs/decisions/theming.md](decisions/themin
 The tile styling posture is now done too: `TileKit.Tile.Rendered` carries a
 `TileKit.Tile.StylePosture` (`themed` default, or `overriding`), and the renderer
 routes overriding CSS into the `tile-override` layer. Still to do below: an explicit
-per-tile dedup key (CSS is currently deduped by content), the site theme plus design
-tokens, and JavaScript deduplication.
+per-tile dedup key (CSS is currently deduped by content), the site theme plus its
+theme properties (named CSS custom properties), and JavaScript deduplication.
 
 Goal: move from raw page-local CSS and JavaScript strings toward explicit asset
 declarations.
