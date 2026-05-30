@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- HTML rendering now flows through the output renderer seam: `TileKit.Output.HTMLRenderer`
+  is the first output renderer (beside `TileKit.Output.JSONRenderer`), projecting a
+  parsed document's block tree to body HTML and collecting page-local CSS and
+  JavaScript into the new `TileKit.Output.Artifact.assets` (`TileKit.Output.Assets`).
+  `TileKit.Site.Generator` no longer renders HTML inline; it parses the document,
+  delegates body rendering to an injected `TileKit.Output.Rendering`, and composes the
+  page template as before. HTML output is byte-identical to the previous inline path.
+
 - `tiledown fmt` command: rewrites a Tiledown Markdown document to its canonical
   form, the CLI consumer of the serializer's fixed-point law. `TileKit.Site.DocumentFormatter`
   splits the raw front matter off (preserved verbatim, since front matter has no
@@ -53,6 +61,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   directive parser. Round-trip law tests assert the research's semantic invariant:
   PutGet (`parse(serialize(parse(x))) == parse(x)`) and PutPut (canonical output is
   a fixed point). Byte identity is not a goal.
+
+### Changed
+
+- `TileKit.Markdown.Rendering` now refines `Sendable`, matching the other render and
+  parse seams, so output renderers that hold one can be `Sendable`.
 
 ### Fixed
 

@@ -214,7 +214,7 @@ Not implemented yet:
 | Area | Missing piece |
 |---|---|
 | Canonical source | full document round-trip is implemented (tiles + prose normalized to one canonical form); a typed in-memory prose tree for the future editor and richer JSON is not built (prose round-trips through canonical strings, not stored AST nodes) |
-| Output | HTML still renders on the site generator's own path; routing it through the new `TileKit.Output.Registry` as an HTML renderer, plus RSS or feed renderers, is not done (the registry and a JSON renderer exist) |
+| Output | HTML and JSON both render through the `TileKit.Output.Rendering` seam (`TileKit.Output.HTMLRenderer` and `JSONRenderer`); RSS or feed renderers are not done |
 | Site config | config file loading, output config, and template/theme config (service binding values exist; no file format yet) |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
@@ -512,14 +512,17 @@ secret reads, or tile logic.
 
 ### 8.3 Output Renderers
 
-Output renderers are injected:
+Output renderers are injected behind the `TileKit.Output.Rendering` seam:
 
-- HTML renderer first.
-- JSON renderer second.
-- RSS or feed renderer later.
+- HTML renderer (`TileKit.Output.HTMLRenderer`): implemented. It projects the block
+  tree to body HTML and collects assets; the generator injects it and wraps the body
+  in a page template. The generator no longer renders HTML inline.
+- JSON renderer (`TileKit.Output.JSONRenderer`): implemented, the derived view.
+- RSS or feed renderer: later.
 
-No renderer selection should be implemented as a hard-coded switch in the core
-pipeline.
+No renderer selection is a hard-coded switch in the core pipeline; the generator
+holds an injected `TileKit.Output.Rendering`, and the CLI registers the renderers in
+a `TileKit.Output.Registry`.
 
 ---
 
@@ -1200,12 +1203,12 @@ and properties), `TileKit.Markdown.CommonMarkFormatter` canonicalizes prose, and
 point; once canonical, the tile tree round-trips (PutGet/PutPut). Custom
 ordered-list start is normalized away (a documented profile property).
 
-JSON output now ships as a derived renderer (`TileKit.Output.JSONRenderer`, not a
-source format), and `tiledown fmt` exposes the canonical serialization through
-`TileKit.Site.DocumentFormatter`. Next major design milestones:
+HTML and JSON both render through the `TileKit.Output.Rendering` seam
+(`HTMLRenderer` and `JSONRenderer`), `tiledown fmt` exposes the canonical
+serialization through `TileKit.Site.DocumentFormatter`, and the generator no longer
+renders HTML inline. Next major design milestones:
 
-1. Route HTML through the `TileKit.Output.Registry` as an output renderer, then add
-   RSS or feed renderers.
+1. Add an RSS or feed renderer behind the same output seam.
 2. Add asset declarations and asset behavior registry.
 3. Add `init`, `serve`, `watch`, and optional proxy support.
 

@@ -155,11 +155,17 @@ private struct Command {
                 fileManager: .default,
             ),
             markdownParser: TileKit.Source.FrontMatterParser(),
-            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
             tileParser: TileKit.Tile.DirectiveParser(),
-            tileRegistry: makeTileRegistry(),
+            htmlRenderer: makeHTMLRenderer(),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+        )
+    }
+
+    private func makeHTMLRenderer() -> TileKit.Output.HTMLRenderer {
+        .init(
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
+            tileRegistry: makeTileRegistry(),
         )
     }
 
@@ -175,6 +181,7 @@ private struct Command {
 
     private func makeOutputRegistry() -> TileKit.Output.Registry {
         TileKit.Output.Registry()
+            .registering(makeHTMLRenderer())
             .registering(TileKit.Output.JSONRenderer())
     }
 

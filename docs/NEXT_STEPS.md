@@ -126,8 +126,12 @@ decoding the output and checking structure plus determinism, the same semantic
 posture the Markdown serializer takes, rather than a byte-golden that would be
 fragile across Foundation versions.
 
-Still open: route HTML through the output registry as an `Output.Rendering` (it
-still renders on the site generator's own path), and add RSS or feed renderers.
+HTML now renders through the same seam: `TileKit.Output.HTMLRenderer` is the first
+output renderer, `TileKit.Site.Generator` delegates body rendering to an injected
+`Output.Rendering` and composes the page template on top, and `Output.Artifact`
+gained `assets` (the new `TileKit.Output.Assets`) for the renderer's CSS and
+JavaScript. HTML output is byte-identical to the previous inline path. Still open:
+add an RSS or feed renderer behind the same seam.
 
 ### 4. Add canonical Markdown serialization (tile-block slice done)
 
