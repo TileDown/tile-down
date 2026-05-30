@@ -304,7 +304,14 @@ let targets: [Target] = {
         ],
         swiftSettings: swiftSettings,
     )
-    let frontDoorTargets = [tiledownCLITarget]
+    let tiledownCLITestsTarget = Target.testTarget(
+        name: "TiledownCLITests",
+        dependencies: [
+            "TiledownCLI",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let frontDoorTargets = [tiledownCLITarget, tiledownCLITestsTarget]
 
     return tileCoreTargets
         + tileContentTargets

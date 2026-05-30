@@ -25,7 +25,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
             ),
         )
@@ -54,7 +54,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
             ),
         )
@@ -80,7 +80,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
             ),
         )
@@ -103,7 +103,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .file(path: "templates/page.html"),
                 outputRootPath: "dist",
             ),
         )
@@ -119,7 +119,6 @@ extension SiteGeneratorTests {
             files: [
                 "content/index.md": "---\ntitle: Home\n---\n# Welcome",
                 "content/about/index.md": "---\ntitle: About\nweight: 1\n---\n# About us",
-                "templates/page.html": TileKit.Site.Layout.topNav.template,
             ],
         )
         let generator = makeGenerator(fileSystem: fileSystem)
@@ -127,7 +126,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .layout(.topNav),
                 outputRootPath: "dist",
                 configuration: .init(title: "My Site"),
             ),
@@ -149,7 +148,6 @@ extension SiteGeneratorTests {
             files: [
                 "content/index.md": "---\ntitle: Home\n---\n# Welcome",
                 "content/about/index.md": "---\ntitle: About\nweight: 1\n---\n# About us",
-                "templates/page.html": TileKit.Site.Layout.leftSidebar.template,
             ],
         )
         let generator = makeGenerator(fileSystem: fileSystem)
@@ -157,7 +155,7 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .layout(.leftSidebar),
                 outputRootPath: "dist",
                 configuration: .init(title: "My Site"),
             ),
@@ -173,12 +171,11 @@ extension SiteGeneratorTests {
 }
 
 extension SiteGeneratorTests {
-    @Test("a configured theme is composed into the shared stylesheet, written even without tiles")
+    @Test("the default theme is composed into the shared stylesheet, written even without tiles")
     func themedStylesheet() throws {
         let fileSystem = MemoryFileSystem(
             files: [
                 "content/index.md": "---\ntitle: Home\n---\n# Home",
-                "templates/page.html": TileKit.Site.Layout.topNav.template,
             ],
         )
         let generator = makeGenerator(fileSystem: fileSystem)
@@ -186,9 +183,9 @@ extension SiteGeneratorTests {
         _ = try generator.buildContent(
             .init(
                 contentRootPath: "content",
-                templatePath: "templates/page.html",
+                template: .layout(.topNav),
                 outputRootPath: "dist",
-                configuration: .init(title: "My Site", theme: .standard),
+                configuration: .init(title: "My Site"),
             ),
         )
 

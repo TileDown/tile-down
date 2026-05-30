@@ -9,14 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CLI site builds now work without a hand-written template:
+  `tiledown build-site <content-dir> <output-dir>` uses the built-in top-nav
+  layout and the standard theme by default, producing a styled, navigable site
+  from content alone. The explicit custom-template form remains available as
+  `tiledown build-site <content-dir> <template.html> <output-dir>`.
+  `TileKit.Site.TemplateSource` models this choice as `.layout(Layout)` or
+  `.file(path:)`, replacing raw template paths on `ContentBuildRequest`.
+  `Configuration.theme` now defaults to `.standard`; pass `theme: nil` for an
+  unstyled build where tiles still carry their own CSS.
+
 - Built-in theme: `TileKit.Site.Theme.standard` is the first built-in theme, a warm,
   readable design with a centered measure. It defines its semantic theme properties
   (`--td-*`) twice, a light set on `:root` and a dark set under `prefers-color-scheme:
   dark` and `[data-theme="dark"]`, so light and dark are a mode of the theme rather than
   separate themes, plus reset and base styles for the layout regions. A theme is
-  orthogonal to a layout: any layout wears any theme. Set it via `Configuration.theme`
-  (opt-in); the generator composes the theme's properties, reset, and base into the
-  shared stylesheet's cascade layers, so a themed site always emits a `styles.css`. See
+  orthogonal to a layout: any layout wears any theme. It is the default site
+  theme; pass `Configuration.theme: nil` for an unstyled build. The generator
+  composes the theme's properties, reset, and base into the shared stylesheet's
+  cascade layers, so a themed site always emits a `styles.css`. See
   [docs/decisions/theming.md](docs/decisions/theming.md) and
   [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
 
@@ -27,8 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   main content, and a footer, and links the shared stylesheet. A layout is a
   template, not Swift that emits HTML; all layouts use the same data and differ only
   in how they arrange the regions. The closed enum of cases is the selection itself
-  (the engine ships a curated few, not an open extension point). Wiring layout
-  selection into the CLI is a follow-up. See
+  (the engine ships a curated few, not an open extension point), and
+  `TemplateSource.layout(_:)` wires that selection into content builds. See
   [docs/decisions/site-structure-navigation.md](docs/decisions/site-structure-navigation.md).
 
 - Site navigation: templates can build a menu from `site.sections`, the site's top-level
