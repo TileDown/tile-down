@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Slug override: a non-empty `slug` value in a page's front matter overrides the
+  folder-derived slug, deciding the output path the page publishes under.
+  Surrounding slashes are trimmed, so `slug: /custom/` and `slug: custom` agree,
+  and two pages that resolve to the same slug raise a typed build error rather
+  than silently clobbering each other's output. (#44)
+
 - GFM tables: pipe tables render to a real `<table>` with `<thead>`/`<tbody>`
   and per-column alignment from the `:--`/`--:`/`:-:` markers (emitted as inline
   `text-align`, so alignment works without theme CSS). Cells render inline

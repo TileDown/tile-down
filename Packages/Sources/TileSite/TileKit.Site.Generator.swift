@@ -123,18 +123,15 @@ private extension TileKit.Site.Generator {
         let locations = contentDiscovery.discover(
             relativePaths: relativePaths,
         )
-        return try locations
+        let pages = try locations
             .map { location in
-                try loadPage(
+                try loadContentPage(
                     sourcePath: join(
                         request.contentRootPath,
                         location.sourceRelativePath,
                     ),
-                    outputPath: outputPath(
-                        outputRootPath: request.outputRootPath,
-                        slug: location.slug,
-                    ),
-                    slug: location.slug,
+                    folderSlug: location.slug,
+                    outputRootPath: request.outputRootPath,
                 )
             }
             // Drafts are excluded from the whole build, no page, no listing, no
@@ -143,6 +140,8 @@ private extension TileKit.Site.Generator {
             .filter { page in
                 request.includeDrafts || !isDraft(page)
             }
+        try assertUniqueSlugs(pages)
+        return pages
     }
 
     /// Whether a page is a draft, from a truthy `draft` front-matter value.
@@ -272,13 +271,58 @@ private extension TileKit.Site.Generator {
         return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
     }
 
+    /// Loads a single page at a fixed slug and output path, for the single-file
+    /// `build`. Content builds go through `loadContentPage`, which can override the
+    /// slug from front matter.
     private func loadPage(
         sourcePath: String,
         outputPath: String,
         slug: String,
     ) throws -> TileKit.Site.Page {
-        let source = try fileSystem.readTextFile(at: sourcePath)
-        let document = try markdownParser.parse(source)
+        let document = try markdownParser.parse(
+            fileSystem.readTextFile(at: sourcePath),
+        )
+        return try makePage(
+            sourcePath: sourcePath,
+            outputPath: outputPath,
+            slug: slug,
+            document: document,
+        )
+    }
+
+    /// Loads a content page, letting a non-empty `slug` front-matter value
+    /// override the folder-derived slug and the output path it publishes under.
+    private func loadContentPage(
+        sourcePath: String,
+        folderSlug: String,
+        outputRootPath: String,
+    ) throws -> TileKit.Site.Page {
+        let document = try markdownParser.parse(
+            fileSystem.readTextFile(at: sourcePath),
+        )
+        let slug = effectiveSlug(
+            folderSlug: folderSlug,
+            frontMatter: document.frontMatter,
+        )
+        return try makePage(
+            sourcePath: sourcePath,
+            outputPath: outputPath(
+                outputRootPath: outputRootPath,
+                slug: slug,
+            ),
+            slug: slug,
+            document: document,
+        )
+    }
+
+    /// Parses tiles and renders a page from an already-parsed document: the shared
+    /// tail of `loadPage` and `loadContentPage`.
+    private func makePage(
+        sourcePath: String,
+        outputPath: String,
+        slug: String,
+        document: TileKit.Source.Document,
+    ) throws -> TileKit.Site.Page {
         let blocks = try tileParser.parseBlocks(document.body)
         let artifact = try htmlRenderer.render(
             .init(
