@@ -134,6 +134,20 @@ struct TileOutputHTMLRendererTests {
         #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer tile-override {\n.z {}\n}")
     }
 
+    @Test("identical overriding css is deduplicated within the tile-override layer")
+    func overrideDedup() throws {
+        let registry = TileKit.Tile.Registry(renderers: ["custom": OverrideTile()])
+        let document = TileKit.Output.Document(
+            blocks: [
+                .tile(.init(typeID: "custom", properties: [])),
+                .tile(.init(typeID: "custom", properties: [])),
+            ],
+        )
+
+        let artifact = try renderer(tileRegistry: registry).render(document)
+        #expect(artifact.assets.css == "@layer reset, theme, tile-override;\n@layer tile-override {\n.z {}\n}")
+    }
+
     @Test("themed and overriding css go to their own layers in order")
     func themedAndOverrideLayers() throws {
         let registry = TileKit.Tile.Registry(
