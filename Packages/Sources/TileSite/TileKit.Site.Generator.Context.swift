@@ -215,14 +215,17 @@ extension TileKit.Site.Generator {
                 "html": .string(page.html),
             ],
         )
+        let tags = TileKit.Site.Tags.tags(of: page)
         context["tags"] = .list(
-            TileKit.Site.Tags.tags(of: page).map { tag in
+            tags.map { tag in
                 [
                     "name": .string(tag),
                     "url": .string(url(for: "tags/" + TileKit.Site.Tags.slug(for: tag), baseURL: baseURL)),
                 ]
             },
         )
+        // Non-empty only when the page has tags, gating the chip block in templates.
+        context["hasTags"] = .string(tags.isEmpty ? "" : "true")
         context["assets"] = assetsValue(page)
         return context
     }
