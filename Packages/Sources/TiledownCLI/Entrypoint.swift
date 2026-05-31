@@ -158,7 +158,13 @@ private struct Command {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
             process.arguments = generator.command
-            process.currentDirectoryURL = URL(fileURLWithPath: workingDirectory)
+            // Resolve to an absolute directory: Process does not reliably chdir to
+            // a relative currentDirectoryURL, and the content path is often relative
+            // (e.g. `build-site ../site/content out`).
+            process.currentDirectoryURL = URL(
+                fileURLWithPath: workingDirectory,
+                relativeTo: URL(fileURLWithPath: FileManager.default.currentDirectoryPath),
+            ).standardizedFileURL
             try process.run()
             process.waitUntilExit()
             guard process.terminationStatus == 0 else {

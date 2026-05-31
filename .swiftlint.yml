@@ -9,6 +9,7 @@ disabled_rules:
   - trailing_comma
 excluded:
   - Packages/.build
+  - Examples/aleahim
 force_unwrapping: error
 force_try: error
 force_cast: error

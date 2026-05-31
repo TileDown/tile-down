@@ -18,6 +18,31 @@ struct TiledownCLITests {
         try assertBuiltInSiteOutput(at: fixture.output)
     }
 
+    @Test("a content generator runs against a relative content directory")
+    func buildSiteRunsContentGenerator() throws {
+        let fixture = try makeContentFixture()
+        defer {
+            try? FileManager.default.removeItem(at: fixture.root)
+        }
+        try writeContentGenerator(to: fixture.content)
+
+        // Run with a relative content directory, from the fixture root, so the
+        // generator subprocess must resolve its working directory. Without that
+        // resolution the generator fails and the build exits non-zero.
+        let result = try runTiledown(
+            arguments: ["build-site", "content", "dist"],
+            currentDirectory: fixture.root,
+        )
+
+        #expect(result.status == 0, "stderr: \(result.stderr)")
+        let generated = fixture.output
+            .appendingPathComponent("extra/index.html")
+        #expect(
+            FileManager.default.fileExists(atPath: generated.path),
+            "generator did not produce \(generated.path)",
+        )
+    }
+
     @Test("build-site reads tiledown.yml for layout theme footer links and RSS")
     func buildSiteWithConfigurationFile() throws {
         let fixture = try makeContentFixture()
@@ -104,6 +129,29 @@ struct TiledownCLITests {
         )
     }
 
+    private func writeContentGenerator(
+        to content: URL,
+    ) throws {
+        try """
+        title: Generator Demo
+        generate.extra: bash gen.sh
+        """.write(
+            to: content.appendingPathComponent("tiledown.yml"),
+            atomically: true,
+            encoding: .utf8,
+        )
+        // A generator that writes a new page into the content tree.
+        try """
+        #!/bin/bash
+        mkdir -p extra
+        printf -- '---\\ntitle: Extra\\n---\\n# Extra\\n' > extra/index.md
+        """.write(
+            to: content.appendingPathComponent("gen.sh"),
+            atomically: true,
+            encoding: .utf8,
+        )
+    }
+
     private func writeConfiguration(
         to content: URL,
     ) throws {
@@ -144,10 +192,14 @@ struct TiledownCLITests {
 
     private func runTiledown(
         arguments: [String],
+        currentDirectory: URL? = nil,
     ) throws -> ProcessResult {
         let process = Process()
         process.executableURL = try tiledownExecutable()
         process.arguments = arguments
+        if let currentDirectory {
+            process.currentDirectoryURL = currentDirectory
+        }
 
         let stdout = Pipe()
         let stderr = Pipe()
