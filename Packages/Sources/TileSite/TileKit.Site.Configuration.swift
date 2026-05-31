@@ -25,6 +25,9 @@ public extension TileKit.Site {
         /// (`site.posts`) and the RSS feed. A slug-style path with no surrounding
         /// slashes (e.g. `posts`, `blog`, `writing/notes`). Defaults to `posts`.
         public var postsDirectory: String
+        /// How many of the newest posts `site.latestPosts` exposes (for a home-page
+        /// "recent posts" block). Defaults to 3; a value <= 0 yields no latest posts.
+        public var latestPostCount: Int
 
         public init(
             title: String = "",
@@ -34,6 +37,7 @@ public extension TileKit.Site {
             feed: Feed? = nil,
             appearance: Appearance = .toggle,
             postsDirectory: String = "posts",
+            latestPostCount: Int = 3,
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -42,6 +46,7 @@ public extension TileKit.Site {
             self.feed = feed
             self.appearance = appearance
             self.postsDirectory = postsDirectory
+            self.latestPostCount = latestPostCount
         }
     }
 }

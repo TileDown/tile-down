@@ -38,22 +38,7 @@ public extension TileKit.Site {
                 ) {
                     continue
                 }
-                switch item.key {
-                case "title":
-                    result.configuration.title = item.value
-                case "baseURL":
-                    result.configuration.baseURL = item.value
-                case "layout":
-                    result.layout = try layout(named: item.value)
-                case "theme":
-                    result.configuration.theme = try theme(named: item.value)
-                case "appearance":
-                    result.configuration.appearance = try appearance(named: item.value)
-                case "postsDir":
-                    result.configuration.postsDirectory = postsDirectory(from: item.value)
-                default:
-                    throw ConfigurationFileError.unknownKey(item.key)
-                }
+                try applyScalarSetting(item, to: &result)
             }
 
             result.configuration.feed = resolvedFeed(
@@ -98,6 +83,33 @@ public extension TileKit.Site {
                 return false
             }
             return true
+        }
+
+        /// Applies a single scalar `key: value` setting to the result, throwing on
+        /// an unknown key. Split out of `parse` so the per-line dispatch stays
+        /// simple and within the complexity budget.
+        private static func applyScalarSetting(
+            _ item: (key: String, value: String),
+            to result: inout ConfigurationFile,
+        ) throws {
+            switch item.key {
+            case "title":
+                result.configuration.title = item.value
+            case "baseURL":
+                result.configuration.baseURL = item.value
+            case "layout":
+                result.layout = try layout(named: item.value)
+            case "theme":
+                result.configuration.theme = try theme(named: item.value)
+            case "appearance":
+                result.configuration.appearance = try appearance(named: item.value)
+            case "postsDir":
+                result.configuration.postsDirectory = postsDirectory(from: item.value)
+            case "latestPosts":
+                result.configuration.latestPostCount = try latestPostCount(from: item.value)
+            default:
+                throw ConfigurationFileError.unknownKey(item.key)
+            }
         }
 
         private static func resolvedFeed(
@@ -205,6 +217,17 @@ public extension TileKit.Site {
                 directory = directory.dropLast()
             }
             return directory.isEmpty ? "posts" : String(directory)
+        }
+
+        /// Parses a `latestPosts` count: a non-negative integer. A malformed value
+        /// is a typed error rather than a silent default.
+        private static func latestPostCount(
+            from value: String,
+        ) throws -> Int {
+            guard let count = Int(value), count >= 0 else {
+                throw ConfigurationFileError.invalidLatestPosts(value)
+            }
+            return count
         }
 
         private static func boolean(

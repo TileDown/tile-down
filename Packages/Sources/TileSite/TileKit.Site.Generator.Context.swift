@@ -48,11 +48,13 @@ extension TileKit.Site.Generator {
         posts: [TileKit.Site.Page],
         title: String,
     ) -> TileKit.Template.Value {
-        .object(
+        let baseURL = configuration.baseURL
+        let latest = Array(posts.prefix(max(0, configuration.latestPostCount)))
+        return .object(
             [
                 "title": .string(title),
-                "baseURL": .string(configuration.baseURL),
-                "homeURL": .string(url(for: "", baseURL: configuration.baseURL)),
+                "baseURL": .string(baseURL),
+                "homeURL": .string(url(for: "", baseURL: baseURL)),
                 "stylesheetPath": .string(sitePaths.stylesheetPath),
                 "feedPath": .string(sitePaths.feedPath),
                 // Forced light/dark sets data-theme on <html>; empty for toggle/auto.
@@ -60,25 +62,23 @@ extension TileKit.Site.Generator {
                 // Non-empty only in toggle mode, gating the button and its script.
                 "appearanceToggle": .string(configuration.appearance == .toggle ? "true" : ""),
                 "socialLinks": .list(configuration.socialLinks.map(socialLinkContext)),
-                "sections": .list(
-                    sections.map { section in
-                        pageContext(
-                            section,
-                            baseURL: configuration.baseURL,
-                        )
-                    },
-                ),
-                "posts": .list(
-                    posts.map { post in
-                        pageContext(
-                            post,
-                            baseURL: configuration.baseURL,
-                        )
-                    },
-                ),
-                "tags": .list(tagContexts(posts: posts, baseURL: configuration.baseURL)),
+                "sections": .list(pageContexts(sections, baseURL: baseURL)),
+                "posts": .list(pageContexts(posts, baseURL: baseURL)),
+                "tags": .list(tagContexts(posts: posts, baseURL: baseURL)),
+                "latestPosts": .list(pageContexts(latest, baseURL: baseURL)),
             ],
         )
+    }
+
+    /// Maps pages to their template contexts at a base URL. The shared projection
+    /// behind `site.sections`, `site.posts`, and `site.latestPosts`.
+    func pageContexts(
+        _ pages: [TileKit.Site.Page],
+        baseURL: String,
+    ) -> [TileKit.Template.Context] {
+        pages.map { page in
+            pageContext(page, baseURL: baseURL)
+        }
     }
 
     /// The site-wide tag contexts for `site.tags`: every distinct tag with its
