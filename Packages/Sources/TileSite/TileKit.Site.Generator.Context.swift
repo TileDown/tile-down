@@ -9,8 +9,8 @@ extension TileKit.Site.Generator {
         sitePaths: TileKit.Site.GeneratedSitePaths,
     ) -> TileKit.Template.Context {
         var result = stringValues(page.document.frontMatter)
-        let posts = TileKit.Site.PostSelection.posts(
-            in: pages,
+        let posts = TileKit.Site.PostCollection(
+            among: pages,
             postsDirectory: configuration.postsDirectory,
         )
         result["site"] = siteValue(
@@ -45,11 +45,11 @@ extension TileKit.Site.Generator {
         _ configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
         sections: [TileKit.Site.Page],
-        posts: [TileKit.Site.Page],
+        posts: TileKit.Site.PostCollection,
         title: String,
     ) -> TileKit.Template.Value {
         let baseURL = configuration.baseURL
-        let latest = Array(posts.prefix(max(0, configuration.latestPostCount)))
+        let latest = posts.prefix(max(0, configuration.latestPostCount))
         return .object(
             [
                 "title": .string(title),
@@ -73,7 +73,7 @@ extension TileKit.Site.Generator {
     /// Maps pages to their template contexts at a base URL. The shared projection
     /// behind `site.sections`, `site.posts`, and `site.latestPosts`.
     func pageContexts(
-        _ pages: [TileKit.Site.Page],
+        _ pages: some Sequence<TileKit.Site.Page>,
         baseURL: String,
     ) -> [TileKit.Template.Context] {
         pages.map { page in
@@ -84,7 +84,7 @@ extension TileKit.Site.Generator {
     /// The site-wide tag contexts for `site.tags`: every distinct tag with its
     /// name, URL, and post count, ordered by slug.
     func tagContexts(
-        posts: [TileKit.Site.Page],
+        posts: some Sequence<TileKit.Site.Page>,
         baseURL: String,
     ) -> [TileKit.Template.Context] {
         TileKit.Site.Tags.allTags(among: posts).map { tag in
@@ -186,10 +186,10 @@ extension TileKit.Site.Generator {
     /// template decides whether to show them (via `postList`).
     func pagePosts(
         for page: TileKit.Site.Page,
-        among posts: [TileKit.Site.Page],
+        among posts: some Sequence<TileKit.Site.Page>,
     ) -> [TileKit.Site.Page] {
         guard let tag = page.document.frontMatter["tag"], !tag.isEmpty else {
-            return posts
+            return Array(posts)
         }
         return posts.filter { post in
             TileKit.Site.Tags.tags(of: post).contains { candidate in
