@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Markdown reference links that the engine resolves to the URLs it owns:
+  `[text](page:slug)`, `[text](post:key)` (a key relative to the posts directory,
+  so it survives renaming `postsDir`), `[text](tag:name)`, `[text](social:key)`
+  (a configured social link, used verbatim), and `[text](link:key)`. Internal
+  target URLs are computed at build time, an empty anchor (`[](page:slug)`) fills
+  with the target's title, tag, or social label, and an unknown reference fails
+  the build with one aggregated error naming every broken link and its file.
+- Outbound link shims: `links.<key>: <url>` in `tiledown.yml` generates a stable
+  `/out/<key>/` redirect page (a canonical link plus meta refresh) that forwards
+  to the external URL, so `[text](link:key)` points at a location-independent
+  local link you can repoint in one place.
 - The recent-posts block is hidden entirely when `latestPosts` is `0` (or there
   are no posts), via a `site.hasLatestPosts` flag gating the built-in layouts.
 - Site customization in `tiledown.yml`: `postsLabel` overrides the posts

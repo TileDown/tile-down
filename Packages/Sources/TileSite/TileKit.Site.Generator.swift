@@ -70,7 +70,7 @@ public extension TileKit.Site {
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
             )
-            let pages = contentPages + tagPages(among: posts, outputRootPath: request.outputRootPath)
+            let pages = try assembledPages(contentPages, posts: posts, request: request)
             try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 
@@ -109,6 +109,7 @@ public extension TileKit.Site {
                 outputPaths.append(page.outputPath)
             }
 
+            outputPaths += try outboundShims(request: request)
             try copyAssets(
                 request: request,
                 generated: Set(outputPaths),

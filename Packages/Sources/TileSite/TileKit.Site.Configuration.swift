@@ -36,6 +36,10 @@ public extension TileKit.Site {
         /// whole type scale grows or shrinks together. `1` is the theme default;
         /// `1.1` is 10% larger. Values <= 0 are rejected at parse time.
         public var fontScale: Double
+        /// Named outbound external links, keyed by name. `[text](link:key)` resolves
+        /// to a generated `/out/<key>/` redirect page that forwards here, so an
+        /// external URL lives in one place and the public link stays stable.
+        public var outboundLinks: [String: String]
 
         public init(
             title: String = "",
@@ -48,6 +52,7 @@ public extension TileKit.Site {
             latestPostCount: Int = 3,
             postsLabel: String = "",
             fontScale: Double = 1,
+            outboundLinks: [String: String] = [:],
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -59,6 +64,7 @@ public extension TileKit.Site {
             self.latestPostCount = latestPostCount
             self.postsLabel = postsLabel
             self.fontScale = fontScale
+            self.outboundLinks = outboundLinks
         }
     }
 }
