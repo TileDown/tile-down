@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A sticky tag bar on the tags landing and every per-tag page: all tags as
+  larger pills, the current tag marked, an accent `Clear` pill that returns to
+  all articles, and tapping the current tag toggles it off. Hidden when the site
+  has no tags. Exposed via `site.hasTags`, per-tag `isCurrent`, `site.tagsURL`,
+  and a `page.tagBar` gate.
+- A recent-posts placement marker: `:::recent:::` on its own line in a page that
+  opts in with `latest: true` renders the recent block at that spot, so content
+  after the marker (e.g. a "see also" line) lands below the cards. The split is
+  exposed as `page.contents.htmlHead` / `htmlTail`; with no marker, behavior is
+  unchanged.
 - Markdown reference links that the engine resolves to the URLs it owns:
   `[text](page:slug)`, `[text](post:key)` (a key relative to the posts directory,
   so it survives renaming `postsDir`), `[text](tag:name)`, `[text](social:key)`

@@ -105,7 +105,7 @@ public extension TileKit.Site {
         .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.35rem 0.6rem; font: inherit; line-height: 1; }
         .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { padding-block: 2.5rem; }
-        .td-main h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-block: 0 1rem; }
+        .td-main h1 { font-size: 2rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-block: 0 1rem; }
         .td-main h2 { font-size: 1.5rem; margin-block: 2.5rem 0.75rem; }
         .td-main p { margin-block: 0 1.25rem; }
         .td-main img { display: block; max-width: 100%; max-height: 30rem; width: auto; height: auto; margin-inline: auto; border-radius: var(--td-radius); }
@@ -113,7 +113,7 @@ public extension TileKit.Site {
         .td-main th, .td-main td { padding: 0.5rem 0.75rem; border: 1px solid var(--td-border); }
         .td-main thead th { background: var(--td-surface); font-weight: 700; }
         .td-main .td-hero { display: block; width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
-        .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+        .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
         .td-post-body { min-width: 0; }
@@ -127,6 +127,12 @@ public extension TileKit.Site {
         .td-tag:hover { color: var(--td-ink); border-color: var(--td-accent); }
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }
+        .td-tagbar-title { text-align: center; margin: 0 0 1.25rem; }
+        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
+        .td-tagbar .td-tag-lg { font-size: 1.05rem; padding: 0.5rem 1.1rem; }
+        .td-tagbar .td-tag-current { color: var(--td-ink); border-color: var(--td-accent); font-weight: 600; }
+        .td-tagbar .td-tag-clear { color: #fff; background: var(--td-accent); border-color: var(--td-accent); font-weight: 700; }
+        .td-tagbar .td-tag-clear:hover { color: #fff; filter: brightness(1.1); }
         .td-footer { border-top: 1px solid var(--td-border); padding-block: 2rem; color: var(--td-muted); }
         .td-footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1rem; max-width: var(--td-measure); margin-inline: auto; padding-inline: var(--td-space); }
         .td-footer-nav, .td-socials { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -195,7 +201,7 @@ public extension TileKit.Site {
         .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.4rem 0.65rem; font: inherit; font-size: 0.9rem; line-height: 1; }
         .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { max-width: var(--td-measure); margin-inline: auto; padding: 5rem var(--td-space) 4rem; }
-        .td-main h1 { max-width: 12ch; margin-block: 0 1.2rem; font-size: clamp(3rem, 11vw, 5.8rem); font-weight: 700; line-height: 0.98; letter-spacing: 0; }
+        .td-main h1 { max-width: 20ch; margin-block: 0 1.2rem; font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.05; letter-spacing: 0; }
         .td-main h2 { margin-block: 3rem 0.85rem; font-size: 1.55rem; line-height: 1.16; letter-spacing: 0; }
         .td-main h3 { margin-block: 2rem 0.5rem; font-size: 1.15rem; line-height: 1.25; letter-spacing: 0; }
         .td-main p, .td-main li { color: var(--td-muted); }
@@ -210,7 +216,7 @@ public extension TileKit.Site {
         .td-main th, .td-main td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--td-border); }
         .td-main thead th { color: var(--td-ink); font-weight: 700; border-bottom-width: 2px; }
         .td-main .td-hero { width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
-        .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+        .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }
         .td-post-body { min-width: 0; }
@@ -224,6 +230,12 @@ public extension TileKit.Site {
         .td-tag:hover { color: var(--td-ink); border-color: var(--td-accent); }
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }
+        .td-tagbar-title { text-align: center; margin: 0 0 1.25rem; }
+        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
+        .td-tagbar .td-tag-lg { font-size: 1.05rem; padding: 0.5rem 1.1rem; }
+        .td-tagbar .td-tag-current { color: var(--td-ink); border-color: var(--td-accent); font-weight: 600; }
+        .td-tagbar .td-tag-clear { color: #fff; background: var(--td-accent); border-color: var(--td-accent); font-weight: 700; }
+        .td-tagbar .td-tag-clear:hover { color: #fff; filter: brightness(1.1); }
         .td-footer { border-top: 1px solid var(--td-border); background: var(--td-surface); color: var(--td-muted); }
         .td-footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 1rem; max-width: var(--td-measure); margin-inline: auto; padding: 1.5rem var(--td-space); }
         .td-footer-nav, .td-socials { display: flex; flex-wrap: wrap; gap: 0.85rem; }

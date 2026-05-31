@@ -48,11 +48,15 @@ extension TileKit.Site.Generator {
         let baseURL = configuration.baseURL
         let latest = posts.prefix(max(0, configuration.latestPostCount))
         let title = siteTitle(configuration: configuration, pages: pages)
+        let tags = tagContexts(posts: posts, baseURL: baseURL, currentSlug: currentSlug)
         return .object(
             [
                 "title": .string(title),
                 "baseURL": .string(baseURL),
                 "homeURL": .string(url(for: "", baseURL: baseURL)),
+                // The tags landing URL, for a "clear filter" link that stays in the
+                // tags area and shows every article.
+                "tagsURL": .string(url(for: "tags", baseURL: baseURL)),
                 "stylesheetPath": .string(sitePaths.stylesheetPath),
                 "feedPath": .string(sitePaths.feedPath),
                 // Forced light/dark sets data-theme on <html>; empty for toggle/auto.
@@ -62,7 +66,9 @@ extension TileKit.Site.Generator {
                 "socialLinks": .list(configuration.socialLinks.map(socialLinkContext)),
                 "sections": .list(sectionContexts(sections(pages), baseURL: baseURL, currentSlug: currentSlug)),
                 "posts": .list(pageContexts(posts, baseURL: baseURL)),
-                "tags": .list(tagContexts(posts: posts, baseURL: baseURL)),
+                "tags": .list(tags),
+                // Non-empty only when the site has any tags, gating the tag bar.
+                "hasTags": .string(tags.isEmpty ? "" : "true"),
                 "latestPosts": .list(pageContexts(latest, baseURL: baseURL)),
                 // Non-empty only when there are latest posts to show, so the
                 // recent-posts block (and its wrapper) disappears at count 0.
@@ -100,17 +106,25 @@ extension TileKit.Site.Generator {
     }
 
     /// The site-wide tag contexts for `site.tags`: every distinct tag with its
-    /// name, URL, and post count, ordered by slug.
+    /// name, URL, post count, and whether it is the tag being viewed, ordered by
+    /// slug. `isCurrent` lets a tag bar mark the active tag.
     func tagContexts(
         posts: some Sequence<TileKit.Site.Page>,
         baseURL: String,
+        currentSlug: String,
     ) -> [TileKit.Template.Context] {
         TileKit.Site.Tags.allTags(among: posts).map { tag in
-            [
+            let isCurrent = currentSlug == "tags/" + tag.slug
+            // Tapping the current tag toggles it off, back to all articles; tapping
+            // any other tag filters to it.
+            let target = isCurrent ? "tags" : "tags/" + tag.slug
+            let context: TileKit.Template.Context = [
                 "name": .string(tag.label),
-                "url": .string(url(for: "tags/" + tag.slug, baseURL: baseURL)),
+                "url": .string(url(for: target, baseURL: baseURL)),
                 "count": .string(String(tag.count)),
+                "isCurrent": .string(isCurrent ? "true" : ""),
             ]
+            return context
         }
     }
 
@@ -228,6 +242,10 @@ extension TileKit.Site.Generator {
                 baseURL: baseURL,
             ),
         )
+        // Non-empty on the tags landing page and any per-tag page, gating the
+        // sticky tag bar that lets a reader jump between tags.
+        let onTagPage = page.slug == "tags" || page.slug.hasPrefix("tags/")
+        context["tagBar"] = .string(onTagPage ? "true" : "")
         let split = recentSplit(page.html)
         context["contents"] = .object(
             [
