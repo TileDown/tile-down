@@ -198,7 +198,9 @@ private struct Command {
 
     private func makeHTMLRenderer() -> TileKit.Output.HTMLRenderer {
         .init(
-            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
+                passthroughSchemes: TileKit.Site.Reference.schemes,
+            ),
             tileRegistry: makeTileRegistry(),
         )
     }

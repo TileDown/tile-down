@@ -11,12 +11,22 @@ public extension TileKit.Markdown {
     /// is the prose half of Tiledown Markdown; tile directives are extracted before
     /// rendering, so the input here never contains them.
     struct CommonMarkRenderer: Rendering {
-        public init() {}
+        /// URL schemes, beyond the built-in safe set, that may pass through to
+        /// generated `href`/`src` unchanged. The site layer opts in its reference
+        /// schemes (`page:`, `post:`, `tag:`, ...) so they survive rendering and can
+        /// be resolved to real URLs afterward.
+        private let passthroughSchemes: Set<String>
+
+        public init(
+            passthroughSchemes: Set<String> = [],
+        ) {
+            self.passthroughSchemes = passthroughSchemes
+        }
 
         public func renderHTML(
             _ markdown: String,
         ) -> String {
-            var visitor = HTMLVisitor()
+            var visitor = HTMLVisitor(extraSchemes: passthroughSchemes)
             return visitor.visitDocument(Document(parsing: markdown))
         }
     }
@@ -29,6 +39,10 @@ private struct HTMLVisitor: MarkupVisitor {
     /// URL schemes allowed to reach generated `href`/`src`. Everything else is
     /// dropped so `javascript:`, `data:`, and similar cannot execute.
     private static let safeSchemes: Set<String> = ["http", "https", "mailto"]
+
+    /// Extra schemes the composition root allows through unchanged, beyond the
+    /// built-in safe set (e.g. the site's `page:`/`post:`/`tag:` references).
+    let extraSchemes: Set<String>
 
     mutating func defaultVisit(
         _ markup: any Markup,
@@ -282,7 +296,9 @@ private struct HTMLVisitor: MarkupVisitor {
         if scheme.contains(where: { $0 == "/" || $0 == "?" || $0 == "#" }) {
             return url
         }
-        return Self.safeSchemes.contains(scheme.lowercased()) ? url : nil
+        let lowered = scheme.lowercased()
+        let allowed = Self.safeSchemes.contains(lowered) || extraSchemes.contains(lowered)
+        return allowed ? url : nil
     }
 
     private func escape(

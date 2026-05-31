@@ -31,6 +31,9 @@ public extension TileKit.Site {
                 if try applySocialLink(item, to: &result) {
                     continue
                 }
+                if applyOutboundLink(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,
@@ -296,5 +299,22 @@ private extension TileKit.Site.ConfigurationFile {
             throw TileKit.Site.ConfigurationFileError.invalidFontScale(value)
         }
         return scale
+    }
+
+    /// Records a `links.<key>: <url>` outbound link shim, returning true when the
+    /// line is a link setting so the parser can stop dispatching it.
+    static func applyOutboundLink(
+        _ item: (key: String, value: String),
+        to result: inout Self,
+    ) -> Bool {
+        guard item.key.hasPrefix("links.") else {
+            return false
+        }
+        let key = String(item.key.dropFirst("links.".count))
+        guard !key.isEmpty else {
+            return false
+        }
+        result.configuration.outboundLinks[key] = item.value
+        return true
     }
 }
