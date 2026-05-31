@@ -1,45 +1,54 @@
 name: CI
 
-# The mechanical gates, run on GitHub as the backstop to the local git hooks:
-# style + namespacing on every change, plus build and test on macOS and Linux.
-
 on:
   push:
     branches: [main]
   pull_request:
 
-permissions:
-  contents: read
+# Mirrors the gates enforced locally by .githooks/pre-push: build and test the
+# Swift package on Linux and macOS, and run the repo style, namespacing,
+# swiftformat, and swiftlint checks. See docs/rules and AGENTS.md.
 
 jobs:
-  style:
-    name: Style and namespacing
+  linux:
+    name: Linux (Swift 6.1)
     runs-on: ubuntu-latest
+    container: swift:6.1.2
+    defaults:
+      run:
+        working-directory: Packages
     steps:
       - uses: actions/checkout@v4
-      - name: Style gate (no em dashes, no tool attribution)
-        run: bash scripts/check-style.sh
-      - name: Namespacing gate (one type per file)
-        run: bash scripts/check-namespacing.sh
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test
 
-  swift-macos:
-    name: Swift (macOS)
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: Packages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test
+
+  lint:
+    name: Lint and format
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Format, lint, build, test
+      - name: Repo style and namespacing
         run: |
-          brew install swiftformat swiftlint
-          swiftformat . --config .swiftformat --lint
-          swiftlint --config .swiftlint.yml --strict
-          cd Packages && swift build && swift test
-
-  swift-linux:
-    name: Swift (Linux)
-    runs-on: ubuntu-latest
-    container: swift:6.1
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build and test
-        run: |
-          cd Packages && swift build && swift test
+          bash scripts/check-style.sh
+          bash scripts/check-namespacing.sh
+      - name: Install SwiftFormat and SwiftLint
+        run: brew install swiftformat swiftlint
+      - name: SwiftFormat (lint)
+        run: swiftformat . --config .swiftformat --lint
+      - name: SwiftLint (strict)
+        run: swiftlint --config .swiftlint.yml --strict
