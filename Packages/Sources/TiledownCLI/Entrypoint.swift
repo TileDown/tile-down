@@ -118,6 +118,10 @@ private struct Command {
         let configurationFile = try loadConfigurationFile(
             contentRootPath: positional[1],
         )
+        try runContentGenerators(
+            configurationFile.generators,
+            workingDirectory: positional[1],
+        )
         let template: TileKit.Site.TemplateSource
         let outputRootPath: String
         if positional.count == 3 {
@@ -137,6 +141,33 @@ private struct Command {
                 includeDrafts: includeDrafts,
             ),
         )
+    }
+
+    /// Runs each declared content generator as a subprocess before the build, in
+    /// the content directory, so a generator can write into the content tree.
+    /// A generator that exits non-zero fails the build. Subprocess use lives here
+    /// at the composition root, never in the engine core.
+    private func runContentGenerators(
+        _ generators: [TileKit.Site.ContentGenerator],
+        workingDirectory: String,
+    ) throws {
+        for generator in generators {
+            FileHandle.standardError.write(
+                Data("tiledown: generating \(generator.name)...\n".utf8),
+            )
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+            process.arguments = generator.command
+            process.currentDirectoryURL = URL(fileURLWithPath: workingDirectory)
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else {
+                throw CommandError.generatorFailed(
+                    name: generator.name,
+                    status: process.terminationStatus,
+                )
+            }
+        }
     }
 
     private func loadConfigurationFile(
@@ -247,9 +278,12 @@ private struct Command {
 
 private enum CommandError: Error, CustomStringConvertible {
     case invalidArguments
+    case generatorFailed(name: String, status: Int32)
 
     var description: String {
         switch self {
+        case let .generatorFailed(name, status):
+            "Content generator `\(name)` failed with exit code \(status)."
         case .invalidArguments:
             """
             usage:

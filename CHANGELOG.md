@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Content generators: declare `generate.<name>: <command>` in `tiledown.yml` and
+  `build-site` runs each command (as a subprocess, in the content directory,
+  ordered by name) before reading content, so a custom Swift package or any
+  executable can write Tiledown Markdown into the content tree from structured
+  data (e.g. a CV page from JSON). A generator that exits non-zero fails the
+  build. The generated page is ordinary content from then on.
 - A sticky tag bar on the tags landing and every per-tag page: all tags as
   larger pills, the current tag marked, an accent `Clear` pill that returns to
   all articles, and tapping the current tag toggles it off. Hidden when the site
