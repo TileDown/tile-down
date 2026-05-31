@@ -10,6 +10,7 @@ public extension TileKit.Site {
         case invalidBoolean(String)
         case invalidPath(String)
         case duplicateSlug(String)
+        case invalidLatestPosts(String)
 
         public var description: String {
             switch self {
@@ -29,6 +30,8 @@ public extension TileKit.Site {
                 "Invalid site configuration path `\(path)`."
             case let .duplicateSlug(slug):
                 "Duplicate page slug `\(slug)`. Two pages resolve to the same output path."
+            case let .invalidLatestPosts(value):
+                "Invalid latestPosts value `\(value)`. Expected a non-negative integer."
             }
         }
     }
