@@ -8,7 +8,7 @@ extension TileKit.Site.Generator {
     /// context uses to list only the posts carrying that tag. Returned in slug
     /// order for a deterministic build.
     func tagPages(
-        among posts: [TileKit.Site.Page],
+        among posts: some Sequence<TileKit.Site.Page>,
         outputRootPath: String,
     ) -> [TileKit.Site.Page] {
         TileKit.Site.Tags.allTags(among: posts).map { tag in

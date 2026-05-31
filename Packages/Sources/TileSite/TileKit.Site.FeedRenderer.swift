@@ -15,8 +15,8 @@ public extension TileKit.Site {
             postsDirectory: String = "posts",
         ) -> String {
             let title = feed.title.isEmpty ? siteTitle : feed.title
-            let items = TileKit.Site.PostSelection.posts(
-                in: pages,
+            let items = TileKit.Site.PostCollection(
+                among: pages,
                 postsDirectory: postsDirectory,
             )
             .map { page in

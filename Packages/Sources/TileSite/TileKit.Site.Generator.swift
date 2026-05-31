@@ -63,8 +63,8 @@ public extension TileKit.Site {
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
             let contentPages = try loadPages(request)
-            let posts = TileKit.Site.PostSelection.posts(
-                in: contentPages,
+            let posts = TileKit.Site.PostCollection(
+                among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
             )
             let pages = contentPages + tagPages(

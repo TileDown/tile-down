@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Posts are modeled as `TileKit.Site.PostCollection`, a `RandomAccessCollection`
+  that owns the newest-first, date-valid selection once. The listing, the RSS
+  feed, per-tag filtering, and the latest-posts block derive from it via
+  `prefix`, `filter`, and iteration instead of separate helpers; `PostSelection`
+  keeps only `parsedDate`. `TileKit.Site.Page` now conforms to `Hashable` and
+  `Comparable` (keyed on its unique slug), so pages sort, dedup, and key a set or
+  dictionary directly. Behavior is unchanged (generated output is byte-identical).
+  (#51)
+
 - The post listing (`site.posts`) and the RSS feed now share one post-selection
   helper, so they never diverge on what counts as a post. A post must have a
   `date` that parses as `yyyy-MM-dd`; a page with a missing or malformed date is

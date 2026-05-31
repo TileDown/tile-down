@@ -65,7 +65,7 @@ public extension TileKit.Site {
         /// first spelling seen for that slug. The basis for both `site.tags` and
         /// the synthesized per-tag listing pages.
         static func allTags(
-            among posts: [Page],
+            among posts: some Sequence<Page>,
         ) -> [TagSummary] {
             var labels: [String: String] = [:]
             var counts: [String: Int] = [:]
