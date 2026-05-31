@@ -113,6 +113,13 @@ struct SiteFeedTests {
         #expect(feed.contains(#"xmlns:content="http://purl.org/rss/1.0/modules/content/""#))
         #expect(feed.contains("<content:encoded><![CDATA[<h1>First</h1>"))
         #expect(feed.contains("<content:encoded><![CDATA[<h1>Second</h1>"))
+        // Reader-facing channel metadata: the Atom namespace, a declared
+        // language, a self-referencing Atom link, and permalink guids.
+        #expect(feed.contains(#"xmlns:atom="http://www.w3.org/2005/Atom""#))
+        #expect(feed.contains("<language>en-US</language>"))
+        let selfLink = #"<atom:link href="https://example.com/feed.xml" rel="self" type="application/rss+xml"/>"#
+        #expect(feed.contains(selfLink))
+        #expect(feed.contains(#"<guid isPermaLink="true">"#))
     }
 
     @Test("strips XML-illegal control characters from feed content")

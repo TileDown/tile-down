@@ -27,13 +27,19 @@ public extension TileKit.Site {
             }
             .joined(separator: "\n")
 
+            let rssOpen = #"<rss version="2.0" "#
+                + #"xmlns:atom="http://www.w3.org/2005/Atom" "#
+                + #"xmlns:content="http://purl.org/rss/1.0/modules/content/">"#
+            let selfURL = absoluteURL(baseURL: baseURL, path: "/" + feed.path)
             return """
             <?xml version="1.0" encoding="UTF-8"?>
-            <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+            \(rssOpen)
             <channel>
             <title>\(xmlEscaped(title))</title>
             <link>\(xmlEscaped(absoluteURL(baseURL: baseURL, path: "/")))</link>
             <description>\(xmlEscaped(feed.description))</description>
+            <language>en-US</language>
+            <atom:link href="\(xmlEscaped(selfURL))" rel="self" type="application/rss+xml"/>
             \(items)
             </channel>
             </rss>
@@ -59,7 +65,7 @@ public extension TileKit.Site {
             <item>
             <title>\(xmlEscaped(title))</title>
             <link>\(xmlEscaped(absolutePath))</link>
-            <guid>\(xmlEscaped(absolutePath))</guid>
+            <guid isPermaLink="true">\(xmlEscaped(absolutePath))</guid>
             \(pubDateXML)<description>\(xmlEscaped(description))</description>
             <content:encoded>\(cdata(page.html))</content:encoded>
             </item>
