@@ -82,6 +82,67 @@ struct SiteTagsTests {
         #expect(home == "ios:1 swift:2 ")
     }
 
+    @Test("a tag page shows the sticky tag bar with the current tag marked")
+    func tagPageShowsTagBar() throws {
+        var files = taggedFixtureFiles()
+        files["templates/page.html"] = [
+            "{{#page.tagBar}}{{#site.hasTags}}<nav class=\"bar\">",
+            "<a class=\"clear\" href=\"{{ site.tagsURL }}\">Clear</a>{{#site.tags}}",
+            "<a class=\"t{{#isCurrent}} cur{{/isCurrent}}\" href=\"{{ url }}\">{{ name }}</a>",
+            "{{/site.tags}}</nav>{{/site.hasTags}}{{/page.tagBar}}",
+        ].joined()
+        let fileSystem = MemoryFileSystem(files: files)
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        // The /tags/swift/ page shows every tag with the bar, ios not current and
+        // linking to its own filter; swift is current and toggles back to /tags/.
+        let swift = try #require(fileSystem.files["dist/tags/swift/index.html"])
+        #expect(swift.contains("<nav class=\"bar\">"))
+        #expect(swift.contains(#"<a class="t cur" href="/tags/">swift</a>"#))
+        #expect(swift.contains(#"<a class="t" href="/tags/ios/">ios</a>"#))
+        #expect(swift.contains(#"<a class="clear" href="/tags/">Clear</a>"#))
+
+        // A non-tag page (home) does not show the bar.
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(!home.contains("<nav class=\"bar\">"))
+    }
+
+    @Test("the tag bar is absent when the site has no tags")
+    func tagBarAbsentWithoutTags() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/tags/index.md": "---\ntitle: Tags\n---\nBrowse.",
+                "templates/page.html": [
+                    "{{#page.tagBar}}{{#site.hasTags}}<nav class=\"bar\"></nav>",
+                    "{{/site.hasTags}}{{/page.tagBar}}OK",
+                ].joined(),
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        // The tags landing exists and renders, but with no tags the bar is gone.
+        let tags = try #require(fileSystem.files["dist/tags/index.html"])
+        #expect(tags.contains("OK"))
+        #expect(!tags.contains("<nav class=\"bar\">"))
+    }
+
     @Test("tag parsing splits on commas, trims, and de-duplicates by slug")
     func tagParsing() {
         let page = makePage(tags: "Swift, ios , swift,, Swift")
@@ -137,7 +198,9 @@ struct SiteTagsTests {
             markdownParser: TileKit.Source.FrontMatterParser(),
             tileParser: TileKit.Tile.DirectiveParser(),
             htmlRenderer: TileKit.Output.HTMLRenderer(
-                markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
+                markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
+                    passthroughSchemes: TileKit.Site.Reference.schemes,
+                ),
                 tileRegistry: .init(),
             ),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
