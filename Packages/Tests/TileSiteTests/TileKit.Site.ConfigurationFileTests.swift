@@ -84,4 +84,17 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("appearance: sepia")
         }
     }
+
+    @Test("parses content generators under generate.* and orders them by name")
+    func parsesContentGenerators() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            generate.zed: swift run Zed
+            generate.cv: swift run GenerateCV --out content/cv/index.md
+            """,
+        )
+        // Ordered by name (cv before zed), command split into parts.
+        #expect(file.generators.map(\.name) == ["cv", "zed"])
+        #expect(file.generators.first?.command == ["swift", "run", "GenerateCV", "--out", "content/cv/index.md"])
+    }
 }

@@ -11,13 +11,18 @@ public extension TileKit.Site {
     struct ConfigurationFile: Equatable, Sendable {
         public var configuration: Configuration
         public var layout: Layout
+        /// Pre-build content generators (`generate.<name>: <command>`), ordered by
+        /// name. The composition root runs these before the content build.
+        public var generators: [ContentGenerator]
 
         public init(
             configuration: Configuration = .init(),
             layout: Layout = .topNav,
+            generators: [ContentGenerator] = [],
         ) {
             self.configuration = configuration
             self.layout = layout
+            self.generators = generators
         }
 
         public static func parse(
@@ -34,6 +39,9 @@ public extension TileKit.Site {
                 if applyOutboundLink(item, to: &result) {
                     continue
                 }
+                if applyGenerator(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,
@@ -48,6 +56,8 @@ public extension TileKit.Site {
                 feed,
                 feedEnabled: feedEnabled,
             )
+            // Order generators by name so the run order is deterministic.
+            result.generators.sort { $0.name < $1.name }
             return result
         }
 
@@ -279,6 +289,27 @@ public extension TileKit.Site {
 }
 
 private extension TileKit.Site.ConfigurationFile {
+    /// Records a `generate.<name>: <command>` content generator, returning true
+    /// when the line is a generator setting so the parser stops dispatching it.
+    /// The command value is split on whitespace into command + arguments.
+    static func applyGenerator(
+        _ item: (key: String, value: String),
+        to result: inout Self,
+    ) -> Bool {
+        guard item.key.hasPrefix("generate.") else {
+            return false
+        }
+        let name = String(item.key.dropFirst("generate.".count))
+        let command = item.value
+            .split(separator: " ", omittingEmptySubsequences: true)
+            .map(String.init)
+        guard !name.isEmpty, !command.isEmpty else {
+            return false
+        }
+        result.generators.append(TileKit.Site.ContentGenerator(name: name, command: command))
+        return true
+    }
+
     /// Parses a `latestPosts` count: a non-negative integer. A malformed value
     /// is a typed error rather than a silent default.
     static func latestPostCount(
