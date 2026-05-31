@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Multi-tag AND filtering: generated tag pages now include canonical static
+  paths for one-tag and two-tag filters, plus larger filters when all selected
+  tags co-occur on at least one post, capped at three selected tags to keep
+  static generation bounded. Pages such as `/tags/ios/swift/` list only posts
+  carrying all selected tags. The tag bar marks every selected tag, selected tags
+  link to remove themselves, unselected tags link to available narrower AND
+  selections, and empty two-tag combinations render an explicit empty state.
+  Custom tag bars can use `isVisibleInTagBar` on each `site.tags` item to hide
+  links to ungenerated higher-order filters. Existing single-tag URLs remain
+  unchanged. (#62)
 - Opt-in analytics: `analytics.head` and `analytics.bodyEnd` in `tiledown.yml`
   inject a provider snippet verbatim into every page's `<head>` and end of
   `<body>` in the built-in layouts. Empty by default, so a build emits no

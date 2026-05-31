@@ -116,19 +116,47 @@ extension TileKit.Site.Generator {
         baseURL: String,
         currentSlug: String,
     ) -> [TileKit.Template.Context] {
-        TileKit.Site.Tags.allTags(among: posts).map { tag in
-            let isCurrent = currentSlug == "tags/" + tag.slug
-            // Tapping the current tag toggles it off, back to all articles; tapping
-            // any other tag filters to it.
-            let target = isCurrent ? "tags" : "tags/" + tag.slug
+        let posts = Array(posts)
+        let selectedSlugs = Set(TileKit.Site.Tags.filterSlugs(fromTagPageSlug: currentSlug))
+        let postTagSlugSets = posts.map { Set(TileKit.Site.Tags.tagSlugs(of: $0)) }
+        return TileKit.Site.Tags.allTags(among: posts).map { tag in
+            let isCurrent = selectedSlugs.contains(tag.slug)
+            let isVisibleInTagBar = tagIsVisibleInTagBar(
+                tag.slug,
+                selectedSlugs: selectedSlugs,
+                postTagSlugSets: postTagSlugSets,
+            )
+            var targetSlugs = selectedSlugs
+            if isCurrent {
+                targetSlugs.remove(tag.slug)
+            } else {
+                targetSlugs.insert(tag.slug)
+            }
+            let target = TileKit.Site.Tags.pageSlug(forFilterSlugs: Array(targetSlugs))
             let context: TileKit.Template.Context = [
                 "name": .string(tag.label),
                 "url": .string(url(for: target, baseURL: baseURL)),
                 "count": .string(String(tag.count)),
                 "isCurrent": .string(isCurrent ? "true" : ""),
+                "isVisibleInTagBar": .string(isVisibleInTagBar ? "true" : ""),
             ]
             return context
         }
+    }
+
+    private func tagIsVisibleInTagBar(
+        _ slug: String,
+        selectedSlugs: Set<String>,
+        postTagSlugSets: [Set<String>],
+    ) -> Bool {
+        if selectedSlugs.count <= 1 || selectedSlugs.contains(slug) {
+            return true
+        }
+        guard selectedSlugs.count < TileKit.Site.Tags.maximumGeneratedFilterDepth else {
+            return false
+        }
+        let narrowedSlugs = selectedSlugs.union([slug])
+        return postTagSlugSets.contains { narrowedSlugs.isSubset(of: $0) }
     }
 
     /// The literal appearance to pin on `<html data-theme>` for forced modes
@@ -213,23 +241,27 @@ extension TileKit.Site.Generator {
                 )
             },
         )
+        let listsPosts = !(page.document.frontMatter["postList"] ?? "").isEmpty
+        let filtersByTags = !TileKit.Site.Tags.filterSlugs(of: page).isEmpty
+        context["hasPosts"] = .string(posts.isEmpty ? "" : "true")
+        context["emptyPosts"] = .string(posts.isEmpty && listsPosts && filtersByTags ? "true" : "")
         return .object(context)
     }
 
-    /// The posts a page lists. A tag page (carrying a `tag` marker) lists only
-    /// the posts with that tag; every other page is given all posts and the
-    /// template decides whether to show them (via `postList`).
+    /// The posts a page lists. A tag page (carrying tag filter markers) lists
+    /// only the posts with every selected tag; every other page is given all
+    /// posts and the template decides whether to show them (via `postList`).
     func pagePosts(
         for page: TileKit.Site.Page,
         among posts: some Sequence<TileKit.Site.Page>,
     ) -> [TileKit.Site.Page] {
-        guard let tag = page.document.frontMatter["tag"], !tag.isEmpty else {
+        let selectedSlugs = TileKit.Site.Tags.filterSlugs(of: page)
+        guard !selectedSlugs.isEmpty else {
             return Array(posts)
         }
+        let requiredSlugs = Set(selectedSlugs)
         return posts.filter { post in
-            TileKit.Site.Tags.tags(of: post).contains { candidate in
-                TileKit.Site.Tags.slug(for: candidate) == tag
-            }
+            requiredSlugs.isSubset(of: Set(TileKit.Site.Tags.tagSlugs(of: post)))
         }
     }
 

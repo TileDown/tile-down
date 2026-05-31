@@ -35,6 +35,12 @@ struct SiteTagsTests {
         #expect(ios.contains("<li>Alpha</li>"))
         #expect(!ios.contains("<li>Beta</li>"))
         #expect(!ios.contains("<li>Gamma</li>"))
+
+        // /tags/ios/swift/ has only posts carrying both tags.
+        let iosSwift = try #require(fileSystem.files["dist/tags/ios/swift/index.html"])
+        #expect(iosSwift.contains("<li>Alpha</li>"))
+        #expect(!iosSwift.contains("<li>Beta</li>"))
+        #expect(!iosSwift.contains("<li>Gamma</li>"))
     }
 
     @Test("an untagged post produces no tag page and appears on none")
@@ -103,16 +109,65 @@ struct SiteTagsTests {
         )
 
         // The /tags/swift/ page shows every tag with the bar, ios not current and
-        // linking to its own filter; swift is current and toggles back to /tags/.
+        // linking to the narrowed AND filter; swift toggles back to /tags/.
         let swift = try #require(fileSystem.files["dist/tags/swift/index.html"])
         #expect(swift.contains("<nav class=\"bar\">"))
         #expect(swift.contains(#"<a class="t cur" href="/tags/">swift</a>"#))
-        #expect(swift.contains(#"<a class="t" href="/tags/ios/">ios</a>"#))
+        #expect(swift.contains(#"<a class="t" href="/tags/ios/swift/">ios</a>"#))
         #expect(swift.contains(#"<a class="clear" href="/tags/">Clear</a>"#))
 
         // A non-tag page (home) does not show the bar.
         let home = try #require(fileSystem.files["dist/index.html"])
         #expect(!home.contains("<nav class=\"bar\">"))
+    }
+
+    @Test("a multi-tag page marks selected tags and links each one to remove it")
+    func multiTagPageShowsSelectedTagLinks() throws {
+        var files = taggedFixtureFiles()
+        files["templates/page.html"] = [
+            "{{#page.tagBar}}{{#site.hasTags}}<nav class=\"bar\">",
+            "{{#site.tags}}<a class=\"t{{#isCurrent}} cur{{/isCurrent}}\" href=\"{{ url }}\">{{ name }}</a>",
+            "{{/site.tags}}</nav>{{/site.hasTags}}{{/page.tagBar}}",
+        ].joined()
+        let fileSystem = MemoryFileSystem(files: files)
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        let iosSwift = try #require(fileSystem.files["dist/tags/ios/swift/index.html"])
+        #expect(iosSwift.contains(#"<a class="t cur" href="/tags/swift/">ios</a>"#))
+        #expect(iosSwift.contains(#"<a class="t cur" href="/tags/ios/">swift</a>"#))
+    }
+
+    @Test("empty multi-tag pages render an empty post state")
+    func emptyMultiTagPagesRenderEmptyState() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/index.md": "---\ntitle: Posts\npostList: true\n---\n# Posts",
+                "content/posts/alpha/index.md": "---\ntitle: Alpha\ndate: 2026-05-28\ntags: swift\n---\n# Alpha",
+                "content/posts/beta/index.md": "---\ntitle: Beta\ndate: 2026-05-29\ntags: ios\n---\n# Beta",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        let empty = try #require(fileSystem.files["dist/tags/ios/swift/index.html"])
+        #expect(empty.contains("No posts match this tag selection."))
+        #expect(!empty.contains("td-post-card"))
     }
 
     @Test("the tag bar is absent when the site has no tags")
@@ -206,5 +261,96 @@ struct SiteTagsTests {
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )
+    }
+}
+
+extension SiteTagsTests {
+    @Test("tag pages do not include unrelated global higher-order combinations")
+    func tagPagesAvoidUnrelatedGlobalHigherOrderCombinations() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/index.md": "---\ntitle: Posts\n---\n# Posts",
+                "content/posts/alpha/index.md": [
+                    "---",
+                    "title: Alpha",
+                    "date: 2026-05-28",
+                    "tags: alpha, beta, epsilon, zeta",
+                    "---",
+                    "# Alpha",
+                ].joined(separator: "\n"),
+                "content/posts/gamma/index.md": [
+                    "---",
+                    "title: Gamma",
+                    "date: 2026-05-29",
+                    "tags: gamma, delta",
+                    "---",
+                    "# Gamma",
+                ].joined(separator: "\n"),
+                "templates/page.html": tagListingTemplate(),
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/tags/alpha/gamma/index.html"] != nil)
+        #expect(fileSystem.files["dist/tags/alpha/beta/epsilon/index.html"] != nil)
+        #expect(fileSystem.files["dist/tags/alpha/beta/epsilon/zeta/index.html"] == nil)
+        #expect(fileSystem.files["dist/tags/alpha/gamma/delta/index.html"] == nil)
+    }
+
+    @Test("the built-in tag bar hides unavailable and over-depth additions")
+    func builtInTagBarHidesUnavailableAndOverDepthAdditions() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/index.md": "---\ntitle: Posts\npostList: true\n---\n# Posts",
+                "content/posts/alpha/index.md": [
+                    "---",
+                    "title: Alpha",
+                    "date: 2026-05-28",
+                    "tags: ios, swift, testing, release",
+                    "---",
+                    "# Alpha",
+                ].joined(separator: "\n"),
+                "content/posts/beta/index.md": [
+                    "---",
+                    "title: Beta",
+                    "date: 2026-05-29",
+                    "tags: ios, swift",
+                    "---",
+                    "# Beta",
+                ].joined(separator: "\n"),
+                "content/posts/gamma/index.md": "---\ntitle: Gamma\ndate: 2026-05-30\ntags: docs\n---\n# Gamma",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        let iosSwift = try #require(fileSystem.files["dist/tags/ios/swift/index.html"])
+        #expect(iosSwift.contains(#"href="/tags/swift/">ios</a>"#))
+        #expect(iosSwift.contains(#"href="/tags/ios/">swift</a>"#))
+        #expect(iosSwift.contains(#"href="/tags/ios/swift/testing/">testing</a>"#))
+        #expect(!iosSwift.contains(#">docs</a>"#))
+
+        let iosSwiftTesting = try #require(fileSystem.files["dist/tags/ios/swift/testing/index.html"])
+        #expect(iosSwiftTesting.contains(#"href="/tags/swift/testing/">ios</a>"#))
+        #expect(iosSwiftTesting.contains(#"href="/tags/ios/testing/">swift</a>"#))
+        #expect(iosSwiftTesting.contains(#"href="/tags/ios/swift/">testing</a>"#))
+        #expect(!iosSwiftTesting.contains(#"href="/tags/ios/swift/testing/release/">release</a>"#))
     }
 }
