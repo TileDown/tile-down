@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.14
+#!/usr/bin/env python3
 """Browser tests for a Tiledown-generated site, driven by Playwright.
 
 Exercises the generated HTML in a real Chromium: rendered tables, images,

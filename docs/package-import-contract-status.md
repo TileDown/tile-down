@@ -16,7 +16,7 @@ and facade targets are the exceptions.
 | `TileTemplate` | `Foundation`, `TileCore` | matches |
 | `TileTile` | `Foundation`, `TileCore` | matches |
 | `TileOutput` | `Foundation`, `TileCore`, `TileMarkdown`, `TileTile` | matches |
-| `TileSite` | `TileCore`, `TileMarkdown`, `TileOutput`, `TileSource`, `TileTemplate`, `TileTile` | matches |
+| `TileSite` | `Foundation`, `TileCore`, `TileMarkdown`, `TileOutput`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TileSiteImpl` | `Foundation`, `TileCore`, `TileSite` | matches |
 | `TileKit` | re-exports `TileCore`, `TileContent`, `TileMarkdown`, `TileOutput`, `TileService`, `TileServiceForm`, `TileServiceImpl`, `TileSite`, `TileSiteImpl`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TiledownCLI` | `Foundation`, `TileKit` | matches |

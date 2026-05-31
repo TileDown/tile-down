@@ -43,8 +43,8 @@ The repository currently has:
 
 The wiring slice is done: a `:::tile service-form` block now renders through the
 normal site pipeline. The CLI's contract resolver is still empty, so a
-service-form tile fails with a typed missing-service error until service binding
-configuration lands.
+service-form tile fails with a typed missing-service error until CLI config
+loading can populate service bindings.
 
 ## Working Constraints
 
@@ -189,8 +189,10 @@ page via `site.stylesheetPath`, per [docs/decisions/theming.md](decisions/themin
 The tile styling posture is now done too: `TileKit.Tile.Rendered` carries a
 `TileKit.Tile.StylePosture` (`themed` default, or `overriding`), and the renderer
 routes overriding CSS into the `tile-override` layer. The standard site theme and
-theme properties are done too. Still to do below: an explicit per-tile dedup key
-(CSS is currently deduped by content) and JavaScript deduplication.
+theme properties are done too. Identical browser JavaScript is also deduplicated
+per page by `TileKit.Output.HTMLRenderer`. Still to do below: explicit asset
+declarations, an explicit per-tile dedup key (CSS and JavaScript are currently
+deduped by content), and a site-wide runtime asset policy.
 
 Goal: move from raw page-local CSS and JavaScript strings toward explicit asset
 declarations.
@@ -200,7 +202,8 @@ Design:
 - Keep the existing `TileKit.Tile.Rendered` fields as the current simple path.
 - Add asset declaration values when more than one tile needs shared runtime
   code.
-- Deduplicate identical runtime assets per page.
+- Keep per-page deduplication deterministic while moving from raw strings to
+  named asset declarations.
 - Later, lift site-wide asset behavior into `TileAsset`.
 - Keep transforms such as Sass and CSS minification deferred until templates
   require them.

@@ -115,8 +115,29 @@ swift test
 ```
 
 The engine targets macOS and Linux. To build and test on Linux, see
-[docs/linux-testing.md](docs/linux-testing.md). Every push runs build and test on
-both platforms in CI.
+[docs/linux-testing.md](docs/linux-testing.md).
+
+The full local verification stack is:
+
+```sh
+scripts/check-local.sh
+```
+
+It runs style checks, namespacing checks, SwiftFormat in lint mode, SwiftLint,
+`swift build`, `swift test`, and the local Playwright browser gate.
+The same browser fixture runs on Linux in the GitHub workflow.
+
+For generated-site behavior that needs a real browser, such as computed styles,
+image decoding, client-side tile JavaScript, and the theme toggle, run the local
+Playwright gate from the repo root:
+
+```sh
+Packages/Tests/Browser/run.sh
+```
+
+That script builds the browser fixture site, serves it locally, and drives
+Chromium through Playwright. It requires Python Playwright and Chromium; see
+[Packages/Tests/Browser](Packages/Tests/Browser).
 
 ## Project conventions
 

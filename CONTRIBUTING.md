@@ -17,22 +17,22 @@ be Swift instead.
 
 ## Project status
 
-Tiledown is at the documentation and design stage. The engine package is not yet
-committed, so the `swift` commands below describe the intended workflow once the
-package lands; they will not run against the repo until then. The architecture is
-in [`docs/DESIGN.md`](docs/DESIGN.md).
+Tiledown is an early Swift static site generator. The engine package is committed
+under `Packages/`, but the project is not yet ready for real sites. The current
+working surface and missing pieces are listed in [`README.md`](README.md), and the
+architecture is in [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Getting started
 
-Will require a recent Swift toolchain (Swift 6.1+). Tiledown is a monorepo: a
+Requires a recent Swift toolchain (Swift 6.1+). Tiledown is a monorepo: a
 workspace at the root, a single `Package.swift` under `Packages/`, and `Apps/`
-for app targets. Once the package is in:
+for app targets.
 
 ```sh
 cd Packages
 swift build
 swift test
-swift run tile-down            # renders a demo page to stdout
+swift run tiledown version
 ```
 
 Install the project git hooks once after cloning:
@@ -43,9 +43,18 @@ git config core.hooksPath .githooks
 
 This wires three hooks: `commit-msg` and `pre-commit` reject forbidden style tells
 (em dashes, tool-attribution) in messages and staged content, and `pre-push` runs
-the style, namespacing, format, lint, build, and test gates. The same gates run in
-GitHub CI (`.github/workflows/ci.yml`) as the backstop. The Swift gates are inert
-until the package lands.
+the full local verification stack. You can also run the same checks locally
+before pushing:
+
+```sh
+scripts/check-local.sh
+```
+
+The full local stack runs style checks, namespacing checks, SwiftFormat in lint
+mode, SwiftLint, `swift build`, `swift test`, and the local Playwright browser
+gate. The browser gate requires Python Playwright and Chromium; see
+[`Packages/Tests/Browser/README.md`](Packages/Tests/Browser/README.md).
+The same browser fixture runs on Linux in the GitHub workflow.
 
 ## Conventions
 

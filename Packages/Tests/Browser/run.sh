@@ -19,6 +19,7 @@ pids=()
 
 cleanup() {
   for pid in "${pids[@]:-}"; do kill "$pid" 2>/dev/null || true; done
+  for pid in "${pids[@]:-}"; do wait "$pid" 2>/dev/null || true; done
   rm -rf "$work"
 }
 trap cleanup EXIT
@@ -53,4 +54,4 @@ done
 echo "Running browser tests..."
 NORMAL_URL="http://localhost:$normal_port" \
 DRAFTS_URL="http://localhost:$drafts_port" \
-  "${PYTHON:-python3.14}" "$here/test_site.py"
+  "${PYTHON:-python3}" "$here/test_site.py"
