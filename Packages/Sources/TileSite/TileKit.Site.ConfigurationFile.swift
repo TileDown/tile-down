@@ -107,6 +107,10 @@ public extension TileKit.Site {
                 result.configuration.postsDirectory = postsDirectory(from: item.value)
             case "latestPosts":
                 result.configuration.latestPostCount = try latestPostCount(from: item.value)
+            case "postsLabel":
+                result.configuration.postsLabel = item.value
+            case "fontScale":
+                result.configuration.fontScale = try fontScale(from: item.value)
             default:
                 throw ConfigurationFileError.unknownKey(item.key)
             }
@@ -219,17 +223,6 @@ public extension TileKit.Site {
             return directory.isEmpty ? "posts" : String(directory)
         }
 
-        /// Parses a `latestPosts` count: a non-negative integer. A malformed value
-        /// is a typed error rather than a silent default.
-        private static func latestPostCount(
-            from value: String,
-        ) throws -> Int {
-            guard let count = Int(value), count >= 0 else {
-                throw ConfigurationFileError.invalidLatestPosts(value)
-            }
-            return count
-        }
-
         private static func boolean(
             _ value: String,
         ) throws -> Bool {
@@ -279,5 +272,29 @@ public extension TileKit.Site {
                 value
             }
         }
+    }
+}
+
+private extension TileKit.Site.ConfigurationFile {
+    /// Parses a `latestPosts` count: a non-negative integer. A malformed value
+    /// is a typed error rather than a silent default.
+    static func latestPostCount(
+        from value: String,
+    ) throws -> Int {
+        guard let count = Int(value), count >= 0 else {
+            throw TileKit.Site.ConfigurationFileError.invalidLatestPosts(value)
+        }
+        return count
+    }
+
+    /// Parses a `fontScale` multiplier: a positive number. A malformed or
+    /// non-positive value is a typed error rather than a silent default.
+    static func fontScale(
+        from value: String,
+    ) throws -> Double {
+        guard let scale = Double(value), scale > 0 else {
+            throw TileKit.Site.ConfigurationFileError.invalidFontScale(value)
+        }
+        return scale
     }
 }

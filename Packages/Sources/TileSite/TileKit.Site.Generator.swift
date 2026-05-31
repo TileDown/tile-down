@@ -62,15 +62,15 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let contentPages = try loadPages(request)
+            let contentPages = try applyingPostsLabel(
+                to: loadPages(request),
+                configuration: request.configuration,
+            )
             let posts = TileKit.Site.PostCollection(
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
             )
-            let pages = contentPages + tagPages(
-                among: posts,
-                outputRootPath: request.outputRootPath,
-            )
+            let pages = contentPages + tagPages(among: posts, outputRootPath: request.outputRootPath)
             try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 
@@ -153,6 +153,27 @@ private extension TileKit.Site.Generator {
         return pages
     }
 
+    /// Applies the configured `postsLabel` to the posts landing page (the page
+    /// whose slug is the posts directory), overriding its `title` so navigation
+    /// and its heading read the chosen label. An empty label leaves pages as is.
+    func applyingPostsLabel(
+        to pages: [TileKit.Site.Page],
+        configuration: TileKit.Site.Configuration,
+    ) -> [TileKit.Site.Page] {
+        let label = configuration.postsLabel
+        guard !label.isEmpty else {
+            return pages
+        }
+        return pages.map { page in
+            guard page.slug == configuration.postsDirectory else {
+                return page
+            }
+            var page = page
+            page.document.frontMatter["title"] = label
+            return page
+        }
+    }
+
     /// Whether a page is a draft, from a truthy `draft` front-matter value.
     /// Unset or any non-truthy value publishes as normal.
     func isDraft(
@@ -193,6 +214,7 @@ private extension TileKit.Site.Generator {
         let css = Self.composeStylesheet(
             theme: configuration.theme,
             tiles: tiles,
+            fontScale: configuration.fontScale,
         )
         guard !css.isEmpty else {
             return ""
@@ -240,35 +262,6 @@ private extension TileKit.Site.Generator {
             baseURL: configuration.baseURL,
             fileName: feedFilePath,
         )
-    }
-
-    /// Composes the shared stylesheet from the theme and the merged tile CSS.
-    /// With no theme this is exactly the tile stylesheet; with a theme it adds
-    /// the theme properties (unlayered) and the theme's reset and base styles
-    /// into the `reset` and `theme` cascade layers, beside the tiles.
-    private static func composeStylesheet(
-        theme: TileKit.Site.Theme?,
-        tiles: TileKit.Output.Stylesheet,
-    ) -> String {
-        guard let theme else {
-            return tiles.text()
-        }
-
-        var result = theme.tokens
-        result += "\n@layer reset, theme, tile-override;"
-        if !theme.reset.isEmpty {
-            result += "\n@layer reset {\n\(theme.reset)\n}"
-        }
-        let themeLayer = ([theme.base] + tiles.themed)
-            .filter { !$0.isEmpty }
-            .joined(separator: "\n")
-        if !themeLayer.isEmpty {
-            result += "\n@layer theme {\n\(themeLayer)\n}"
-        }
-        if !tiles.overriding.isEmpty {
-            result += "\n@layer tile-override {\n\(tiles.overriding.joined(separator: "\n"))\n}"
-        }
-        return result
     }
 
     private func stylesheetURL(

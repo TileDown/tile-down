@@ -69,7 +69,7 @@ public extension TileKit.Site {
         <body>
         <header class="td-header">
         <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
-        <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
+        <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}"{{#isCurrent}} aria-current="page"{{/isCurrent}}>{{ title }}</a>{{/site.sections}}</nav>
         {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </header>
         <main class="td-main">{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.html }}}{{#page.hasTags}}<nav class="td-tags" aria-label="Tags">{{#page.tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/page.tags}}</nav>{{/page.hasTags}}{{#page.latest}}<ul class="td-posts">{{#site.latestPosts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}{{#hasTags}}<nav class="td-tags td-tags-card" aria-label="Tags">{{#tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/tags}}</nav>{{/hasTags}}</div></li>{{/site.latestPosts}}</ul>{{/page.latest}}{{#page.postList}}<ul class="td-posts">{{#page.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}{{#hasTags}}<nav class="td-tags td-tags-card" aria-label="Tags">{{#tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/tags}}</nav>{{/hasTags}}</div></li>{{/page.posts}}</ul>{{/page.postList}}</main>
@@ -111,7 +111,7 @@ public extension TileKit.Site {
         <body class="td-layout-sidebar">
         <aside class="td-sidebar">
         <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
-        <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav>
+        <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}"{{#isCurrent}} aria-current="page"{{/isCurrent}}>{{ title }}</a>{{/site.sections}}</nav>
         {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </aside>
         <div class="td-content">

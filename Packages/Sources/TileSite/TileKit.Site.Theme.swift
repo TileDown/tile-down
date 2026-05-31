@@ -93,7 +93,7 @@ public extension TileKit.Site {
         """
 
         private static let standardBase = """
-        body { background: var(--td-bg); color: var(--td-ink); font: 16px/1.6 var(--td-font); -webkit-font-smoothing: antialiased; }
+        body { background: var(--td-bg); color: var(--td-ink); font: 1rem/1.6 var(--td-font); -webkit-font-smoothing: antialiased; }
         a { color: var(--td-accent); }
         .td-header, .td-main, .td-content { max-width: var(--td-measure); margin-inline: auto; padding-inline: var(--td-space); }
         .td-header { display: flex; align-items: center; justify-content: space-between; gap: var(--td-space); padding-block: 1.25rem; border-bottom: 1px solid var(--td-border); }
@@ -101,6 +101,7 @@ public extension TileKit.Site {
         .td-nav { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
         .td-nav a, .td-footer a { color: var(--td-muted); text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover { color: var(--td-ink); }
+        .td-nav a[aria-current="page"] { color: var(--td-ink); font-weight: 700; }
         .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.35rem 0.6rem; font: inherit; line-height: 1; }
         .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { padding-block: 2.5rem; }
@@ -114,9 +115,9 @@ public extension TileKit.Site {
         .td-main .td-hero { display: block; width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
         .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.5rem; }
         .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
-        .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
+        .td-posts .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
         .td-post-body { min-width: 0; }
-        .td-post-title { margin: 0 0 0.25rem; font-size: 1.2rem; }
+        .td-main .td-post-title { margin: 0 0 0.25rem; font-size: 1.2rem; }
         .td-post-title a { color: var(--td-ink); text-decoration: none; }
         .td-post-date { display: block; color: var(--td-muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
         .td-post-desc { margin: 0; color: var(--td-muted); }
@@ -183,13 +184,14 @@ public extension TileKit.Site {
 
         private static let systemBase = """
         html { background: var(--td-bg); }
-        body { min-height: 100vh; background: var(--td-bg); color: var(--td-ink); font: 17px/1.58 var(--td-font); letter-spacing: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+        body { min-height: 100vh; background: var(--td-bg); color: var(--td-ink); font: 1.0625rem/1.58 var(--td-font); letter-spacing: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
         a { color: var(--td-accent); text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
         .td-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.5rem; padding: 0.75rem max(1rem, calc((100vw - var(--td-measure)) / 2)); border-bottom: 1px solid var(--td-border); background: var(--td-surface); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
         .td-brand { color: var(--td-ink); font-size: 0.95rem; font-weight: 700; text-decoration: none; }
         .td-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.85rem; }
         .td-nav a, .td-footer a, .td-sidebar-nav a { color: var(--td-muted); font-size: 0.9rem; text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover, .td-sidebar-nav a:hover { color: var(--td-accent); }
+        .td-nav a[aria-current="page"], .td-sidebar-nav a[aria-current="page"] { color: var(--td-ink); font-weight: 700; }
         .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.4rem 0.65rem; font: inherit; font-size: 0.9rem; line-height: 1; }
         .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-main { max-width: var(--td-measure); margin-inline: auto; padding: 5rem var(--td-space) 4rem; }
@@ -210,9 +212,9 @@ public extension TileKit.Site {
         .td-main .td-hero { width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
         .td-posts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.75rem; }
         .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
-        .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }
+        .td-posts .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }
         .td-post-body { min-width: 0; }
-        .td-post-title { margin: 0 0 0.25rem; font-size: 1.25rem; }
+        .td-main .td-post-title { margin: 0 0 0.25rem; font-size: 1.25rem; }
         .td-post-title a { color: var(--td-ink); text-decoration: none; }
         .td-post-date { display: block; color: var(--td-muted); font-size: 0.85rem; margin-bottom: 0.4rem; }
         .td-post-desc { margin: 0; color: var(--td-muted); }

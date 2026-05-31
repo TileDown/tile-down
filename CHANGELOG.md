@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Site customization in `tiledown.yml`: `postsLabel` overrides the posts
+  section's name in navigation and its heading (e.g. `Writings`), and `fontScale`
+  multiplies the base font size site-wide (e.g. `1.1` for 10% larger, emitted as
+  a root `font-size` so the whole rem-based type scale grows together; a positive
+  number, validated at parse time).
+- The navigation marks the current section with `aria-current="page"` (styled
+  bold in both themes), including when viewing any page beneath that section.
+
+### Fixed
+
+- Post-listing card titles no longer pick up the prose-heading top margin, so the
+  title aligns with the top of its thumbnail.
+
 ### Changed
 
 - Posts are modeled as `TileKit.Site.PostCollection`, a `RandomAccessCollection`

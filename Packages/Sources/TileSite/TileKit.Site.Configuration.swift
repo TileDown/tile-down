@@ -28,6 +28,14 @@ public extension TileKit.Site {
         /// How many of the newest posts `site.latestPosts` exposes (for a home-page
         /// "recent posts" block). Defaults to 3; a value <= 0 yields no latest posts.
         public var latestPostCount: Int
+        /// An optional label for the posts section, overriding the posts landing
+        /// page's own title in navigation and its heading (e.g. `Writings`). Empty
+        /// means use the page's own title.
+        public var postsLabel: String
+        /// A multiplier on the base font size, applied to the root element so the
+        /// whole type scale grows or shrinks together. `1` is the theme default;
+        /// `1.1` is 10% larger. Values <= 0 are rejected at parse time.
+        public var fontScale: Double
 
         public init(
             title: String = "",
@@ -38,6 +46,8 @@ public extension TileKit.Site {
             appearance: Appearance = .toggle,
             postsDirectory: String = "posts",
             latestPostCount: Int = 3,
+            postsLabel: String = "",
+            fontScale: Double = 1,
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -47,6 +57,8 @@ public extension TileKit.Site {
             self.appearance = appearance
             self.postsDirectory = postsDirectory
             self.latestPostCount = latestPostCount
+            self.postsLabel = postsLabel
+            self.fontScale = fontScale
         }
     }
 }
