@@ -52,6 +52,8 @@ def run(page):
     page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
     check("home title", page.title() == "Home", page.title())
+    footer_credit = page.locator(".td-built").inner_text()
+    check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
 
     broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
     check("all home images load", broken == 0, f"{broken} broken")
