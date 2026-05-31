@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Custom tag bars can use `isVisibleInTagBar` on each `site.tags` item to hide
   links to ungenerated higher-order filters. Existing single-tag URLs remain
   unchanged. (#62)
+- Theme-aware page images: pages can pair `image` with `imageDark` in front
+  matter. Built-in hero images and post-card thumbnails switch to the dark
+  variant when the site is in dark mode, including system preference and the
+  manual theme toggle. Pages with only `image` keep the current single-image
+  markup. (#63)
 - Opt-in analytics: `analytics.head` and `analytics.bodyEnd` in `tiledown.yml`
   inject a provider snippet verbatim into every page's `<head>` and end of
   `<body>` in the built-in layouts. Empty by default, so a build emits no

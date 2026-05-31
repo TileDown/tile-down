@@ -1,5 +1,7 @@
 ---
 title: Home
+image: /assets/logo.svg
+imageDark: /assets/logo-dark.svg
 ---
 # Home
 

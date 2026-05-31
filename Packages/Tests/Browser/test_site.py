@@ -49,11 +49,15 @@ def click_center(page, locator):
 
 def run(page):
     # --- Home: image, table, counter tile ---
+    page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
     check("home title", page.title() == "Home", page.title())
 
     broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
     check("all home images load", broken == 0, f"{broken} broken")
+    light_hero = page.locator(".td-theme-image.td-hero .td-theme-image-light")
+    dark_hero = page.locator(".td-theme-image.td-hero .td-theme-image-dark")
+    check("light hero image visible by default", light_hero.is_visible() and not dark_hero.is_visible())
 
     check("GFM table renders", page.query_selector("table") is not None)
     aligns = page.eval_on_selector_all("table thead th", "els => els.map(e => getComputedStyle(e).textAlign)")
@@ -73,6 +77,7 @@ def run(page):
     bg_after = page.evaluate("getComputedStyle(document.body).backgroundColor")
     check("toggle sets data-theme", theme in ("dark", "light"), f"data-theme={theme}")
     check("toggle changes background", bg_before != bg_after, f"{bg_before}->{bg_after}")
+    check("dark hero image visible after toggle", theme == "dark" and dark_hero.is_visible() and not light_hero.is_visible())
     page.reload(wait_until="networkidle")
     check("toggle choice persists", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme)
 
