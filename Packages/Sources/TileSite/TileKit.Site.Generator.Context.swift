@@ -64,6 +64,9 @@ extension TileKit.Site.Generator {
                 "posts": .list(pageContexts(posts, baseURL: baseURL)),
                 "tags": .list(tagContexts(posts: posts, baseURL: baseURL)),
                 "latestPosts": .list(pageContexts(latest, baseURL: baseURL)),
+                // Non-empty only when there are latest posts to show, so the
+                // recent-posts block (and its wrapper) disappears at count 0.
+                "hasLatestPosts": .string(latest.isEmpty ? "" : "true"),
             ],
         )
     }

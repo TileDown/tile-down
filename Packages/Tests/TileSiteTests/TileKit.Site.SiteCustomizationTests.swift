@@ -126,6 +126,35 @@ struct SiteCustomizationTests {
         #expect(post.contains(#"<a href="/about/">About</a>"#))
     }
 
+    @Test("latestPosts at zero hides the recent-posts block")
+    func zeroLatestPostsHidesBlock() throws {
+        func built(latestPostCount: Int) throws -> String {
+            let fileSystem = MemoryFileSystem(
+                files: [
+                    "content/index.md": "---\ntitle: Home\nlatest: true\n---\n# Home",
+                    "content/posts/first/index.md": "---\ntitle: First\ndate: 2026-05-01\n---\n# First",
+                    "templates/page.html": [
+                        #"{{#page.latest}}{{#site.hasLatestPosts}}"#,
+                        #"<ul class="td-posts"></ul>{{/site.hasLatestPosts}}{{/page.latest}}"#,
+                    ].joined(),
+                ],
+            )
+            _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil, latestPostCount: latestPostCount),
+                ),
+            )
+            return try #require(fileSystem.files["dist/index.html"])
+        }
+
+        // At zero the block (and its wrapper) is gone; with a positive count it shows.
+        #expect(try !built(latestPostCount: 0).contains(#"<ul class="td-posts">"#))
+        #expect(try built(latestPostCount: 3).contains(#"<ul class="td-posts">"#))
+    }
+
     private func makeGenerator(
         fileSystem: MemoryFileSystem,
     ) -> TileKit.Site.Generator {
