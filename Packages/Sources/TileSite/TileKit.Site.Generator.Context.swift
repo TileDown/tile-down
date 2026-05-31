@@ -16,12 +16,9 @@ extension TileKit.Site.Generator {
         result["site"] = siteValue(
             configuration,
             sitePaths: sitePaths,
-            sections: sections(pages),
             posts: posts,
-            title: siteTitle(
-                configuration: configuration,
-                pages: pages,
-            ),
+            pages: pages,
+            currentSlug: page.slug,
         )
         result["page"] = pageValue(
             page,
@@ -44,12 +41,13 @@ extension TileKit.Site.Generator {
     func siteValue(
         _ configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
-        sections: [TileKit.Site.Page],
         posts: TileKit.Site.PostCollection,
-        title: String,
+        pages: [TileKit.Site.Page],
+        currentSlug: String,
     ) -> TileKit.Template.Value {
         let baseURL = configuration.baseURL
         let latest = posts.prefix(max(0, configuration.latestPostCount))
+        let title = siteTitle(configuration: configuration, pages: pages)
         return .object(
             [
                 "title": .string(title),
@@ -62,7 +60,7 @@ extension TileKit.Site.Generator {
                 // Non-empty only in toggle mode, gating the button and its script.
                 "appearanceToggle": .string(configuration.appearance == .toggle ? "true" : ""),
                 "socialLinks": .list(configuration.socialLinks.map(socialLinkContext)),
-                "sections": .list(pageContexts(sections, baseURL: baseURL)),
+                "sections": .list(sectionContexts(sections(pages), baseURL: baseURL, currentSlug: currentSlug)),
                 "posts": .list(pageContexts(posts, baseURL: baseURL)),
                 "tags": .list(tagContexts(posts: posts, baseURL: baseURL)),
                 "latestPosts": .list(pageContexts(latest, baseURL: baseURL)),
@@ -78,6 +76,23 @@ extension TileKit.Site.Generator {
     ) -> [TileKit.Template.Context] {
         pages.map { page in
             pageContext(page, baseURL: baseURL)
+        }
+    }
+
+    /// Section contexts for the navigation, each carrying `isCurrent` so the
+    /// template can mark the active item. A section is current when the page being
+    /// rendered is that section's landing page or any page beneath it.
+    func sectionContexts(
+        _ sections: some Sequence<TileKit.Site.Page>,
+        baseURL: String,
+        currentSlug: String,
+    ) -> [TileKit.Template.Context] {
+        sections.map { section in
+            var context = pageContext(section, baseURL: baseURL)
+            let isCurrent = currentSlug == section.slug
+                || currentSlug.hasPrefix(section.slug + "/")
+            context["isCurrent"] = .string(isCurrent ? "true" : "")
+            return context
         }
     }
 
