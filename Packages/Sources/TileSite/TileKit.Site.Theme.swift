@@ -66,6 +66,7 @@ public extension TileKit.Site {
         --td-space: 1rem;
         --td-measure: 46rem;
         --td-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --td-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
         }
         .td-dark-tokens, [data-theme="dark"] {
         --td-bg: #0a0a0a;
@@ -108,6 +109,9 @@ public extension TileKit.Site {
         .td-main h1 { font-size: 2rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-block: 0 1rem; }
         .td-main h2 { font-size: 1.5rem; margin-block: 2.5rem 0.75rem; }
         .td-main p { margin-block: 0 1.25rem; }
+        .td-main code { font-family: var(--td-mono); font-size: 0.92em; background: var(--td-surface); border: 1px solid var(--td-border); border-radius: 0.3rem; padding: 0.12em 0.4em; }
+        .td-main pre { font-family: var(--td-mono); font-size: 0.875rem; line-height: 1.6; background: var(--td-surface); border: 1px solid var(--td-border); border-radius: var(--td-radius); padding: 1rem 1.25rem; margin-block: 0 1.5rem; overflow-x: auto; }
+        .td-main pre code { background: none; border: 0; border-radius: 0; padding: 0; font-size: inherit; }
         .td-main img { display: block; max-width: 100%; max-height: 30rem; width: auto; height: auto; margin-inline: auto; border-radius: var(--td-radius); }
         .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
         .td-main th, .td-main td { padding: 0.5rem 0.75rem; border: 1px solid var(--td-border); }
@@ -157,6 +161,7 @@ public extension TileKit.Site {
         --td-space: 1rem;
         --td-measure: 45rem;
         --td-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --td-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
         }
         .td-dark-tokens, [data-theme="dark"] {
         --td-bg: #000000;
@@ -209,8 +214,9 @@ public extension TileKit.Site {
         .td-main ul, .td-main ol { margin-block: 0 1.25rem; }
         .td-main strong { color: var(--td-ink); }
         .td-main blockquote { margin-block: 2rem; padding: 1.25rem; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); box-shadow: var(--td-shadow); }
-        .td-main code { border-radius: 0.4rem; background: var(--td-elevated); padding: 0.12rem 0.28rem; font-size: 0.92em; }
-        .td-main pre { overflow: auto; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-elevated); padding: 1rem; box-shadow: var(--td-shadow); }
+        .td-main code { font-family: var(--td-mono); border-radius: 0.4rem; background: var(--td-elevated); border: 1px solid var(--td-border); padding: 0.12em 0.4em; font-size: 0.92em; }
+        .td-main pre { font-family: var(--td-mono); font-size: 0.875rem; line-height: 1.6; overflow-x: auto; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-elevated); padding: 1rem 1.25rem; margin-block: 0 1.5rem; box-shadow: var(--td-shadow); }
+        .td-main pre code { background: none; border: 0; border-radius: 0; padding: 0; font-size: inherit; box-shadow: none; }
         .td-main img { display: block; max-width: 100%; max-height: 30rem; width: auto; height: auto; margin-inline: auto; border-radius: var(--td-radius); box-shadow: var(--td-shadow); }
         .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
         .td-main th, .td-main td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--td-border); }
