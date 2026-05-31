@@ -84,6 +84,24 @@ social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
 ```
 
+Posts can declare tags in front matter:
+
+```markdown
+---
+title: Notes from the renderer
+date: 2026-05-31
+tags: swift, rendering
+---
+```
+
+Tiledown generates static tag pages. Single-tag pages keep `/tags/swift/`.
+Two-tag AND filters are always generated, and larger filters use canonical nested
+URLs such as `/tags/rendering/swift/testing/` when those tags co-occur on a post.
+Higher-order generated filters are capped at three selected tags so a densely
+tagged post cannot expand to every possible tag subset.
+Custom tag bars should render only `site.tags` items with `isVisibleInTagBar` on
+multi-tag pages; the built-in layouts already do this.
+
 Or pass a custom template explicitly:
 
 ```sh

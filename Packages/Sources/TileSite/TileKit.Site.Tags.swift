@@ -14,6 +14,11 @@ public extension TileKit.Site {
     /// to its page URL, shared by the per-post `tags`, the site-wide `site.tags`,
     /// and the synthesized per-tag listing pages so they all agree.
     enum Tags {
+        /// The maximum number of selected tags that gets a generated static page.
+        /// Keeping this finite prevents one densely tagged post from expanding to
+        /// every possible higher-order tag subset.
+        static let maximumGeneratedFilterDepth = 3
+
         /// The tags declared on a page, parsed from a comma-separated `tags`
         /// front-matter value (e.g. `tags: swift, ios`). Each tag is trimmed;
         /// empty tokens are dropped; source order is preserved; tags that
@@ -35,6 +40,68 @@ public extension TileKit.Site {
                 result.append(tag)
             }
             return result
+        }
+
+        /// The normalized tag slugs declared on a page, ordered like the source
+        /// tags and de-duplicated by `tags(of:)`.
+        static func tagSlugs(
+            of page: Page,
+        ) -> [String] {
+            tags(of: page).map(slug(for:))
+        }
+
+        /// The normalized tag filter slugs carried by a synthesized tag page.
+        /// Single-tag pages keep the historical `tag` marker; multi-tag pages use
+        /// `tagFilters` so the page's own `tags` metadata stays available for
+        /// real content.
+        static func filterSlugs(
+            of page: Page,
+        ) -> [String] {
+            if let filters = page.document.frontMatter["tagFilters"] {
+                return normalizedSlugs(filters.split(separator: ",").map(String.init))
+            }
+            if let tag = page.document.frontMatter["tag"] {
+                return normalizedSlugs([tag])
+            }
+            return []
+        }
+
+        /// The normalized tag filter slugs represented by a generated tag-page
+        /// slug. `tags` has no selected tags; `tags/ios/swift` selects both.
+        static func filterSlugs(
+            fromTagPageSlug slug: String,
+        ) -> [String] {
+            guard slug.hasPrefix("tags/") else {
+                return []
+            }
+            let path = String(slug.dropFirst("tags/".count))
+            return normalizedSlugs(path.split(separator: "/").map(String.init))
+        }
+
+        /// A stable page slug for a tag selection. Selections are sorted by slug
+        /// so every set of selected tags has one canonical URL.
+        static func pageSlug(
+            forFilterSlugs slugs: [String],
+        ) -> String {
+            let normalized = normalizedSlugs(slugs)
+            guard !normalized.isEmpty else {
+                return "tags"
+            }
+            return "tags/" + normalized.joined(separator: "/")
+        }
+
+        /// Normalizes raw labels or slugs into a sorted, de-duplicated slug list.
+        static func normalizedSlugs(
+            _ values: some Sequence<String>,
+        ) -> [String] {
+            Array(
+                Set(
+                    values
+                        .map(slug(for:))
+                        .filter { !$0.isEmpty },
+                ),
+            )
+            .sorted()
         }
 
         /// The URL-safe slug for a tag: lowercased, with each run of

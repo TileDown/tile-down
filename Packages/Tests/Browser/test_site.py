@@ -24,6 +24,29 @@ def check(name, ok, detail=""):
     results.append((name, bool(ok), detail))
 
 
+def click_center(page, locator):
+    locator.wait_for(state="visible")
+    locator.scroll_into_view_if_needed()
+    box = locator.bounding_box()
+    if box is None:
+        raise AssertionError("click target has no bounding box")
+    x = box["x"] + box["width"] / 2
+    y = box["y"] + box["height"] / 2
+    handle = locator.element_handle()
+    receives_click = handle.evaluate(
+        """(element, point) => {
+            const hit = document.elementFromPoint(point.x, point.y);
+            return hit === element || element.contains(hit);
+        }""",
+        {"x": x, "y": y},
+    )
+    if not receives_click:
+        raise AssertionError("click target is covered at its center")
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.up()
+
+
 def run(page):
     # --- Home: image, table, counter tile ---
     page.goto(NORMAL + "/", wait_until="networkidle")
@@ -59,6 +82,25 @@ def run(page):
     check("listing has cards", len(page.query_selector_all(".td-post-card")) >= 1)
     check("draft absent from listing", "Secret Draft" not in listing)
     check("live post in listing", "Live Post" in listing)
+
+    # --- Tag filtering: single tags and tag1 AND tag2 ---
+    page.goto(NORMAL + "/tags/swift/", wait_until="networkidle")
+    swift_tags = page.inner_text("body")
+    check("swift tag lists both swift posts", "Live Post" in swift_tags and "Swift Only" in swift_tags)
+    click_center(page, page.locator(".td-tagbar").get_by_role("link", name="release").first)
+    page.wait_for_url("**/tags/release/swift/")
+    clicked_tags = page.inner_text("body")
+    check("tapping release narrows swift tag", "Live Post" in clicked_tags and "Swift Only" not in clicked_tags)
+    click_center(page, page.locator(".td-tagbar").get_by_role("link", name="swift").first)
+    page.wait_for_url("**/tags/release/")
+    removed_tags = page.inner_text("body")
+    check("tapping selected swift removes it", "Live Post" in removed_tags and "Swift Only" not in removed_tags)
+    page.goto(NORMAL + "/tags/release/", wait_until="networkidle")
+    release_tags = page.inner_text("body")
+    check("release tag excludes swift-only post", "Live Post" in release_tags and "Swift Only" not in release_tags)
+    page.goto(NORMAL + "/tags/release/swift/", wait_until="networkidle")
+    both_tags = page.inner_text("body")
+    check("release AND swift lists matching post", "Live Post" in both_tags and "Swift Only" not in both_tags)
 
     # --- Drafts: 404 in normal, present in --drafts build ---
     status = page.evaluate("async () => (await fetch('/posts/secret/', {method:'HEAD'})).status")
