@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The recent-posts block is hidden entirely when `latestPosts` is `0` (or there
+  are no posts), via a `site.hasLatestPosts` flag gating the built-in layouts.
 - Site customization in `tiledown.yml`: `postsLabel` overrides the posts
   section's name in navigation and its heading (e.g. `Writings`), and `fontScale`
   multiplies the base font size site-wide (e.g. `1.1` for 10% larger, emitted as
