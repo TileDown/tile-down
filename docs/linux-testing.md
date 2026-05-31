@@ -6,11 +6,16 @@ any of the routes below run a Linux toolchain from a macOS host.
 
 ## The authoritative gate is CI
 
-Every push and pull request runs the full Linux build and test in GitHub Actions
-(the `swift-linux` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml),
-a `swift:6.1` container running `swift build && swift test`). That is the
-authoritative answer to "is it green on Linux." Everything below is for catching
-breakage before you push, or for debugging a Linux-only failure interactively.
+Every push and pull request runs the Linux Swift build and tests in GitHub
+Actions (the `swift-linux` job in
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml), a `swift:6.1`
+container running `swift build && swift test`). CI also runs the Playwright
+browser fixture on Linux in the `browser-linux` job, using the same
+`Packages/Tests/Browser/run.sh` script used locally.
+
+Together those jobs are the authoritative answer to "is it green on Linux."
+Everything below is for catching breakage before you push, or for debugging a
+Linux-only failure interactively.
 
 ## What can differ on Linux
 
@@ -63,7 +68,21 @@ clone the repo, then:
 cd Packages && swift build && swift test
 ```
 
-### D. Cross-compile only (fast compile check, no VM, cannot run tests)
+### D. Browser fixture on Linux
+
+The browser fixture needs Python Playwright and Chromium in addition to Swift:
+
+```sh
+python3 -m pip install playwright
+python3 -m playwright install --with-deps chromium
+PYTHON=python3 Packages/Tests/Browser/run.sh
+```
+
+If your distro protects the system Python environment, use a virtual environment
+or pass the distro-supported override flag to `pip`. The CI job uses the
+container's Python and installs Playwright at job setup time.
+
+### E. Cross-compile only (fast compile check, no VM, cannot run tests)
 
 The [Static Linux SDK](https://www.swift.org/documentation/articles/static-linux-getting-started.html)
 cross-compiles a Linux binary from macOS with no VM or container. It catches the
@@ -91,7 +110,8 @@ file .build/*-linux-gnu/debug/TiledownPackageTests.xctest
 ## Picking a route
 
 - Just want the answer: push and let CI run it.
-- Want a fast local pre-push check: route D (cross-compile), or route A/B if you
+- Want a fast local pre-push check: route E (cross-compile), or route A/B if you
   also want the tests to actually execute.
+- Want browser-visible generated-site coverage: route D.
 - Debugging a Linux-only failure: route A or B, so you can open a shell, run a
   single test with `swift test --filter <name>`, add prints, and iterate.

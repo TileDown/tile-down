@@ -30,6 +30,17 @@ Packages/Tests/Browser/run.sh
 runs `test_site.py`, and tears everything down. Exit code is 0 only if every
 check passes.
 
+This browser gate is part of the full local stack:
+
+```sh
+# from the repo root
+scripts/check-local.sh
+```
+
+It is also run by the repo's `pre-push` hook when hooks are enabled and by the
+Linux browser job in the GitHub workflow. Set `TILEDOWN_SKIP_BROWSER=1` only for a
+narrow local iteration where browser coverage is intentionally deferred.
+
 ## Prerequisites
 
 - A Swift toolchain (the script builds `tiledown` via `swift run`).
@@ -38,7 +49,7 @@ check passes.
   pip install playwright && playwright install chromium
   # or, on macOS with Homebrew: brew install playwright
   ```
-  Set `PYTHON` if your interpreter is not `python3.14` (e.g. `PYTHON=python3`).
+  Set `PYTHON` if your interpreter is not `python3`.
 
 ## Fixture
 
