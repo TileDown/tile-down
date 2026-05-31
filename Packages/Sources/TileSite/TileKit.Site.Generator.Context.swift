@@ -59,6 +59,9 @@ extension TileKit.Site.Generator {
                 "tagsURL": .string(url(for: "tags", baseURL: baseURL)),
                 "stylesheetPath": .string(sitePaths.stylesheetPath),
                 "feedPath": .string(sitePaths.feedPath),
+                // Opt-in analytics snippets, injected verbatim by the layouts.
+                "analyticsHead": .string(configuration.analyticsHead),
+                "analyticsBodyEnd": .string(configuration.analyticsBodyEnd),
                 // Forced light/dark sets data-theme on <html>; empty for toggle/auto.
                 "appearanceForced": .string(forcedAppearance(configuration.appearance)),
                 // Non-empty only in toggle mode, gating the button and its script.

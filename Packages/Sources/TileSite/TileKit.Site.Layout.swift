@@ -65,6 +65,7 @@ public extension TileKit.Site {
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
+        {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
         </head>
         <body>
         <header class="td-header">
@@ -75,6 +76,7 @@ public extension TileKit.Site {
         <main class="td-main">{{#page.tagBar}}<h1 class="td-tagbar-title">{{ page.title }}</h1>{{#site.hasTags}}<nav class="td-tagbar" aria-label="All tags"><a class="td-tag td-tag-lg td-tag-clear" href="{{ site.tagsURL }}" aria-label="Show all articles">&#215; Clear</a>{{#site.tags}}<a class="td-tag td-tag-lg{{#isCurrent}} td-tag-current{{/isCurrent}}" href="{{ url }}">{{ name }}</a>{{/site.tags}}</nav>{{/site.hasTags}}{{/page.tagBar}}{{#page.image}}<img class="td-hero" src="{{ page.image }}" alt="{{ page.title }}">{{/page.image}}{{{ page.contents.htmlHead }}}{{#page.hasTags}}<nav class="td-tags" aria-label="Tags">{{#page.tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/page.tags}}</nav>{{/page.hasTags}}{{#page.latest}}{{#site.hasLatestPosts}}<ul class="td-posts">{{#site.latestPosts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}{{#hasTags}}<nav class="td-tags td-tags-card" aria-label="Tags">{{#tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/tags}}</nav>{{/hasTags}}</div></li>{{/site.latestPosts}}</ul>{{/site.hasLatestPosts}}{{/page.latest}}{{{ page.contents.htmlTail }}}{{#page.postList}}<ul class="td-posts">{{#page.posts}}<li class="td-post-card"><a class="td-post-thumb" href="{{ url }}">{{#image}}<img src="{{ image }}" alt="{{ title }}">{{/image}}</a><div class="td-post-body"><h3 class="td-post-title"><a href="{{ url }}">{{ title }}</a></h3>{{#date}}<time class="td-post-date">{{ date }}</time>{{/date}}{{#description}}<p class="td-post-desc">{{ description }}</p>{{/description}}{{#hasTags}}<nav class="td-tags td-tags-card" aria-label="Tags">{{#tags}}<a class="td-tag" href="{{ url }}">{{ name }}</a>{{/tags}}</nav>{{/hasTags}}</div></li>{{/page.posts}}</ul>{{/page.postList}}</main>
         <footer class="td-footer"><div class="td-footer-inner"><nav class="td-footer-nav">{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}</nav><nav class="td-socials">{{#site.socialLinks}}<a href="{{ url }}">{{ label }}</a>{{/site.socialLinks}}{{#site.feedPath}}<a href="{{ site.feedPath }}">RSS</a>{{/site.feedPath}}</nav><span class="td-built">Built with <a href="https://github.com/TileDown/tile-down">Tiledown</a></span></div></footer>
         {{#page.assets.javascript}}<script>{{{ page.assets.javascript }}}</script>{{/page.assets.javascript}}
+        {{#site.analyticsBodyEnd}}{{{ site.analyticsBodyEnd }}}{{/site.analyticsBodyEnd}}
         </body>
         </html>
         """
@@ -107,6 +109,7 @@ public extension TileKit.Site {
         <title>{{ page.title }}</title>
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
+        {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
         </head>
         <body class="td-layout-sidebar">
         <aside class="td-sidebar">

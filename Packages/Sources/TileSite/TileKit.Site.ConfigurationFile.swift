@@ -42,6 +42,9 @@ public extension TileKit.Site {
                 if applyGenerator(item, to: &result) {
                     continue
                 }
+                if applyAnalytics(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,
@@ -346,6 +349,24 @@ private extension TileKit.Site.ConfigurationFile {
             return false
         }
         result.configuration.outboundLinks[key] = item.value
+        return true
+    }
+
+    /// Records an opt-in analytics snippet (`analytics.head` / `analytics.bodyEnd`),
+    /// returning true when the line is an analytics setting. Split out of the scalar
+    /// dispatch to keep its complexity within budget.
+    static func applyAnalytics(
+        _ item: (key: String, value: String),
+        to result: inout Self,
+    ) -> Bool {
+        switch item.key {
+        case "analytics.head":
+            result.configuration.analyticsHead = item.value
+        case "analytics.bodyEnd":
+            result.configuration.analyticsBodyEnd = item.value
+        default:
+            return false
+        }
         return true
     }
 }

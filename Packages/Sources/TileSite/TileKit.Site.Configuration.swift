@@ -40,6 +40,14 @@ public extension TileKit.Site {
         /// to a generated `/out/<key>/` redirect page that forwards here, so an
         /// external URL lives in one place and the public link stays stable.
         public var outboundLinks: [String: String]
+        /// An opt-in analytics snippet injected into every page's `<head>`, verbatim
+        /// (e.g. a provider's script tag). Empty by default, so a build emits no
+        /// analytics. Author-supplied and third-party, like client-side tile JS.
+        public var analyticsHead: String
+        /// An opt-in analytics snippet injected at the end of every page's `<body>`,
+        /// verbatim. Empty by default. For providers whose snippet belongs before
+        /// `</body>` rather than in the head.
+        public var analyticsBodyEnd: String
 
         public init(
             title: String = "",
@@ -53,6 +61,8 @@ public extension TileKit.Site {
             postsLabel: String = "",
             fontScale: Double = 1,
             outboundLinks: [String: String] = [:],
+            analyticsHead: String = "",
+            analyticsBodyEnd: String = "",
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -65,6 +75,8 @@ public extension TileKit.Site {
             self.postsLabel = postsLabel
             self.fontScale = fontScale
             self.outboundLinks = outboundLinks
+            self.analyticsHead = analyticsHead
+            self.analyticsBodyEnd = analyticsBodyEnd
         }
     }
 }

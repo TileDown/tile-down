@@ -97,4 +97,21 @@ struct SiteConfigurationFileTests {
         #expect(file.generators.map(\.name) == ["cv", "zed"])
         #expect(file.generators.first?.command == ["swift", "run", "GenerateCV", "--out", "content/cv/index.md"])
     }
+
+    @Test("parses opt-in analytics snippets")
+    func parsesAnalytics() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            analytics.head: <script defer data-domain="x.com" src="https://plausible.io/js/script.js"></script>
+            analytics.bodyEnd: <noscript>no js</noscript>
+            """,
+        )
+        #expect(file.configuration.analyticsHead.contains("plausible.io/js/script.js"))
+        #expect(file.configuration.analyticsBodyEnd == "<noscript>no js</noscript>")
+
+        // Absent by default.
+        let bare = try TileKit.Site.ConfigurationFile.parse("title: Demo")
+        #expect(bare.configuration.analyticsHead.isEmpty)
+        #expect(bare.configuration.analyticsBodyEnd.isEmpty)
+    }
 }

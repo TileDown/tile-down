@@ -155,6 +155,42 @@ struct SiteCustomizationTests {
         #expect(try built(latestPostCount: 3).contains(#"<ul class="td-posts">"#))
     }
 
+    @Test("analytics snippets are injected into head and body, and absent by default")
+    func analyticsSnippets() throws {
+        func built(_ configuration: TileKit.Site.Configuration) throws -> String {
+            let fileSystem = MemoryFileSystem(
+                files: ["content/index.md": "---\ntitle: Home\n---\n# Home"],
+            )
+            _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .layout(.topNav),
+                    outputRootPath: "dist",
+                    configuration: configuration,
+                ),
+            )
+            return try #require(fileSystem.files["dist/index.html"])
+        }
+
+        // Configured: each snippet appears, the head one before </head> and the
+        // body one before </body>.
+        let withAnalytics = try built(.init(
+            analyticsHead: "<script>HEAD_PIXEL</script>",
+            analyticsBodyEnd: "<script>BODY_PIXEL</script>",
+        ))
+        let headSnippet = try #require(withAnalytics.range(of: "HEAD_PIXEL"))
+        let headClose = try #require(withAnalytics.range(of: "</head>"))
+        #expect(headSnippet.upperBound <= headClose.lowerBound)
+        let bodySnippet = try #require(withAnalytics.range(of: "BODY_PIXEL"))
+        let bodyClose = try #require(withAnalytics.range(of: "</body>"))
+        #expect(bodySnippet.upperBound <= bodyClose.lowerBound)
+
+        // Default: no analytics markup at all.
+        let off = try built(.init())
+        #expect(!off.contains("HEAD_PIXEL"))
+        #expect(!off.contains("BODY_PIXEL"))
+    }
+
     private func makeGenerator(
         fileSystem: MemoryFileSystem,
     ) -> TileKit.Site.Generator {

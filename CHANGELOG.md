@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Opt-in analytics: `analytics.head` and `analytics.bodyEnd` in `tiledown.yml`
+  inject a provider snippet verbatim into every page's `<head>` and end of
+  `<body>` in the built-in layouts. Empty by default, so a build emits no
+  analytics; works with any provider (Plausible, GoatCounter, Umami, ...) and is
+  an allowed third-party-JS exception like client-side tile output.
 - Content generators: declare `generate.<name>: <command>` in `tiledown.yml` and
   `build-site` runs each command (as a subprocess, in the content directory,
   ordered by name) before reading content, so a custom Swift package or any
