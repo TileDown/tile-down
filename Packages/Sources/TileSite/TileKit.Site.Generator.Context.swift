@@ -228,9 +228,16 @@ extension TileKit.Site.Generator {
                 baseURL: baseURL,
             ),
         )
+        let split = recentSplit(page.html)
         context["contents"] = .object(
             [
-                "html": .string(page.html),
+                // Marker stripped so a custom template using `html` never shows it.
+                "html": .string(split.head + split.tail),
+                // The body split at the recent-posts marker: a layout renders the
+                // recent block between these, so content after the marker lands
+                // below the cards. With no marker, head is the whole body, tail "".
+                "htmlHead": .string(split.head),
+                "htmlTail": .string(split.tail),
             ],
         )
         let tags = TileKit.Site.Tags.tags(of: page)
@@ -246,6 +253,25 @@ extension TileKit.Site.Generator {
         context["hasTags"] = .string(tags.isEmpty ? "" : "true")
         context["assets"] = assetsValue(page)
         return context
+    }
+
+    /// The rendered HTML for the recent-posts placement marker (`:::recent:::` on
+    /// its own line), as CommonMark renders it: a paragraph of that literal text.
+    private static let recentMarkerHTML = "<p>:::recent:::</p>"
+
+    /// Splits a page's rendered HTML at the recent-posts marker so a layout can
+    /// render the recent block in its place. Returns the body before the marker
+    /// and the body after it (the marker removed). With no marker the whole body
+    /// is the head and the tail is empty, preserving the cards-after-body default.
+    private func recentSplit(
+        _ html: String,
+    ) -> (head: String, tail: String) {
+        guard let range = html.range(of: Self.recentMarkerHTML) else {
+            return (html, "")
+        }
+        let head = String(html[..<range.lowerBound])
+        let tail = String(html[range.upperBound...])
+        return (head, tail)
     }
 
     func assetsValue(
