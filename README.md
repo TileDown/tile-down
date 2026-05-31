@@ -102,6 +102,20 @@ tagged post cannot expand to every possible tag subset.
 Custom tag bars should render only `site.tags` items with `isVisibleInTagBar` on
 multi-tag pages; the built-in layouts already do this.
 
+Pages can set a hero image in front matter. Add `imageDark` when a screenshot or
+diagram needs a separate dark-mode asset:
+
+```markdown
+---
+title: Demo
+image: /assets/demo-light.png
+imageDark: /assets/demo-dark.png
+---
+```
+
+Built-in layouts use the same pair for post-card thumbnails. If `imageDark` is
+omitted, the generated page keeps the plain single-image markup.
+
 Or pass a custom template explicitly:
 
 ```sh
