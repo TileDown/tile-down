@@ -129,7 +129,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::todo
+  Epic --> Embed["#80 Safe embed tile"]:::review
   Epic --> Mermaid["#56 Mermaid tile"]:::todo
   Epic --> Charts["#57 Chart tile"]:::todo
 
