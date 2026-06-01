@@ -120,8 +120,9 @@ public extension TileKit.Site {
         .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
         .td-main th, .td-main td { padding: 0.5rem 0.75rem; border: 1px solid var(--td-border); }
         .td-main thead th { background: var(--td-surface); font-weight: 700; }
-        .td-main .td-hero { display: block; width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
-        .td-main .td-theme-image.td-hero img { width: 100%; max-height: 22rem; object-fit: cover; margin: 0; }
+        .td-main .td-hero { display: block; width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto clamp(3rem, 7vw, 5rem); }
+        .td-main .td-theme-image.td-hero { display: block; }
+        .td-main .td-theme-image.td-hero img { width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto; }
         .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
@@ -213,7 +214,7 @@ public extension TileKit.Site {
         .td-nav a[aria-current="page"], .td-sidebar-nav a[aria-current="page"] { color: var(--td-ink); font-weight: 700; }
         .td-theme-toggle { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-surface); color: var(--td-ink); padding: 0.4rem 0.65rem; font: inherit; font-size: 0.9rem; line-height: 1; }
         .td-theme-toggle:hover { border-color: var(--td-accent); color: var(--td-accent); }
-        .td-main { max-width: var(--td-measure); margin-inline: auto; padding: 5rem var(--td-space) 4rem; }
+        .td-main { max-width: var(--td-measure); margin-inline: auto; padding: clamp(3rem, 7vh, 5rem) var(--td-space) 4rem; }
         .td-main h1 { max-width: 20ch; margin-block: 0 1.2rem; font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.05; letter-spacing: 0; }
         .td-main h2 { margin-block: 3rem 0.85rem; font-size: 1.55rem; line-height: 1.16; letter-spacing: 0; }
         .td-main h3 { margin-block: 2rem 0.5rem; font-size: 1.15rem; line-height: 1.25; letter-spacing: 0; }
@@ -233,8 +234,9 @@ public extension TileKit.Site {
         .td-main table { width: 100%; border-collapse: collapse; margin-block: 0 1.5rem; font-size: 0.95rem; }
         .td-main th, .td-main td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--td-border); }
         .td-main thead th { color: var(--td-ink); font-weight: 700; border-bottom-width: 2px; }
-        .td-main .td-hero { width: 100%; max-height: 22rem; object-fit: cover; margin-block: 0 1.5rem; }
-        .td-main .td-theme-image.td-hero img { width: 100%; max-height: 22rem; object-fit: cover; margin: 0; }
+        .td-main .td-hero { display: block; width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto clamp(3rem, 7vw, 5rem); }
+        .td-main .td-theme-image.td-hero { display: block; }
+        .td-main .td-theme-image.td-hero img { width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto; }
         .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }

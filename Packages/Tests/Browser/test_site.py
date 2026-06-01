@@ -16,6 +16,7 @@ from playwright.sync_api import sync_playwright
 
 NORMAL = os.environ.get("NORMAL_URL", "http://localhost:8090")
 DRAFTS = os.environ.get("DRAFTS_URL", "http://localhost:8091")
+SYSTEM = os.environ.get("SYSTEM_URL", "http://localhost:8092")
 
 results = []
 
@@ -47,8 +48,48 @@ def click_center(page, locator):
     page.mouse.up()
 
 
+def box(page, selector):
+    return page.locator(selector).first.bounding_box()
+
+
+def visible_theme_image_box(page, selector):
+    return page.eval_on_selector(
+        selector,
+        """(root) => {
+            const images = Array.from(root.querySelectorAll("img"));
+            const image = images.find((candidate) => {
+                const style = getComputedStyle(candidate);
+                const rect = candidate.getBoundingClientRect();
+                return style.display !== "none" && rect.width > 0 && rect.height > 0;
+            });
+            if (!image) return null;
+            const rect = image.getBoundingClientRect();
+            return { top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        }""",
+    )
+
+
+def check_hero_rhythm(page, name):
+    hero_box = box(page, ".td-theme-image.td-hero")
+    hero_image_box = visible_theme_image_box(page, ".td-theme-image.td-hero")
+    heading_box = box(page, "h1")
+    if hero_box is None or hero_image_box is None or heading_box is None:
+        check(name, False, "missing hero or title box")
+        return
+
+    gap = heading_box["y"] - (hero_box["y"] + hero_box["height"])
+    title_visible = heading_box["y"] + heading_box["height"] <= page.viewport_size["height"]
+    image_visible = hero_image_box["height"] >= 220
+    check(
+        name,
+        gap >= 48 and title_visible and image_visible,
+        f"gap={gap:.0f}, titleBottom={heading_box['y'] + heading_box['height']:.0f}, imageHeight={hero_image_box['height']:.0f}",
+    )
+
+
 def run(page):
     # --- Home: image, table, counter tile ---
+    page.set_viewport_size({"width": 896, "height": 512})
     page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
     check("home title", page.title() == "Home", page.title())
@@ -60,6 +101,11 @@ def run(page):
     light_hero = page.locator(".td-theme-image.td-hero .td-theme-image-light")
     dark_hero = page.locator(".td-theme-image.td-hero .td-theme-image-dark")
     check("light hero image visible by default", light_hero.is_visible() and not dark_hero.is_visible())
+    check_hero_rhythm(page, "standard hero leaves readable title spacing")
+
+    page.goto(SYSTEM + "/", wait_until="networkidle")
+    check_hero_rhythm(page, "system hero leaves readable title spacing")
+    page.goto(NORMAL + "/", wait_until="networkidle")
 
     check("GFM table renders", page.query_selector("table") is not None)
     aligns = page.eval_on_selector_all("table thead th", "els => els.map(e => getComputedStyle(e).textAlign)")
