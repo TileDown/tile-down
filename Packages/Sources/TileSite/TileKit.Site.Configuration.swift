@@ -52,6 +52,9 @@ public extension TileKit.Site {
         /// Disabled by default so a site only emits third-party share URLs when it
         /// opts in.
         public var shareLinks: Bool
+        /// Fallback redirects emitted into root `404.html` for static hosts that
+        /// cannot express wildcard redirects natively.
+        public var notFoundRedirects: NotFoundRedirects
 
         public init(
             title: String = "",
@@ -68,6 +71,7 @@ public extension TileKit.Site {
             analyticsHead: String = "",
             analyticsBodyEnd: String = "",
             shareLinks: Bool = false,
+            notFoundRedirects: NotFoundRedirects = .init(),
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -83,6 +87,7 @@ public extension TileKit.Site {
             self.analyticsHead = analyticsHead
             self.analyticsBodyEnd = analyticsBodyEnd
             self.shareLinks = shareLinks
+            self.notFoundRedirects = notFoundRedirects
         }
     }
 }

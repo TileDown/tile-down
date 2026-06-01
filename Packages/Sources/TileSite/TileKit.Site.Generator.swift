@@ -119,10 +119,12 @@ public extension TileKit.Site {
     }
 }
 
-private extension TileKit.Site.Generator {
+extension TileKit.Site.Generator {
     static let notFoundSlug = "404"
     static let notFoundFileName = "404.html"
+}
 
+private extension TileKit.Site.Generator {
     func loadPages(
         _ request: TileKit.Site.ContentBuildRequest,
     ) throws -> [TileKit.Site.Page] {

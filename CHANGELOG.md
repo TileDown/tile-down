@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 404 fallback redirects: `notFoundRedirect.exact.<path>` and
+  `notFoundRedirect.prefix.<path>` in `tiledown.yml` inject safe static-host
+  redirect rules into generated `404.html`, preserving query strings and
+  fragments for migrated legacy routes. (#97)
 - Generated 404 pages: content builds now emit root `404.html`, using a
   built-in default page or a site-specific `content/404/index.md` override
   rendered through the same layout and theme as the rest of the site. (#47)

@@ -224,6 +224,8 @@ theme: system
 rss: true
 rssPath: feed.xml
 shareLinks: true
+notFoundRedirect.exact./old-post: /posts/new-post/
+notFoundRedirect.prefix./tag/: /tags/
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
 ```
@@ -231,6 +233,13 @@ social.linkedin: https://www.linkedin.com/
 When `shareLinks: true` is set, built-in article pages include static share links
 for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a
 published site.
+
+Fallback 404 redirects help migrated static sites preserve old URLs on hosts
+without wildcard redirect files. `notFoundRedirect.exact.<path>` redirects one
+legacy path, while `notFoundRedirect.prefix.<path>` redirects any path beginning
+with that prefix. Sources must be root-relative paths. Targets can be
+root-relative paths or HTTPS URLs. Query strings and fragments are preserved, and
+the most specific matching prefix wins.
 
 Posts can declare tags in front matter:
 
