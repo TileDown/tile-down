@@ -70,6 +70,35 @@ extension SiteGeneratorTests {
         }
     }
 
+    @Test("redirect content skips unused body tile parsing")
+    func redirectContentSkipsUnusedBodyTileParsing() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/old-post/index.md": """
+                ---
+                type: redirect
+                to: /posts/live/
+                ---
+                :::tile counter
+                id: stale-counter
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        let result = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(result.outputPaths == ["dist/old-post/index.html"])
+        #expect(fileSystem.files["dist/old-post/index.html"]?.contains("/posts/live/") == true)
+    }
+
     @Test("redirect output cannot be overwritten by an outbound link shim")
     func redirectContentRejectsOutboundShimCollision() {
         let fileSystem = MemoryFileSystem(

@@ -319,6 +319,12 @@ def run(page):
     check("redirect page has canonical target", 'rel="canonical" href="/posts/live/"' in redirect)
     check("redirect page has meta refresh", 'content="0; url=/posts/live/"' in redirect)
     check("redirect page skips normal template", "Old Live Redirect" not in redirect)
+    legacy_tag_status = page.evaluate("async () => (await fetch('/tags/legacy/', {method:'HEAD'})).status")
+    check("redirect-only tag page is absent", legacy_tag_status == 404, f"status={legacy_tag_status}")
+    page.goto(NORMAL + "/old-live/", wait_until="domcontentloaded")
+    page.wait_for_url("**/posts/live/", wait_until="networkidle")
+    check("redirect page navigates in browser", page.url.endswith("/posts/live/"), page.url)
+    check("redirect target renders article", page.locator(".td-article-title").inner_text() == "Live Post")
 
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")

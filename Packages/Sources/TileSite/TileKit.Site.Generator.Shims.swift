@@ -2,6 +2,18 @@ import Foundation
 import TileCore
 
 extension TileKit.Site.Generator {
+    func isRedirect(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        isRedirect(frontMatter: page.document.frontMatter)
+    }
+
+    func isRedirect(
+        frontMatter: [String: String],
+    ) -> Bool {
+        frontMatter["type"]?.lowercased() == "redirect"
+    }
+
     /// Writes a tiny redirect page for each content page marked
     /// `type: redirect`. Redirect content keeps the source slug as the old URL,
     /// but is excluded from normal page rendering, navigation, listings, and feeds.
