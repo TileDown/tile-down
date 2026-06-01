@@ -53,10 +53,12 @@ Status key:
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
+  Active["In progress or open PR"]:::active
   Epic["Epic grouping"]:::epic
   Todo["Open issue"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
@@ -101,9 +103,10 @@ flowchart LR
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
   Epic --> Theme["#20 Site theme and theme properties"]:::todo
-  Epic --> Persistence["#77 Theme choice persistence"]:::todo
+  Epic --> Persistence["#77 Theme choice persistence"]:::active
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
@@ -112,15 +115,19 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::todo
-  Epic --> Types["#49 Content types"]:::todo
-  Epic --> Redirects["#45 Redirect output"]:::todo
-  Epic --> NotFound["#47 404 page"]:::todo
-  Epic --> Sitemap["#46 sitemap.xml"]:::todo
-  Epic --> RSS["#78 RSS content:encoded"]:::todo
-  Epic --> BaseURL["#37 baseURL asset links"]:::todo
+  Epic --> Static["#79 Static passthrough"]:::active
+  Epic --> Types["#49 Content types"]:::active
+  Epic --> Redirects["#45 Redirect output"]:::active
+  Epic --> NotFound["#47 404 page"]:::active
+  Epic --> Sitemap["#46 sitemap.xml"]:::active
+  Epic --> RSS["#78 RSS content:encoded"]:::active
+  Epic --> BaseURL["#37 baseURL asset links"]:::active
+  Epic --> Slugs["#87 Migration slugs"]:::active
+  Epic --> Fallbacks["#97 404 fallback redirects"]:::active
+  Epic --> Metadata["#100 SEO metadata"]:::active
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
@@ -129,11 +136,12 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::todo
+  Epic --> Embed["#80 Safe embed tile"]:::active
   Epic --> Mermaid["#56 Mermaid tile"]:::todo
   Epic --> Charts["#57 Chart tile"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
@@ -263,6 +271,12 @@ imageDark: /assets/demo-dark.png
 
 Built-in layouts use the same pair for post-card thumbnails. If `imageDark` is
 omitted, the generated page keeps the plain single-image markup.
+
+Built-in layouts also use page front matter and site configuration for head
+metadata. Set `description` for the description, Open Graph, and Twitter
+description tags. Set `baseURL` for canonical URLs, Open Graph URLs, and
+absolute social preview images. Dated posts under the posts directory emit
+article metadata.
 
 Or pass a custom template explicitly:
 

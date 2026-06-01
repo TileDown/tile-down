@@ -13,6 +13,7 @@ extension TileKit.Site.Generator {
             among: pages,
             postsDirectory: configuration.postsDirectory,
         )
+        let title = siteTitle(configuration: configuration, pages: pages)
         result["site"] = siteValue(
             configuration,
             sitePaths: sitePaths,
@@ -27,6 +28,7 @@ extension TileKit.Site.Generator {
             sitePosts: Array(posts),
             postsDirectory: configuration.postsDirectory,
             shareLinksEnabled: configuration.shareLinks,
+            siteTitle: title,
         )
         result["pages"] = .list(
             pages.map { page in
@@ -234,10 +236,19 @@ extension TileKit.Site.Generator {
         sitePosts: [TileKit.Site.Page] = [],
         postsDirectory: String = "posts",
         shareLinksEnabled: Bool = false,
+        siteTitle: String = "",
     ) -> TileKit.Template.Value {
         var context = pageContext(
             page,
             baseURL: baseURL,
+        )
+        context["metadata"] = .object(
+            metadataContext(
+                page,
+                baseURL: baseURL,
+                siteTitle: siteTitle,
+                postsDirectory: postsDirectory,
+            ),
         )
         context["posts"] = .list(
             posts.map { post in
