@@ -198,12 +198,6 @@ private extension TileKit.Site.Generator {
         }
     }
 
-    func isRedirect(
-        _ page: TileKit.Site.Page,
-    ) -> Bool {
-        page.document.frontMatter["type"]?.lowercased() == "redirect"
-    }
-
     func template(
         from source: TileKit.Site.TemplateSource,
     ) throws -> String {
@@ -325,12 +319,23 @@ private extension TileKit.Site.Generator {
             folderSlug: folderSlug,
             frontMatter: document.frontMatter,
         )
+        let resolvedOutputPath = outputPath(
+            outputRootPath: outputRootPath,
+            slug: slug,
+        )
+        guard !isRedirect(frontMatter: document.frontMatter) else {
+            return .init(
+                sourcePath: sourcePath,
+                outputPath: resolvedOutputPath,
+                sourceSlug: folderSlug,
+                slug: slug,
+                document: document,
+                html: "",
+            )
+        }
         return try makePage(
             sourcePath: sourcePath,
-            outputPath: outputPath(
-                outputRootPath: outputRootPath,
-                slug: slug,
-            ),
+            outputPath: resolvedOutputPath,
             sourceSlug: folderSlug,
             slug: slug,
             document: document,

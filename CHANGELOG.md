@@ -81,6 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   delimiters, percent escapes, backslashes, and control characters before writing
   output, so a content file cannot publish outside the output root or generate a
   link that browsers resolve to a different path. (#87)
+- Redirect content now ignores unused body tile syntax, so legacy redirect-only
+  pages cannot fail a build because of stale body content. (#45)
 - Outbound link shims now fail the build instead of overwriting an already
   generated page or redirect at the same output path. (#45)
 - Built-in layouts now render the generated footer credit as `TileDown`.
