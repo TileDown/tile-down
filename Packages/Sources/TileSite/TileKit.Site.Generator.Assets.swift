@@ -27,7 +27,16 @@ extension TileKit.Site.Generator {
         let relativePaths = try fileSystem.listFilesRecursively(
             at: request.contentRootPath,
         )
+        let staticPassthroughs = try normalizedStaticPassthroughs(
+            request.configuration.staticPassthroughs,
+        )
         for relativePath in relativePaths where isAsset(relativePath) {
+            guard !isStaticPassthroughSource(
+                relativePath,
+                passthroughs: staticPassthroughs,
+            ) else {
+                continue
+            }
             let destination = join(request.outputRootPath, relativePath)
             // Never let a content file overwrite a generated page/stylesheet/feed.
             guard !generated.contains(destination) else {
@@ -41,6 +50,37 @@ extension TileKit.Site.Generator {
         }
     }
 
+    /// Copies explicitly configured static files and directories to the public
+    /// paths named in site configuration. These run before ordinary asset mirroring
+    /// so a migration can keep a private source layout while preserving public
+    /// URLs such as `/CNAME`, `/robots.txt`, or `/images/...`.
+    func copyStaticPassthroughs(
+        request: TileKit.Site.ContentBuildRequest,
+        generated: inout Set<String>,
+        outputPaths: inout [String],
+    ) throws {
+        let relativePaths = try fileSystem.listFilesRecursively(
+            at: request.contentRootPath,
+        )
+        for passthrough in try normalizedStaticPassthroughs(request.configuration.staticPassthroughs) {
+            let copies = try staticCopies(
+                for: passthrough,
+                relativePaths: relativePaths,
+            )
+            for copy in copies {
+                let destination = join(request.outputRootPath, copy.outputPath)
+                guard generated.insert(destination).inserted else {
+                    throw TileKit.Site.ConfigurationFileError.duplicateOutputPath(copy.outputPath)
+                }
+                try fileSystem.copyFile(
+                    from: join(request.contentRootPath, copy.sourcePath),
+                    to: destination,
+                )
+                outputPaths.append(destination)
+            }
+        }
+    }
+
     func isAsset(
         _ path: String,
     ) -> Bool {
@@ -50,6 +90,56 @@ extension TileKit.Site.Generator {
         }
         let fileName = path.split(separator: "/").last.map(String.init) ?? path
         return !Self.nonAssetFileNames.contains(fileName)
+    }
+
+    private func isStaticPassthroughSource(
+        _ relativePath: String,
+        passthroughs: [TileKit.Site.StaticPassthrough],
+    ) -> Bool {
+        passthroughs.contains { passthrough in
+            relativePath == passthrough.sourcePath
+                || relativePath.hasPrefix(passthrough.sourcePath + "/")
+        }
+    }
+
+    private func normalizedStaticPassthroughs(
+        _ passthroughs: [TileKit.Site.StaticPassthrough],
+    ) throws -> [TileKit.Site.StaticPassthrough] {
+        try passthroughs.map { passthrough in
+            try .init(
+                validatingSourcePath: passthrough.sourcePath,
+                outputPath: passthrough.outputPath,
+            )
+        }
+    }
+
+    private func staticCopies(
+        for passthrough: TileKit.Site.StaticPassthrough,
+        relativePaths: [String],
+    ) throws -> [StaticCopy] {
+        if relativePaths.contains(passthrough.sourcePath) {
+            return [
+                .init(
+                    sourcePath: passthrough.sourcePath,
+                    outputPath: passthrough.outputPath,
+                ),
+            ]
+        }
+
+        let directoryPrefix = passthrough.sourcePath + "/"
+        let nested = relativePaths
+            .filter { $0.hasPrefix(directoryPrefix) }
+            .map { sourcePath in
+                let suffix = String(sourcePath.dropFirst(directoryPrefix.count))
+                return StaticCopy(
+                    sourcePath: sourcePath,
+                    outputPath: join(passthrough.outputPath, suffix),
+                )
+            }
+        guard !nested.isEmpty else {
+            throw TileKit.Site.ConfigurationFileError.missingStaticPath(passthrough.sourcePath)
+        }
+        return nested
     }
 
     /// Runs the injected image-checking pass over the content's image assets.
@@ -90,4 +180,9 @@ extension TileKit.Site.Generator {
 
         return parent + "/" + child
     }
+}
+
+private struct StaticCopy: Equatable {
+    var sourcePath: String
+    var outputPath: String
 }

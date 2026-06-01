@@ -52,6 +52,9 @@ public extension TileKit.Site {
         /// Disabled by default so a site only emits third-party share URLs when it
         /// opts in.
         public var shareLinks: Bool
+        /// Static files or directories to copy from the content tree to explicit
+        /// output paths, e.g. root deployment files or migrated public assets.
+        public var staticPassthroughs: [StaticPassthrough]
 
         public init(
             title: String = "",
@@ -68,6 +71,7 @@ public extension TileKit.Site {
             analyticsHead: String = "",
             analyticsBodyEnd: String = "",
             shareLinks: Bool = false,
+            staticPassthroughs: [StaticPassthrough] = [],
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -83,6 +87,7 @@ public extension TileKit.Site {
             self.analyticsHead = analyticsHead
             self.analyticsBodyEnd = analyticsBodyEnd
             self.shareLinks = shareLinks
+            self.staticPassthroughs = staticPassthroughs
         }
     }
 }

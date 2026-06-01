@@ -7,17 +7,20 @@ extension TileKit.Site.Generator {
     /// same dark-mode selectors as the built-in themes.
     func heroImageContext(
         _ page: TileKit.Site.Page,
+        baseURL: String = "",
     ) -> TileKit.Template.Context? {
         guard
-            let source = page.document.frontMatter["image"],
-            !source.isEmpty
+            let rawSource = page.document.frontMatter["image"],
+            !rawSource.isEmpty
         else {
             return nil
         }
 
+        let source = assetURL(rawSource, baseURL: baseURL)
         let title = page.document.frontMatter["title"] ?? ""
         let darkSource = page.document.frontMatter["imageDark"]
             .flatMap { $0.isEmpty ? nil : $0 }
+            .map { assetURL($0, baseURL: baseURL) }
         return [
             "src": .string(source),
             "darkSrc": .string(darkSource ?? ""),
@@ -62,6 +65,27 @@ extension TileKit.Site.Generator {
             #"<img class="td-theme-image-dark" src="\#(escapedDarkSource)" alt="" aria-hidden="true">"#,
             "</span>",
         ].joined()
+    }
+
+    private func assetURL(
+        _ source: String,
+        baseURL: String,
+    ) -> String {
+        guard !baseURL.isEmpty, source.hasPrefix("/"), !isExternalAssetURL(source) else {
+            return source
+        }
+        let path = String(source.dropFirst())
+        return baseURL.hasSuffix("/") ? baseURL + path : baseURL + "/" + path
+    }
+
+    private func isExternalAssetURL(
+        _ source: String,
+    ) -> Bool {
+        let lowercased = source.lowercased()
+        return lowercased.hasPrefix("http://")
+            || lowercased.hasPrefix("https://")
+            || lowercased.hasPrefix("data:")
+            || lowercased.hasPrefix("//")
     }
 
     private func escapeHTMLAttribute(
