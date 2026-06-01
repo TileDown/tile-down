@@ -70,6 +70,31 @@ extension SiteGeneratorTests {
         }
     }
 
+    @Test("redirect content rejects blank target values")
+    func redirectContentRejectsBlankTargetValues() {
+        let fileSystem = MemoryFileSystem(files: [:])
+        let page = TileKit.Site.Page(
+            sourcePath: "content/old-post/index.md",
+            outputPath: "dist/old-post/index.html",
+            slug: "old-post",
+            document: .init(
+                frontMatter: [
+                    "type": "redirect",
+                    "to": "   \n\t",
+                ],
+                body: "",
+            ),
+            html: "",
+        )
+
+        #expect(throws: TileKit.Site.RedirectError.missingTarget("content/old-post/index.md")) {
+            try makeGenerator(fileSystem: fileSystem).contentRedirects(
+                [page],
+                outputRootPath: "dist",
+            )
+        }
+    }
+
     @Test("redirect content skips unused body tile parsing")
     func redirectContentSkipsUnusedBodyTileParsing() throws {
         let fileSystem = MemoryFileSystem(

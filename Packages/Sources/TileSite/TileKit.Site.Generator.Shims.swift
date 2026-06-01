@@ -23,9 +23,7 @@ extension TileKit.Site.Generator {
     ) throws -> [String] {
         var paths: [String] = []
         for page in pages.sorted() {
-            guard let target = page.document.frontMatter["to"], !target.isEmpty else {
-                throw TileKit.Site.RedirectError.missingTarget(page.sourcePath)
-            }
+            let target = try redirectTarget(for: page)
             let outputPath = join(
                 outputRootPath,
                 page.slug.isEmpty ? "index.html" : page.slug + "/index.html",
@@ -37,6 +35,17 @@ extension TileKit.Site.Generator {
             paths.append(outputPath)
         }
         return paths
+    }
+
+    private func redirectTarget(
+        for page: TileKit.Site.Page,
+    ) throws -> String {
+        let target = page.document.frontMatter["to"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let target, !target.isEmpty else {
+            throw TileKit.Site.RedirectError.missingTarget(page.sourcePath)
+        }
+        return target
     }
 
     /// Writes a tiny redirect page at `out/<key>/index.html` for each configured
