@@ -2,6 +2,52 @@ import TileCore
 import TileOutput
 
 extension TileKit.Site.Generator {
+    static let sharedStylesheetFileName = "styles.css"
+
+    /// Merges every page's CSS into one site stylesheet, writes it to the output
+    /// root, records it in `outputPaths`, and returns the URL to link it from
+    /// each page. Returns "" and writes nothing when no page has any CSS, so a
+    /// site without styled tiles emits no stray stylesheet.
+    func writeSharedStylesheet(
+        pages: [TileKit.Site.Page],
+        outputRootPath: String,
+        configuration: TileKit.Site.Configuration,
+        outputPaths: inout [String],
+    ) throws -> String {
+        let tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
+            result.merging(page.stylesheet)
+        }
+        let css = Self.composeStylesheet(
+            theme: configuration.theme,
+            tiles: tiles,
+            fontScale: configuration.fontScale,
+        )
+        guard !css.isEmpty else {
+            return ""
+        }
+
+        let outputPath = join(outputRootPath, Self.sharedStylesheetFileName)
+        try fileSystem.writeTextFile(
+            css,
+            at: outputPath,
+        )
+        outputPaths.append(outputPath)
+        return stylesheetURL(
+            baseURL: configuration.baseURL,
+            fileName: Self.sharedStylesheetFileName,
+        )
+    }
+
+    func stylesheetURL(
+        baseURL: String,
+        fileName: String,
+    ) -> String {
+        guard !baseURL.isEmpty else {
+            return "/" + fileName
+        }
+        return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
+    }
+
     /// Composes the shared stylesheet from the theme and the merged tile CSS.
     /// With no theme this is exactly the tile stylesheet; with a theme it adds
     /// the theme properties (unlayered) and the theme's reset and base styles
