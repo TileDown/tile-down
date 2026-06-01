@@ -266,6 +266,8 @@ def run(page):
     not_found_text = page.inner_text("body")
     check("custom 404 page renders", page.title() == "Missing in TileDown" and "content/404/index.md" in not_found_text)
     check("custom 404 uses site chrome", "Built with TileDown" in not_found_text)
+    broken_404_images = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
+    check("custom 404 relative images load", broken_404_images == 0, f"{broken_404_images} broken")
     not_found_folder = page.evaluate("async () => (await fetch('/404/', {method:'HEAD'})).status")
     check("custom 404 source does not create /404/", not_found_folder == 404, f"status={not_found_folder}")
 

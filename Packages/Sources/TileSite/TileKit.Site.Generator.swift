@@ -111,6 +111,7 @@ public extension TileKit.Site {
             try copyAssets(
                 request: request,
                 generated: Set(outputPaths),
+                notFoundAssetDirectory: source.notFoundAssetDirectory,
                 outputPaths: &outputPaths,
             )
 
@@ -155,19 +156,30 @@ private extension TileKit.Site.Generator {
 
     private func sourcePages(
         _ request: TileKit.Site.ContentBuildRequest,
-    ) throws -> (contentPages: [TileKit.Site.Page], notFoundPage: TileKit.Site.Page) {
+    ) throws -> SourcePages {
         let loadedPages = try loadPages(request)
+        let sourceNotFoundPage = loadedPages.first(where: isNotFoundPage)
         let notFoundPage = try notFoundPage(
-            from: loadedPages.first(where: isNotFoundPage),
+            from: sourceNotFoundPage,
             outputRootPath: request.outputRootPath,
         )
+        let notFoundAssetDirectory = sourceNotFoundPage.flatMap { page in
+            sourceRelativeDirectory(
+                sourcePath: page.sourcePath,
+                contentRootPath: request.contentRootPath,
+            )
+        }
         let contentPages = applyingPostsLabel(
             to: loadedPages.filter { page in
                 !isNotFoundPage(page)
             },
             configuration: request.configuration,
         )
-        return (contentPages, notFoundPage)
+        return SourcePages(
+            contentPages: contentPages,
+            notFoundPage: notFoundPage,
+            notFoundAssetDirectory: notFoundAssetDirectory,
+        )
     }
 
     /// Applies the configured `postsLabel` to the posts landing page (the page
@@ -236,6 +248,21 @@ private extension TileKit.Site.Generator {
         _ page: TileKit.Site.Page,
     ) -> Bool {
         page.slug == Self.notFoundSlug
+    }
+
+    private func sourceRelativeDirectory(
+        sourcePath: String,
+        contentRootPath: String,
+    ) -> String? {
+        let prefix = contentRootPath.hasSuffix("/") ? contentRootPath : contentRootPath + "/"
+        guard sourcePath.hasPrefix(prefix) else {
+            return nil
+        }
+        let relativePath = String(sourcePath.dropFirst(prefix.count))
+        guard let lastSeparator = relativePath.lastIndex(of: "/") else {
+            return ""
+        }
+        return String(relativePath[..<lastSeparator])
     }
 
     private func writeFeed(
