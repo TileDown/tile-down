@@ -172,7 +172,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#85 Renderer correctness and cleanup"]:::epic
-  Epic --> BooleanFM["#36 Boolean front matter"]:::todo
+  Epic --> BooleanFM["#36 Boolean front matter"]:::done
   Epic --> Mustache["#38 Mustache section typo detection"]:::todo
   Epic --> Escaping["#40 Shared HTML escaping"]:::todo
   Epic --> ContentWalk["#41 Single content tree walk"]:::todo
