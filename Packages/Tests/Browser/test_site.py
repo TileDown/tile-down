@@ -226,6 +226,7 @@ def run(page):
     check("listing has cards", len(page.query_selector_all(".td-post-card")) >= 1)
     check("draft absent from listing", "Secret Draft" not in listing)
     check("live post in listing", "Live Post" in listing)
+    check("redirect absent from listing", "Old Live Redirect" not in listing)
 
     # --- Tag filtering: single tags and tag1 AND tag2 ---
     page.goto(NORMAL + "/tags/swift/", wait_until="networkidle")
@@ -313,11 +314,18 @@ def run(page):
     page.goto(NORMAL + "/tags/migration/", wait_until="networkidle")
     check("migrated post appears on tag page", "Migrated Post" in page.inner_text("body"))
 
+    # --- Redirect content ---
+    redirect = page.evaluate("async () => (await fetch('/old-live/')).text()")
+    check("redirect page has canonical target", 'rel="canonical" href="/posts/live/"' in redirect)
+    check("redirect page has meta refresh", 'content="0; url=/posts/live/"' in redirect)
+    check("redirect page skips normal template", "Old Live Redirect" not in redirect)
+
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")
     check("feed has live post", "Live Post" in feed)
     check("feed uses migrated canonical URL", "<link>/blog/migrated/</link>" in feed)
     check("feed excludes draft", "Secret Draft" not in feed)
+    check("feed excludes redirect", "Old Live Redirect" not in feed)
 
 
 def main():

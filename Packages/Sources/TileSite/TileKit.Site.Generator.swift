@@ -12,7 +12,7 @@ public extension TileKit.Site {
         private let markdownParser: any TileKit.Source.MarkdownParsing
         private let tileParser: any TileKit.Tile.Parsing
         private let htmlRenderer: any TileKit.Output.Rendering
-        private let templateRenderer: any TileKit.Template.Rendering
+        let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
         let imageChecker: any ImageChecking
 
@@ -62,10 +62,9 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let contentPages = try applyingPostsLabel(
-                to: loadPages(request),
-                configuration: request.configuration,
-            )
+            let loadedPages = try loadPages(request)
+            let redirectPages = loadedPages.filter(isRedirect)
+            let contentPages = contentPages(from: loadedPages, request: request)
             let posts = TileKit.Site.PostCollection(
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
@@ -94,22 +93,21 @@ public extension TileKit.Site {
                 feedPath: feedPath,
             )
 
-            for page in pages {
-                let output = try render(
-                    page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: request.configuration,
-                    sitePaths: sitePaths,
-                )
-                try fileSystem.writeTextFile(
-                    output,
-                    at: page.outputPath,
-                )
-                outputPaths.append(page.outputPath)
-            }
+            outputPaths += try writeRenderedPages(
+                pages: pages,
+                template: template,
+                configuration: request.configuration,
+                sitePaths: sitePaths,
+            )
 
-            outputPaths += try outboundShims(request: request)
+            outputPaths += try contentRedirects(
+                redirectPages,
+                outputRootPath: request.outputRootPath,
+            )
+            outputPaths += try outboundShims(
+                request: request,
+                generated: Set(outputPaths),
+            )
             try copyAssets(
                 request: request,
                 generated: Set(outputPaths),
@@ -177,6 +175,16 @@ private extension TileKit.Site.Generator {
         }
     }
 
+    func contentPages(
+        from pages: [TileKit.Site.Page],
+        request: TileKit.Site.ContentBuildRequest,
+    ) -> [TileKit.Site.Page] {
+        applyingPostsLabel(
+            to: pages.filter { !isRedirect($0) },
+            configuration: request.configuration,
+        )
+    }
+
     /// Whether a page is a draft, from a truthy `draft` front-matter value.
     /// Unset or any non-truthy value publishes as normal.
     func isDraft(
@@ -188,6 +196,12 @@ private extension TileKit.Site.Generator {
         default:
             false
         }
+    }
+
+    func isRedirect(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        page.document.frontMatter["type"]?.lowercased() == "redirect"
     }
 
     func template(
@@ -349,24 +363,6 @@ private extension TileKit.Site.Generator {
             html: artifact.contents,
             stylesheet: artifact.assets.stylesheet,
             javascript: artifact.assets.javascript,
-        )
-    }
-
-    private func render(
-        page: TileKit.Site.Page,
-        pages: [TileKit.Site.Page],
-        template: String,
-        configuration: TileKit.Site.Configuration,
-        sitePaths: TileKit.Site.GeneratedSitePaths,
-    ) throws -> String {
-        try templateRenderer.render(
-            template: template,
-            context: context(
-                page: page,
-                pages: pages,
-                configuration: configuration,
-                sitePaths: sitePaths,
-            ),
         )
     }
 

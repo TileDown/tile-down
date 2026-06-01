@@ -10,6 +10,7 @@ public extension TileKit.Site {
         case invalidBoolean(String)
         case invalidPath(String)
         case duplicateSlug(String)
+        case duplicateOutputPath(String)
         case invalidLatestPosts(String)
         case invalidFontScale(String)
 
@@ -31,6 +32,8 @@ public extension TileKit.Site {
                 "Invalid site configuration path `\(path)`."
             case let .duplicateSlug(slug):
                 "Duplicate page slug `\(slug)`. Two pages resolve to the same output path."
+            case let .duplicateOutputPath(path):
+                "Duplicate output path `\(path)`. Two generated files would overwrite each other."
             case let .invalidLatestPosts(value):
                 "Invalid latestPosts value `\(value)`. Expected a non-negative integer."
             case let .invalidFontScale(value):

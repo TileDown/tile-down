@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Redirect content items: a page with `type: redirect` and `to: <url>` now
+  emits a static redirect page at its slug while staying out of navigation, post
+  listings, tag pages, and feeds. (#45)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
@@ -78,6 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   delimiters, percent escapes, backslashes, and control characters before writing
   output, so a content file cannot publish outside the output root or generate a
   link that browsers resolve to a different path. (#87)
+- Outbound link shims now fail the build instead of overwriting an already
+  generated page or redirect at the same output path. (#45)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.
