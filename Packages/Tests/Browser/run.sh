@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build the fixture site (normal + --drafts + system theme), serve them, run the
-# Playwright browser tests, then tear everything down. Exit code propagates from
-# the tests.
+# Build the fixture site (normal + --drafts + system theme + baseURL subpath),
+# serve them, run the Playwright browser tests, then tear everything down. Exit
+# code propagates from the tests.
 #
 # Requires: a built `tiledown` (built here via `swift run`) and either Python
 # Playwright or `uv` for an ephemeral Python Playwright runner.
@@ -16,9 +16,12 @@ normal="$work/normal"
 drafts="$work/drafts"
 system_fixture="$work/system-fixture"
 system="$work/system"
+base_fixture="$work/base-fixture"
+base="$work/base"
 normal_port="${NORMAL_PORT:-8090}"
 drafts_port="${DRAFTS_PORT:-8091}"
 system_port="${SYSTEM_PORT:-8092}"
+base_port="${BASE_PORT:-8093}"
 python="${PYTHON:-python3}"
 pids=()
 
@@ -37,11 +40,13 @@ PY
     NORMAL_URL="http://localhost:$normal_port" \
     DRAFTS_URL="http://localhost:$drafts_port" \
     SYSTEM_URL="http://localhost:$system_port" \
+    BASE_URL="http://localhost:$base_port" \
       "$python" "$here/test_site.py"
   elif command -v uv >/dev/null 2>&1; then
     NORMAL_URL="http://localhost:$normal_port" \
     DRAFTS_URL="http://localhost:$drafts_port" \
     SYSTEM_URL="http://localhost:$system_port" \
+    BASE_URL="http://localhost:$base_port" \
       uv run --with playwright "$python" "$here/test_site.py"
   else
     echo "Python Playwright is not installed. Install it for $python, or install uv for the ephemeral Playwright runner." >&2
@@ -49,17 +54,20 @@ PY
   fi
 }
 
-echo "Building fixture (normal + --drafts + system theme)..."
+echo "Building fixture (normal + --drafts + system theme + baseURL subpath)..."
 ( cd "$packages" && swift run tiledown build-site "$fixture" "$normal" )
 ( cd "$packages" && swift run tiledown build-site --drafts "$fixture" "$drafts" )
 cp -R "$fixture" "$system_fixture"
 perl -0pi -e 's/^theme: standard$/theme: system/m' "$system_fixture/tiledown.yml"
 grep -qx "theme: system" "$system_fixture/tiledown.yml"
 ( cd "$packages" && swift run tiledown build-site "$system_fixture" "$system" )
+cp -R "$fixture" "$base_fixture"
+printf '\nbaseURL: http://localhost:%s/docs\n' "$base_port" >> "$base_fixture/tiledown.yml"
+( cd "$packages" && swift run tiledown build-site "$base_fixture" "$base/docs" )
 
 # Refuse to run if a port is already taken: a stale server there would answer
 # our requests from the wrong directory and the tests would fail confusingly.
-for port in "$normal_port" "$drafts_port" "$system_port"; do
+for port in "$normal_port" "$drafts_port" "$system_port" "$base_port"; do
   if lsof -ti "tcp:$port" >/dev/null 2>&1; then
     echo "Port $port is already in use. Free it (or set NORMAL_PORT/DRAFTS_PORT/SYSTEM_PORT) and retry." >&2
     exit 1
@@ -68,13 +76,14 @@ done
 
 # `exec` so the backgrounded process IS the server (not a wrapping subshell),
 # which makes $! the real PID and lets cleanup kill it instead of orphaning it.
-echo "Serving normal on $normal_port, drafts on $drafts_port, system on $system_port..."
+echo "Serving normal on $normal_port, drafts on $drafts_port, system on $system_port, baseURL on $base_port..."
 ( cd "$normal" && exec python3 -m http.server "$normal_port" >/dev/null 2>&1 ) & pids+=($!)
 ( cd "$drafts" && exec python3 -m http.server "$drafts_port" >/dev/null 2>&1 ) & pids+=($!)
 ( cd "$system" && exec python3 -m http.server "$system_port" >/dev/null 2>&1 ) & pids+=($!)
+( cd "$base" && exec python3 -m http.server "$base_port" >/dev/null 2>&1 ) & pids+=($!)
 
 # Wait until each server actually answers, rather than guessing with a fixed sleep.
-for port in "$normal_port" "$drafts_port" "$system_port"; do
+for port in "$normal_port" "$drafts_port" "$system_port" "$base_port"; do
   for _ in $(seq 1 50); do
     if curl -sf -o /dev/null "http://localhost:$port/"; then break; fi
     sleep 0.1
