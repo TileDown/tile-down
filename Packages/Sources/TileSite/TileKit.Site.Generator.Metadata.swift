@@ -62,8 +62,16 @@ extension TileKit.Site.Generator {
         pageURL: String,
         baseURL: String,
     ) -> String {
-        if let scheme = URLComponents(string: source)?.scheme?.lowercased() {
-            return scheme == "http" || scheme == "https" ? source : ""
+        let sourceComponents = URLComponents(string: source)
+        if let scheme = sourceComponents?.scheme?.lowercased() {
+            guard
+                scheme == "http" || scheme == "https",
+                let host = sourceComponents?.host,
+                !host.isEmpty
+            else {
+                return ""
+            }
+            return source
         }
 
         guard
