@@ -275,6 +275,8 @@ extension TileKit.Site.Generator {
                     shareLinksEnabled: shareLinksEnabled,
                 ),
             )
+        } else {
+            context["article"] = ""
         }
         return .object(context)
     }
@@ -311,6 +313,9 @@ extension TileKit.Site.Generator {
         context["displayDate"] = .string(
             TileKit.Site.PostSelection.displayDate(page.document.frontMatter["date"]),
         )
+        context["description"] = .string(page.document.frontMatter["description"] ?? "")
+        context["latest"] = .string(frontMatterSectionIsTruthy(page.document.frontMatter["latest"]) ? "true" : "")
+        context["postList"] = .string(frontMatterSectionIsTruthy(page.document.frontMatter["postList"]) ? "true" : "")
         // Non-empty on the tags landing page and any per-tag page, gating the
         // sticky tag bar that lets a reader jump between tags.
         let onTagPage = page.slug == "tags" || page.slug.hasPrefix("tags/")
@@ -320,6 +325,8 @@ extension TileKit.Site.Generator {
             baseURL: baseURL,
         ) {
             context["heroImage"] = .object(heroImage)
+        } else {
+            context["heroImage"] = ""
         }
         let split = recentSplit(page.html)
         context["contents"] = .object(
