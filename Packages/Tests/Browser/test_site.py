@@ -238,6 +238,17 @@ def run(page):
     check("back navigation reapplies stored light theme", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
     page.go_back(wait_until="load")
     check("back navigation keeps stored light theme on home", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
+    other_page = page.context.new_page()
+    try:
+        other_page.goto(NORMAL + "/", wait_until="networkidle")
+        other_page.evaluate("localStorage.removeItem('td-theme')")
+        page.wait_for_function("document.documentElement.getAttribute('data-theme') === null")
+    finally:
+        other_page.close()
+    check(
+        "storage removal clears explicit theme",
+        page.evaluate("document.documentElement.hasAttribute('data-theme')") is False,
+    )
 
     # --- Post listing: live present, draft absent ---
     page.goto(NORMAL + "/posts/", wait_until="networkidle")
@@ -289,10 +300,12 @@ def run(page):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page()
+        context = browser.new_context()
+        page = context.new_page()
         try:
             run(page)
         finally:
+            context.close()
             browser.close()
 
     passed = sum(1 for _, ok, _ in results if ok)

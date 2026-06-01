@@ -57,6 +57,7 @@ public extension TileKit.Site {
           function applyStoredTheme() {
             var saved = storedTheme();
             if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
           }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
@@ -117,6 +118,7 @@ public extension TileKit.Site {
           function applyStoredTheme() {
             var saved = storedTheme();
             if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
           }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
