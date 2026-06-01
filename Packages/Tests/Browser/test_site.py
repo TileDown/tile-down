@@ -214,6 +214,47 @@ def run(page):
     check("light hero image visible by default", light_hero.is_visible() and not dark_hero.is_visible())
     check_hero_rhythm(page, "standard hero leaves readable title spacing")
 
+    page.goto(NORMAL + "/hero/", wait_until="networkidle")
+    check("hero front matter page title", page.title() == "Hero Fallback", page.title())
+    fallback_hero = page.locator(".td-hero")
+    check("hero front matter image renders", fallback_hero.is_visible())
+    check("hero front matter image center is unobstructed", can_receive_center_click(fallback_hero))
+    check(
+        "hero front matter omits relative metadata image without base URL",
+        page.locator('meta[property="og:image"]').count() == 0,
+    )
+    fallback_box = box(page, ".td-hero")
+    fallback_heading = box(page, "h1")
+    check(
+        "hero front matter spacing is readable",
+        fallback_box is not None
+        and fallback_heading is not None
+        and fallback_heading["y"] - (fallback_box["y"] + fallback_box["height"]) >= 48,
+        "" if fallback_box is None or fallback_heading is None else f"gap={fallback_heading['y'] - (fallback_box['y'] + fallback_box['height']):.0f}",
+    )
+    broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
+    check("hero front matter image loads", broken == 0, f"{broken} broken")
+
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(NORMAL + "/hero/", wait_until="networkidle")
+    mobile_fallback_box = box(page, ".td-hero")
+    mobile_fallback_heading = box(page, "h1")
+    check(
+        "hero front matter mobile image fits viewport",
+        mobile_fallback_box is not None
+        and mobile_fallback_box["x"] >= 0
+        and mobile_fallback_box["x"] + mobile_fallback_box["width"] <= page.viewport_size["width"],
+        "" if mobile_fallback_box is None else f"x={mobile_fallback_box['x']:.0f}, width={mobile_fallback_box['width']:.0f}",
+    )
+    check(
+        "hero front matter mobile spacing is readable",
+        mobile_fallback_box is not None
+        and mobile_fallback_heading is not None
+        and mobile_fallback_heading["y"] - (mobile_fallback_box["y"] + mobile_fallback_box["height"]) >= 48,
+        "" if mobile_fallback_box is None or mobile_fallback_heading is None else f"gap={mobile_fallback_heading['y'] - (mobile_fallback_box['y'] + mobile_fallback_box['height']):.0f}",
+    )
+
+    page.set_viewport_size({"width": 896, "height": 512})
     page.goto(SYSTEM + "/", wait_until="networkidle")
     check_hero_rhythm(page, "system hero leaves readable title spacing")
     page.goto(NORMAL + "/", wait_until="networkidle")

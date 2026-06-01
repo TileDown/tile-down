@@ -128,6 +128,7 @@ flowchart TD
   Epic --> Slugs["#87 Migration slugs"]:::review
   Epic --> Fallbacks["#97 404 fallback redirects"]:::review
   Epic --> Metadata["#100 SEO metadata"]:::review
+  Epic --> HeroFM["#103 Hero front matter"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827

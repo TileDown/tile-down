@@ -3,15 +3,13 @@ import TileTemplate
 
 extension TileKit.Site.Generator {
     /// Page image metadata for built-in layouts and custom templates. `image` is
-    /// the light/default source; `imageDark` is optional and switches with the
-    /// same dark-mode selectors as the built-in themes.
+    /// the light/default source; `hero` is a migration-friendly fallback for the
+    /// same concept. `imageDark` is optional and switches with the same dark-mode
+    /// selectors as the built-in themes.
     func heroImageContext(
         _ page: TileKit.Site.Page,
     ) -> TileKit.Template.Context? {
-        guard
-            let source = page.document.frontMatter["image"],
-            !source.isEmpty
-        else {
+        guard let source = heroImageSource(page) else {
             return nil
         }
 
@@ -36,6 +34,24 @@ extension TileKit.Site.Generator {
                 className: "td-post-thumb-image",
             )),
         ]
+    }
+
+    func heroImageSource(
+        _ page: TileKit.Site.Page,
+    ) -> String? {
+        if let image = nonEmptyFrontMatterValue("image", in: page) {
+            return image
+        }
+        return nonEmptyFrontMatterValue("hero", in: page)
+    }
+
+    private func nonEmptyFrontMatterValue(
+        _ key: String,
+        in page: TileKit.Site.Page,
+    ) -> String? {
+        page.document.frontMatter[key].flatMap { value in
+            value.isEmpty ? nil : value
+        }
     }
 
     private func imageHTML(
