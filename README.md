@@ -175,10 +175,12 @@ flowchart TD
   Epic --> BooleanFM["#36 Boolean front matter"]:::done
   Epic --> Mustache["#38 Mustache section typo detection"]:::done
   Epic --> Escaping["#40 Shared HTML escaping"]:::done
-  Epic --> ContentWalk["#41 Single content tree walk"]:::todo
+  Epic --> ContentWalk["#41 Single content tree walk"]:::review
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
