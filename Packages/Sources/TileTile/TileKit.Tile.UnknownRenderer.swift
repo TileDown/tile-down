@@ -1,4 +1,3 @@
-import Foundation
 import TileCore
 
 public extension TileKit.Tile {
@@ -9,30 +8,15 @@ public extension TileKit.Tile {
         public func render(
             _ tile: Instance,
         ) -> Rendered {
-            .init(
+            let escapedAttribute = TileKit.HTML.escapeAttribute(tile.typeID)
+            let escapedText = TileKit.HTML.escape(tile.typeID)
+            return .init(
                 html: """
-                <div class="td-unsupported-tile" data-td-unsupported-tile="\(Self.escapeAttribute(tile.typeID))">
-                Unsupported tile: \(Self.escapeHTML(tile.typeID))
+                <div class="td-unsupported-tile" data-td-unsupported-tile="\(escapedAttribute)">
+                Unsupported tile: \(escapedText)
                 </div>
                 """,
             )
-        }
-
-        private static func escapeHTML(
-            _ value: String,
-        ) -> String {
-            value
-                .replacingOccurrences(of: "&", with: "&amp;")
-                .replacingOccurrences(of: "<", with: "&lt;")
-                .replacingOccurrences(of: ">", with: "&gt;")
-                .replacingOccurrences(of: "\"", with: "&quot;")
-                .replacingOccurrences(of: "'", with: "&#39;")
-        }
-
-        private static func escapeAttribute(
-            _ value: String,
-        ) -> String {
-            escapeHTML(value)
         }
     }
 }

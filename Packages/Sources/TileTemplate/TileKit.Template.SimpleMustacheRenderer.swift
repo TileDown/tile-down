@@ -106,7 +106,7 @@ public extension TileKit.Template {
             guard let value = Self.lookup(key, scopes: scopes)?.stringValue else {
                 throw SimpleMustacheRendererError.missingValue(key)
             }
-            return (Self.escapeHTML(value), closeRange.upperBound)
+            return (TileKit.HTML.escape(value), closeRange.upperBound)
         }
 
         private func renderSectionTag(
@@ -296,16 +296,5 @@ private extension TileKit.Template.SimpleMustacheRenderer {
         }
 
         return value
-    }
-
-    static func escapeHTML(
-        _ value: String,
-    ) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
-            .replacingOccurrences(of: "\"", with: "&quot;")
-            .replacingOccurrences(of: "'", with: "&#39;")
     }
 }

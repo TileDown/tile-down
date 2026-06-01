@@ -166,19 +166,13 @@ extension TileKit.Site.Generator {
     private func attributeEscape(
         _ value: String,
     ) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "\"", with: "&quot;")
-            .replacingOccurrences(of: "<", with: "&lt;")
+        TileKit.HTML.escapeAttribute(value)
     }
 
     /// Escapes a value for use as HTML element text.
     private func textEscape(
         _ value: String,
     ) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
+        TileKit.HTML.escapeText(value)
     }
 }

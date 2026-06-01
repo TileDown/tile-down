@@ -11,26 +11,9 @@ extension TileKit.ServiceForm.Renderer {
                     return attribute.name
                 }
 
-                return #"\#(attribute.name)="\#(escapeAttribute(value))""#
+                return #"\#(attribute.name)="\#(TileKit.HTML.escapeAttribute(value))""#
             }
             .joined(separator: " ")
-    }
-
-    func escapeHTML(
-        _ value: String,
-    ) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
-            .replacingOccurrences(of: "\"", with: "&quot;")
-            .replacingOccurrences(of: "'", with: "&#39;")
-    }
-
-    func escapeAttribute(
-        _ value: String,
-    ) -> String {
-        escapeHTML(value)
     }
 
     func baseAttributes(
@@ -125,13 +108,13 @@ extension TileKit.ServiceForm.Renderer {
             attributes.append(.init(name: "hidden"))
         }
 
-        return "<p \(renderedAttributes(attributes))>\(escapeHTML(text))</p>"
+        return "<p \(renderedAttributes(attributes))>\(TileKit.HTML.escape(text))</p>"
     }
 
     func unitHTML(
         _ value: String,
     ) -> String {
-        #"<span class="td-service-form__unit">\#(escapeHTML(value))</span>"#
+        #"<span class="td-service-form__unit">\#(TileKit.HTML.escape(value))</span>"#
     }
 
     func htmlID(

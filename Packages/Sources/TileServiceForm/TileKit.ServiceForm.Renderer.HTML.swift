@@ -38,7 +38,7 @@ extension TileKit.ServiceForm.Renderer {
         <div \(rootAttributes)>
         <form class="td-service-form__form" data-td-service-form novalidate>
         \(fieldHTML)
-        <button class="td-service-form__submit" type="submit">\(escapeHTML(submitLabel))</button>
+        <button class="td-service-form__submit" type="submit">\(TileKit.HTML.escape(submitLabel))</button>
         </form>
         <div class="td-service-form__states" aria-live="polite">
         \(stateHTML(name: "idle", text: "Ready.", hidden: false))
@@ -81,10 +81,13 @@ extension TileKit.ServiceForm.Renderer {
                 .init(name: "data-td-field-message", value: field.id),
             ],
         )
+        let escapedFieldID = TileKit.HTML.escapeAttribute(field.id)
+        let escapedInputID = TileKit.HTML.escapeAttribute(inputID)
+        let escapedLabel = TileKit.HTML.escape(label)
 
         return """
-        <div class="td-service-form__field" data-td-field="\(escapeAttribute(field.id))">
-        <label class="td-service-form__label" for="\(escapeAttribute(inputID))">\(escapeHTML(label))</label>
+        <div class="td-service-form__field" data-td-field="\(escapedFieldID)">
+        <label class="td-service-form__label" for="\(escapedInputID)">\(escapedLabel)</label>
         <div class="td-service-form__control">
         \(control)
         \(unit)
@@ -184,7 +187,7 @@ extension TileKit.ServiceForm.Renderer {
         )
         let options = field.schema.enumValues
             .map { value in
-                #"<option value="\#(escapeAttribute(value))">\#(escapeHTML(value))</option>"#
+                #"<option value="\#(TileKit.HTML.escapeAttribute(value))">\#(TileKit.HTML.escape(value))</option>"#
             }
             .joined(separator: "\n")
 
@@ -273,8 +276,8 @@ extension TileKit.ServiceForm.Renderer {
         let unit = field.fieldUI.unit.map(unitHTML) ?? ""
 
         return """
-        <div class="td-service-form__result" data-td-output-field="\(escapeAttribute(field.id))">
-        <dt class="td-service-form__result-label">\(escapeHTML(label))</dt>
+        <div class="td-service-form__result" data-td-output-field="\(TileKit.HTML.escapeAttribute(field.id))">
+        <dt class="td-service-form__result-label">\(TileKit.HTML.escape(label))</dt>
         <dd \(renderedAttributes(valueAttributes))></dd>
         \(unit)
         </div>
