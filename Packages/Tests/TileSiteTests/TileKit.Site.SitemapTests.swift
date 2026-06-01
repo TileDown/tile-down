@@ -20,7 +20,9 @@ extension SiteGeneratorTests {
         )
 
         #expect(result.outputPaths.contains("dist/sitemap.xml"))
-        #expect(fileSystem.files["dist/sitemap.xml"] == expectedSitemap)
+        let sitemap = try #require(fileSystem.files["dist/sitemap.xml"])
+        #expect(sitemap == expectedSitemap)
+        #expect(!sitemap.contains("/old-target-only/"))
     }
 
     @Test("preview content builds keep drafts out of the sitemap")
@@ -71,6 +73,14 @@ extension SiteGeneratorTests {
                 date: 2026-05-19
                 ---
                 # Old Post
+                """,
+                "content/old-target-only/index.md": """
+                ---
+                title: Old Target Only
+                to: /posts/live/
+                date: 2026-05-18
+                ---
+                # Old Target Only
                 """,
                 "templates/page.html": "{{{ page.contents.html }}}",
             ],
