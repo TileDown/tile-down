@@ -53,12 +53,14 @@ Status key:
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
+  Review["Open PR"]:::review
   Epic["Epic grouping"]:::epic
   Todo["Open issue"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### Current shipped slice
@@ -91,8 +93,9 @@ flowchart LR
   Site --> Docs["#86 Docs and hygiene"]:::epic
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #17 Assets and theming
@@ -100,11 +103,12 @@ flowchart LR
 ```mermaid
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::todo
-  Epic --> Persistence["#77 Theme choice persistence"]:::todo
+  Epic --> Theme["#20 Site theme and theme properties"]:::review
+  Epic --> Persistence["#77 Theme choice persistence"]:::review
 
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #82 Static output
@@ -112,16 +116,20 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::todo
-  Epic --> Types["#49 Content types"]:::todo
-  Epic --> Redirects["#45 Redirect output"]:::todo
-  Epic --> NotFound["#47 404 page"]:::todo
-  Epic --> Sitemap["#46 sitemap.xml"]:::todo
-  Epic --> RSS["#78 RSS content:encoded"]:::todo
-  Epic --> BaseURL["#37 baseURL asset links"]:::todo
+  Epic --> Static["#79 Static passthrough"]:::review
+  Epic --> Types["#49 Content types"]:::review
+  Epic --> Redirects["#45 Redirect output"]:::review
+  Epic --> NotFound["#47 404 page"]:::review
+  Epic --> Sitemap["#46 sitemap.xml"]:::review
+  Epic --> RSS["#78 RSS content:encoded"]:::review
+  Epic --> BaseURL["#37 baseURL asset links"]:::review
+  Epic --> Slugs["#87 Migration slugs"]:::review
+  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::review
+  Epic --> SEO["#100 SEO metadata"]:::review
 
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #83 Tile catalog
@@ -129,12 +137,13 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::todo
+  Epic --> Embed["#80 Safe embed tile"]:::review
   Epic --> Mermaid["#56 Mermaid tile"]:::todo
   Epic --> Charts["#57 Chart tile"]:::todo
 
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #84 Local workflow
@@ -146,7 +155,7 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #85 Renderer cleanup
@@ -161,7 +170,7 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #86 Docs and hygiene
@@ -174,7 +183,7 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ## What actually runs today
