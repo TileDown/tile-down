@@ -14,3 +14,9 @@ This post is published, so it shows in the listing and the RSS feed.
 ## Browser checked article
 
 The default post layout renders this body below the generated article header.
+
+:::tile embed
+url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+title: TileDown demo video
+aspectRatio: 16/9
+:::

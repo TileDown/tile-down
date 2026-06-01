@@ -279,6 +279,10 @@ private struct Command {
                 TileKit.Tile.CounterRenderer(),
                 for: TileKit.Tile.CounterRenderer.typeID,
             )
+            .registering(
+                TileKit.Tile.EmbedRenderer(),
+                for: TileKit.Tile.EmbedRenderer.typeID,
+            )
     }
 }
 

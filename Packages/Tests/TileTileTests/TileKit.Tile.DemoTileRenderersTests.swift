@@ -50,4 +50,102 @@ struct DemoTileRenderersTests {
         #expect(rendered.javascript.contains("addEventListener"))
         #expect(rendered.javascript.contains("[data-td-counter]"))
     }
+
+    @Test("embed renders a responsive YouTube iframe through youtube-nocookie")
+    func embedRendersYouTube() throws {
+        let rendered = try TileKit.Tile.EmbedRenderer().render(
+            .init(
+                typeID: "embed",
+                properties: [
+                    .init(key: "url", value: .string("https://www.youtube.com/watch?v=dQw4w9WgXcQ")),
+                    .init(key: "title", value: .string(#"Demo "video""#)),
+                    .init(key: "aspectRatio", value: .string("4/3")),
+                ],
+            ),
+        )
+
+        #expect(rendered.html.contains(#"src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ""#))
+        #expect(rendered.html.contains(#"title="Demo &quot;video&quot;""#))
+        #expect(rendered.html.contains("--td-embed-aspect-ratio: 4 / 3"))
+        #expect(rendered.html.contains("loading=\"lazy\""))
+        #expect(rendered.css.contains(".td-embed-frame"))
+        #expect(rendered.javascript.isEmpty)
+    }
+
+    @Test("embed renders Vimeo and direct HTTPS videos")
+    func embedRendersVimeoAndVideo() throws {
+        let vimeo = try TileKit.Tile.EmbedRenderer().render(
+            .init(
+                typeID: "embed",
+                properties: [
+                    .init(key: "url", value: .string("https://vimeo.com/123456")),
+                ],
+            ),
+        )
+        #expect(vimeo.html.contains(#"src="https://player.vimeo.com/video/123456""#))
+
+        let video = try TileKit.Tile.EmbedRenderer().render(
+            .init(
+                typeID: "embed",
+                properties: [
+                    .init(key: "url", value: .string("https://media.example.com/demo.mp4")),
+                ],
+            ),
+        )
+        #expect(video.html.contains("<video class=\"td-embed-video\" controls preload=\"none\""))
+        #expect(video.html.contains(#"type="video/mp4""#))
+    }
+
+    @Test("embed rejects unsafe or unsupported inputs")
+    func embedRejectsUnsafeInputs() {
+        #expect(throws: TileKit.Tile.EmbedRendererError.missingProperty("url")) {
+            try TileKit.Tile.EmbedRenderer().render(.init(typeID: "embed", properties: []))
+        }
+
+        #expect(throws: TileKit.Tile.EmbedRendererError.unsupportedScheme("javascript")) {
+            try TileKit.Tile.EmbedRenderer().render(
+                .init(
+                    typeID: "embed",
+                    properties: [
+                        .init(key: "url", value: .string("javascript:alert(1)")),
+                    ],
+                ),
+            )
+        }
+
+        #expect(throws: TileKit.Tile.EmbedRendererError.unsupportedProvider("https://example.com/widget")) {
+            try TileKit.Tile.EmbedRenderer().render(
+                .init(
+                    typeID: "embed",
+                    properties: [
+                        .init(key: "url", value: .string("https://example.com/widget")),
+                    ],
+                ),
+            )
+        }
+
+        let credentialURL = "https://user:secret@example.com/video.mp4"
+        #expect(throws: TileKit.Tile.EmbedRendererError.unsupportedProvider(credentialURL)) {
+            try TileKit.Tile.EmbedRenderer().render(
+                .init(
+                    typeID: "embed",
+                    properties: [
+                        .init(key: "url", value: .string(credentialURL)),
+                    ],
+                ),
+            )
+        }
+
+        #expect(throws: TileKit.Tile.EmbedRendererError.invalidAspectRatio("16:9")) {
+            try TileKit.Tile.EmbedRenderer().render(
+                .init(
+                    typeID: "embed",
+                    properties: [
+                        .init(key: "url", value: .string("https://vimeo.com/123456")),
+                        .init(key: "aspectRatio", value: .string("16:9")),
+                    ],
+                ),
+            )
+        }
+    }
 }

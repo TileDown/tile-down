@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Safe responsive embeds through `:::tile embed`, with required `url`, optional
+  `title`, optional `aspectRatio`, YouTube and Vimeo iframe normalization, direct
+  HTTPS video-file output, and typed failures for unsafe schemes, unsupported
+  providers, and malformed ratios. (#80)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
