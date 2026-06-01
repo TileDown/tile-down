@@ -141,6 +141,8 @@ extension SiteGeneratorTests {
         // A dark/light theme toggle and the no-flash script that wires it.
         #expect(home.contains(#"data-td-theme-toggle"#))
         #expect(home.contains("localStorage.getItem('td-theme')"))
+        #expect(home.contains("window.addEventListener('pageshow', applyStoredTheme)"))
+        #expect(home.contains("window.addEventListener('storage', function (event)"))
     }
 
     @Test("built-in layouts apply baseURL to home and section links")
