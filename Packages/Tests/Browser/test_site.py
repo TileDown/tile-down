@@ -261,9 +261,23 @@ def run(page):
     missing = page.evaluate("async () => (await fetch('/posts/renamed/', {method:'HEAD'})).status")
     check("original folder path is gone", missing == 404, f"status={missing}")
 
+    # --- Migrated post slug outside postsDir ---
+    page.goto(NORMAL + "/blog/migrated/", wait_until="networkidle")
+    check("migrated post canonical URL renders", "Migrated Post" in page.inner_text("body"))
+    migrated_source = page.evaluate("async () => (await fetch('/posts/migrated/', {method:'HEAD'})).status")
+    check("migrated source folder path is gone", migrated_source == 404, f"status={migrated_source}")
+    page.goto(NORMAL + "/posts/", wait_until="networkidle")
+    migrated_listing = page.inner_text("body")
+    check("migrated post appears in listing", "Migrated Post" in migrated_listing)
+    migrated_card = page.locator(".td-post-card").get_by_role("link", name="Migrated Post").first
+    check("migrated listing uses canonical URL", migrated_card.get_attribute("href") == "/blog/migrated/")
+    page.goto(NORMAL + "/tags/migration/", wait_until="networkidle")
+    check("migrated post appears on tag page", "Migrated Post" in page.inner_text("body"))
+
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")
     check("feed has live post", "Live Post" in feed)
+    check("feed uses migrated canonical URL", "<link>/blog/migrated/</link>" in feed)
     check("feed excludes draft", "Secret Draft" not in feed)
 
 

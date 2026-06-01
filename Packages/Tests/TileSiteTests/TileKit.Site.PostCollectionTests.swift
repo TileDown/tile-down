@@ -35,6 +35,18 @@ struct SitePostCollectionTests {
         #expect(posts.map(\.slug) == ["blog/only"])
     }
 
+    @Test("source slug keeps migrated posts in the collection")
+    func migratedSlugSelection() {
+        let posts = TileKit.Site.PostCollection(
+            among: [
+                page("blog/legacy", sourceSlug: "posts/legacy", date: "2026-05-20"),
+                page("blog/not-a-post", sourceSlug: "pages/not-a-post", date: "2026-05-19"),
+            ],
+            postsDirectory: "posts",
+        )
+        #expect(posts.map(\.slug) == ["blog/legacy"])
+    }
+
     @Test("Page is Hashable and Comparable, keyed on slug")
     func pageConformances() {
         let postA = page("posts/a", date: "2026-05-01")
@@ -59,6 +71,7 @@ struct SitePostCollectionTests {
 
     private func page(
         _ slug: String,
+        sourceSlug: String? = nil,
         date: String?,
         tags: String? = nil,
     ) -> TileKit.Site.Page {
@@ -72,6 +85,7 @@ struct SitePostCollectionTests {
         return .init(
             sourcePath: slug + "/index.md",
             outputPath: "dist/" + slug + "/index.html",
+            sourceSlug: sourceSlug,
             slug: slug,
             document: .init(frontMatter: frontMatter, body: ""),
             html: "",

@@ -25,7 +25,7 @@ extension TileKit.Site.Generator {
         _ page: TileKit.Site.Page,
         postsDirectory: String,
     ) -> Bool {
-        page.slug.hasPrefix(postsDirectory + "/")
+        page.sourceSlug.hasPrefix(postsDirectory + "/")
             && TileKit.Site.PostSelection.parsedDate(page.document.frontMatter["date"]) != nil
     }
 

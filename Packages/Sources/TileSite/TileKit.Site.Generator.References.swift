@@ -70,8 +70,20 @@ extension TileKit.Site.Generator {
         var pageURL: [String: String] = [:]
         var title: [String: String] = [:]
         for page in pages {
-            pageURL[page.slug] = url(for: page.slug, baseURL: baseURL)
-            title[page.slug] = page.document.frontMatter["title"] ?? page.slug
+            let pageURLValue = url(for: page.slug, baseURL: baseURL)
+            let titleValue = page.document.frontMatter["title"] ?? page.slug
+            pageURL[page.slug] = pageURLValue
+            title[page.slug] = titleValue
+            if pageURL[page.sourceSlug] == nil {
+                pageURL[page.sourceSlug] = pageURLValue
+                title[page.sourceSlug] = titleValue
+            }
+        }
+        var postURL: [String: String] = [:]
+        var postTitle: [String: String] = [:]
+        for post in posts {
+            postURL[post.sourceSlug] = url(for: post.slug, baseURL: baseURL)
+            postTitle[post.sourceSlug] = post.document.frontMatter["title"] ?? post.slug
         }
         var tagURL: [String: String] = [:]
         var tagLabel: [String: String] = [:]
@@ -93,6 +105,8 @@ extension TileKit.Site.Generator {
         return .init(
             pageURLBySlug: pageURL,
             titleBySlug: title,
+            postURLBySourceSlug: postURL,
+            postTitleBySourceSlug: postTitle,
             tagURLBySlug: tagURL,
             tagLabelBySlug: tagLabel,
             socialURLByKey: socialURL,

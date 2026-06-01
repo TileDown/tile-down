@@ -166,7 +166,9 @@ private extension TileKit.Site.Generator {
             return pages
         }
         return pages.map { page in
-            guard page.slug == configuration.postsDirectory else {
+            guard page.slug == configuration.postsDirectory
+                || page.sourceSlug == configuration.postsDirectory
+            else {
                 return page
             }
             var page = page
@@ -289,6 +291,7 @@ private extension TileKit.Site.Generator {
         return try makePage(
             sourcePath: sourcePath,
             outputPath: outputPath,
+            sourceSlug: slug,
             slug: slug,
             document: document,
         )
@@ -314,6 +317,7 @@ private extension TileKit.Site.Generator {
                 outputRootPath: outputRootPath,
                 slug: slug,
             ),
+            sourceSlug: folderSlug,
             slug: slug,
             document: document,
         )
@@ -324,6 +328,7 @@ private extension TileKit.Site.Generator {
     private func makePage(
         sourcePath: String,
         outputPath: String,
+        sourceSlug: String,
         slug: String,
         document: TileKit.Source.Document,
     ) throws -> TileKit.Site.Page {
@@ -338,6 +343,7 @@ private extension TileKit.Site.Generator {
         return .init(
             sourcePath: sourcePath,
             outputPath: outputPath,
+            sourceSlug: sourceSlug,
             slug: slug,
             document: document,
             html: artifact.contents,

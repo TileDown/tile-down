@@ -3,8 +3,8 @@ import TileOutput
 import TileSource
 
 public extension TileKit.Site {
-    /// A built page: its source and output paths, slug, parsed document, rendered
-    /// HTML, and per-page assets.
+    /// A built page: its source and output paths, folder-derived source slug,
+    /// canonical output slug, parsed document, rendered HTML, and per-page assets.
     ///
     /// A page's identity is its slug, which the generator guarantees is unique per
     /// build (see `assertUniqueSlugs`). `Equatable`, `Hashable`, and `Comparable`
@@ -14,6 +14,7 @@ public extension TileKit.Site {
     struct Page: Hashable, Comparable, Sendable {
         public var sourcePath: String
         public var outputPath: String
+        public var sourceSlug: String
         public var slug: String
         public var document: TileKit.Source.Document
         public var html: String
@@ -24,6 +25,7 @@ public extension TileKit.Site {
         public init(
             sourcePath: String,
             outputPath: String,
+            sourceSlug: String? = nil,
             slug: String,
             document: TileKit.Source.Document,
             html: String,
@@ -32,6 +34,7 @@ public extension TileKit.Site {
         ) {
             self.sourcePath = sourcePath
             self.outputPath = outputPath
+            self.sourceSlug = sourceSlug ?? slug
             self.slug = slug
             self.document = document
             self.html = html
