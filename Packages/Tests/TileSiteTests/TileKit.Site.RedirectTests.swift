@@ -91,6 +91,7 @@ extension SiteGeneratorTests {
             try makeGenerator(fileSystem: fileSystem).contentRedirects(
                 [page],
                 outputRootPath: "dist",
+                generated: [],
             )
         }
     }
@@ -154,6 +155,46 @@ extension SiteGeneratorTests {
                         theme: nil,
                         outboundLinks: ["github": "https://github.com/"],
                     ),
+                ),
+            )
+        }
+    }
+
+    @Test("redirect output cannot overwrite a synthesized tag page")
+    func redirectContentRejectsTagPageCollision() {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/posts/live/index.md": """
+                ---
+                title: Live Post
+                date: 2026-05-20
+                tags: release
+                ---
+                # Live Post
+                """,
+                "content/tags/release/index.md": """
+                ---
+                title: Legacy Release Tag
+                type: redirect
+                to: /posts/live/
+                ---
+                # Legacy Release Tag
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        #expect(
+            throws: TileKit.Site.ConfigurationFileError.duplicateOutputPath(
+                "dist/tags/release/index.html",
+            ),
+        ) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
                 ),
             )
         }

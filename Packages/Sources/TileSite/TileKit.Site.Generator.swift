@@ -103,6 +103,7 @@ public extension TileKit.Site {
             outputPaths += try contentRedirects(
                 redirectPages,
                 outputRootPath: request.outputRootPath,
+                generated: Set(outputPaths),
             )
             outputPaths += try outboundShims(
                 request: request,
