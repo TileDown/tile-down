@@ -15,12 +15,23 @@ public extension TileKit.Site {
         public func listFilesRecursively(
             at path: String,
         ) throws -> [String] {
+            try listFilesRecursively(at: path, includingHidden: false)
+        }
+
+        public func listFilesRecursively(
+            at path: String,
+            includingHidden: Bool,
+        ) throws -> [String] {
             let rootURL = URL(fileURLWithPath: path)
                 .standardizedFileURL
+            var options: FileManager.DirectoryEnumerationOptions = []
+            if !includingHidden {
+                options.insert(.skipsHiddenFiles)
+            }
             guard let enumerator = fileManager.enumerator(
                 at: rootURL,
                 includingPropertiesForKeys: [.isRegularFileKey],
-                options: [.skipsHiddenFiles],
+                options: options,
             ) else {
                 return []
             }

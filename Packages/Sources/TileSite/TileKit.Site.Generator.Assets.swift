@@ -61,6 +61,7 @@ extension TileKit.Site.Generator {
     ) throws {
         let relativePaths = try fileSystem.listFilesRecursively(
             at: request.contentRootPath,
+            includingHidden: true,
         )
         for passthrough in try normalizedStaticPassthroughs(request.configuration.staticPassthroughs) {
             let copies = try staticCopies(

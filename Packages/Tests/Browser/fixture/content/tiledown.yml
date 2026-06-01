@@ -10,3 +10,5 @@ shareLinks: true
 static.CNAME: deployment/CNAME
 static.robots.txt: deployment/robots.txt
 static.images: public/images
+static..nojekyll: deployment/.nojekyll
+static..well-known: public/.well-known
