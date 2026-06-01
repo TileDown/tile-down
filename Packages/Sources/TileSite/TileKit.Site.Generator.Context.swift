@@ -302,7 +302,10 @@ extension TileKit.Site.Generator {
         // sticky tag bar that lets a reader jump between tags.
         let onTagPage = page.slug == "tags" || page.slug.hasPrefix("tags/")
         context["tagBar"] = .string(onTagPage ? "true" : "")
-        if let heroImage = heroImageContext(page) {
+        if let heroImage = heroImageContext(
+            page,
+            baseURL: baseURL,
+        ) {
             context["heroImage"] = .object(heroImage)
         }
         let split = recentSplit(page.html)

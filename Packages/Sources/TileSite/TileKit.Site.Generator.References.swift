@@ -13,11 +13,19 @@ extension TileKit.Site.Generator {
             among: posts,
             outputRootPath: request.outputRootPath,
         )
-        return try resolveReferences(
+        let resolved = try resolveReferences(
             in: merged,
             posts: posts,
             configuration: request.configuration,
         )
+        return resolved.map { page in
+            var page = page
+            page.html = rewriteRootRelativeURLs(
+                in: page.html,
+                baseURL: request.configuration.baseURL,
+            )
+            return page
+        }
     }
 
     /// Rewrites reference-scheme links in every page to the URLs the engine owns,

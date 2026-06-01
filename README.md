@@ -263,6 +263,9 @@ imageDark: /assets/demo-dark.png
 
 Built-in layouts use the same pair for post-card thumbnails. If `imageDark` is
 omitted, the generated page keeps the plain single-image markup.
+When `baseURL` is set, root-relative generated `src` and `href` values such as
+`/assets/demo-light.png` are prefixed with that base URL. Authored relative URLs
+such as `assets/demo-light.png` remain relative.
 
 Or pass a custom template explicitly:
 

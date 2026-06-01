@@ -17,6 +17,7 @@ from playwright.sync_api import sync_playwright
 NORMAL = os.environ.get("NORMAL_URL", "http://localhost:8090")
 DRAFTS = os.environ.get("DRAFTS_URL", "http://localhost:8091")
 SYSTEM = os.environ.get("SYSTEM_URL", "http://localhost:8092")
+BASE = os.environ.get("BASE_URL", "http://localhost:8093")
 
 results = []
 
@@ -178,6 +179,31 @@ def check_article_page(page):
     )
 
 
+def check_baseurl_subpath(page):
+    page.set_viewport_size({"width": 896, "height": 512})
+    page.emulate_media(color_scheme="light")
+    page.goto(BASE + "/docs/", wait_until="networkidle")
+
+    broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
+    check("baseURL subpath images load", broken == 0, f"{broken} broken")
+    sources = page.eval_on_selector_all(
+        "img",
+        "els => els.map(e => e.getAttribute('src')).filter(Boolean)",
+    )
+    expected_sources = {
+        BASE + "/docs/assets/hero.svg",
+        BASE + "/docs/assets/hero-dark.svg",
+        BASE + "/docs/assets/logo.svg",
+    }
+    check(
+        "baseURL prefixes root-relative image sources",
+        expected_sources.issubset(set(sources)),
+        str(sources),
+    )
+    logo_href = page.get_by_role("link", name="Download logo").get_attribute("href")
+    check("baseURL prefixes root-relative asset links", logo_href == BASE + "/docs/assets/logo.svg", str(logo_href))
+
+
 def run(page):
     # --- Home: image, table, counter tile ---
     page.set_viewport_size({"width": 896, "height": 512})
@@ -208,6 +234,9 @@ def run(page):
     page.click(".td-counter-button")
     after = page.eval_on_selector("[data-td-counter-value]", "e => e.textContent")
     check("counter tile increments per click", before == "0" and after == "2", f"{before}->{after}")
+
+    # --- baseURL subpath: root-relative generated URLs still load ---
+    check_baseurl_subpath(page)
 
     # --- Dark/light toggle ---
     bg_before = page.evaluate("getComputedStyle(document.body).backgroundColor")
