@@ -100,10 +100,11 @@ flowchart LR
 ```mermaid
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::todo
-  Epic --> Persistence["#77 Theme choice persistence"]:::todo
+  Epic --> Theme["#20 Site theme and theme properties"]:::review
+  Epic --> Persistence["#77 Theme choice persistence"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff9c4,stroke:#ffcc00,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
