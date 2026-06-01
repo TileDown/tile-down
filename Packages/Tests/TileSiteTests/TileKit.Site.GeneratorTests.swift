@@ -149,7 +149,7 @@ struct SiteGeneratorTests {
             ),
         )
 
-        #expect(result.outputPaths == ["dist/index.html", "dist/blog/index.html"])
+        #expect(result.outputPaths == ["dist/sitemap.xml", "dist/index.html", "dist/blog/index.html"])
         let navigation = #"<nav><a href="/">Home</a><a href="/blog/">Blog</a></nav>"#
         #expect(
             fileSystem.files["dist/index.html"] ==

@@ -12,7 +12,7 @@ public extension TileKit.Site {
         private let markdownParser: any TileKit.Source.MarkdownParsing
         private let tileParser: any TileKit.Tile.Parsing
         private let htmlRenderer: any TileKit.Output.Rendering
-        private let templateRenderer: any TileKit.Template.Rendering
+        let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
         let imageChecker: any ImageChecking
 
@@ -62,10 +62,7 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let contentPages = try applyingPostsLabel(
-                to: loadPages(request),
-                configuration: request.configuration,
-            )
+            let contentPages = try contentPages(request)
             let posts = TileKit.Site.PostCollection(
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
@@ -89,25 +86,22 @@ public extension TileKit.Site {
                 configuration: request.configuration,
                 outputPaths: &outputPaths,
             )
+            try writeSitemap(
+                pages: pages,
+                request: request,
+                outputPaths: &outputPaths,
+            )
             let sitePaths = TileKit.Site.GeneratedSitePaths(
                 stylesheetPath: stylesheetPath,
                 feedPath: feedPath,
             )
 
-            for page in pages {
-                let output = try render(
-                    page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: request.configuration,
-                    sitePaths: sitePaths,
-                )
-                try fileSystem.writeTextFile(
-                    output,
-                    at: page.outputPath,
-                )
-                outputPaths.append(page.outputPath)
-            }
+            outputPaths += try writeRenderedPages(
+                pages: pages,
+                template: template,
+                configuration: request.configuration,
+                sitePaths: sitePaths,
+            )
 
             outputPaths += try outboundShims(request: request)
             try copyAssets(
@@ -175,17 +169,13 @@ private extension TileKit.Site.Generator {
         }
     }
 
-    /// Whether a page is a draft, from a truthy `draft` front-matter value.
-    /// Unset or any non-truthy value publishes as normal.
-    func isDraft(
-        _ page: TileKit.Site.Page,
-    ) -> Bool {
-        switch page.document.frontMatter["draft"]?.lowercased() {
-        case "true", "yes":
-            true
-        default:
-            false
-        }
+    func contentPages(
+        _ request: TileKit.Site.ContentBuildRequest,
+    ) throws -> [TileKit.Site.Page] {
+        try applyingPostsLabel(
+            to: loadPages(request),
+            configuration: request.configuration,
+        )
     }
 
     func template(
@@ -343,24 +333,6 @@ private extension TileKit.Site.Generator {
             html: artifact.contents,
             stylesheet: artifact.assets.stylesheet,
             javascript: artifact.assets.javascript,
-        )
-    }
-
-    private func render(
-        page: TileKit.Site.Page,
-        pages: [TileKit.Site.Page],
-        template: String,
-        configuration: TileKit.Site.Configuration,
-        sitePaths: TileKit.Site.GeneratedSitePaths,
-    ) throws -> String {
-        try templateRenderer.render(
-            template: template,
-            context: context(
-                page: page,
-                pages: pages,
-                configuration: configuration,
-                sitePaths: sitePaths,
-            ),
         )
     }
 

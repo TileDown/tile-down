@@ -266,6 +266,13 @@ def run(page):
     check("feed has live post", "Live Post" in feed)
     check("feed excludes draft", "Secret Draft" not in feed)
 
+    # --- Sitemap: published pages present, draft and redirects absent ---
+    sitemap = page.evaluate("async () => (await fetch('/sitemap.xml')).text()")
+    check("sitemap has home", "<loc>/</loc>" in sitemap)
+    check("sitemap has live post", "<loc>/posts/live/</loc>" in sitemap)
+    check("sitemap excludes draft", "/posts/secret/" not in sitemap)
+    check("sitemap excludes redirect", "/legacy-live/" not in sitemap)
+
 
 def main():
     with sync_playwright() as p:
