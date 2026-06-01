@@ -2,6 +2,8 @@ import Foundation
 import TileCore
 
 extension TileKit.Site.Generator {
+    private static let safeRedirectSchemes: Set<String> = ["http", "https", "mailto"]
+
     func isRedirect(
         _ page: TileKit.Site.Page,
     ) -> Bool {
@@ -49,7 +51,7 @@ extension TileKit.Site.Generator {
         guard let target, !target.isEmpty else {
             throw TileKit.Site.RedirectError.missingTarget(page.sourcePath)
         }
-        return target
+        return try validatedRedirectTarget(target, source: page.sourcePath)
     }
 
     /// Writes a tiny redirect page at `out/<key>/index.html` for each configured
@@ -70,6 +72,7 @@ extension TileKit.Site.Generator {
             guard !generated.contains(outputPath) else {
                 throw TileKit.Site.ConfigurationFileError.duplicateOutputPath(outputPath)
             }
+            let target = try validatedRedirectTarget(target, source: "links.\(key)")
             try fileSystem.writeTextFile(
                 redirectPage(to: target),
                 at: outputPath,
@@ -77,6 +80,35 @@ extension TileKit.Site.Generator {
             paths.append(outputPath)
         }
         return paths
+    }
+
+    private func validatedRedirectTarget(
+        _ rawTarget: String,
+        source: String,
+    ) throws -> String {
+        let target = rawTarget.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !target.isEmpty, isSafeRedirectTarget(target) else {
+            throw TileKit.Site.RedirectError.invalidTarget(source, target)
+        }
+        return target
+    }
+
+    private func isSafeRedirectTarget(
+        _ target: String,
+    ) -> Bool {
+        // Strip ASCII control and whitespace, which browsers ignore when
+        // resolving a scheme. This matches the Markdown URL safety posture.
+        let cleaned = String(
+            String.UnicodeScalarView(target.unicodeScalars.filter { $0.value > 0x20 }),
+        )
+        guard let colon = cleaned.firstIndex(of: ":") else {
+            return true
+        }
+        let scheme = cleaned[..<colon]
+        if scheme.contains(where: { $0 == "/" || $0 == "?" || $0 == "#" }) {
+            return true
+        }
+        return Self.safeRedirectSchemes.contains(scheme.lowercased())
     }
 
     /// A minimal HTML redirect page: a canonical link, a meta refresh, and a

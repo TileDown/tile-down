@@ -96,6 +96,42 @@ extension SiteGeneratorTests {
         }
     }
 
+    @Test("redirect content rejects unsafe target URL schemes", arguments: [
+        "javascript:alert(1)",
+        "java\tscript:alert(1)",
+        "data:text/html,hello",
+    ])
+    func redirectContentRejectsUnsafeTargetURLSchemes(target: String) {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/old-post/index.md": """
+                ---
+                type: redirect
+                to: \(target)
+                ---
+                # Old Post
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        #expect(
+            throws: TileKit.Site.RedirectError.invalidTarget(
+                "content/old-post/index.md",
+                target,
+            ),
+        ) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+    }
+
     @Test("redirect content skips unused body tile parsing")
     func redirectContentSkipsUnusedBodyTileParsing() throws {
         let fileSystem = MemoryFileSystem(
@@ -154,6 +190,35 @@ extension SiteGeneratorTests {
                     configuration: .init(
                         theme: nil,
                         outboundLinks: ["github": "https://github.com/"],
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test("outbound link shims reject unsafe target URL schemes")
+    func outboundLinkShimsRejectUnsafeTargetURLSchemes() {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        #expect(
+            throws: TileKit.Site.RedirectError.invalidTarget(
+                "links.bad",
+                "javascript:alert(1)",
+            ),
+        ) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(
+                        theme: nil,
+                        outboundLinks: ["bad": "javascript:alert(1)"],
                     ),
                 ),
             )
