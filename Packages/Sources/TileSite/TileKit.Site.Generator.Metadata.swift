@@ -37,7 +37,7 @@ extension TileKit.Site.Generator {
         _ page: TileKit.Site.Page,
         baseURL: String,
     ) -> String {
-        guard !baseURL.isEmpty else {
+        guard hasAbsoluteHTTPBaseURL(baseURL) else {
             return ""
         }
         return url(for: page.slug, baseURL: baseURL)
@@ -70,7 +70,7 @@ extension TileKit.Site.Generator {
             !source.hasPrefix("//"),
             !source.hasPrefix("#"),
             !source.hasPrefix("?"),
-            !baseURL.isEmpty
+            hasAbsoluteHTTPBaseURL(baseURL)
         else {
             return ""
         }
@@ -91,6 +91,21 @@ extension TileKit.Site.Generator {
         }
 
         return resolved.absoluteString
+    }
+
+    private func hasAbsoluteHTTPBaseURL(
+        _ baseURL: String,
+    ) -> Bool {
+        guard
+            let components = URLComponents(string: baseURL),
+            let scheme = components.scheme?.lowercased(),
+            scheme == "http" || scheme == "https",
+            let host = components.host,
+            !host.isEmpty
+        else {
+            return false
+        }
+        return true
     }
 
     private func baseURLPrefixedPath(
