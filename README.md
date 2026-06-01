@@ -48,19 +48,22 @@ The architecture and the planned road are real and written down:
 The public issue tracker is organized into epics. These diagrams include every
 open public issue as of June 1, 2026.
 
-Status key:
+Status key. The roadmap status colors move with the work: open issue, active
+branch, review PR, then merged.
 
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
-  Active["In progress or open PR"]:::active
+  Review["Open PR"]:::review
+  Active["Active branch"]:::active
   Epic["Epic grouping"]:::epic
-  Todo["Open issue"]:::todo
+  Todo["Open issue, no PR"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
   classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### Current shipped slice
@@ -94,7 +97,7 @@ flowchart LR
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #17 Assets and theming
@@ -103,11 +106,11 @@ flowchart LR
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
   Epic --> Theme["#20 Site theme and theme properties"]:::todo
-  Epic --> Persistence["#77 Theme choice persistence"]:::active
+  Epic --> Persistence["#77 Theme choice persistence"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #82 Static output
@@ -115,20 +118,19 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::active
-  Epic --> Types["#49 Content types"]:::active
-  Epic --> Redirects["#45 Redirect output"]:::active
-  Epic --> NotFound["#47 404 page"]:::active
-  Epic --> Sitemap["#46 sitemap.xml"]:::active
-  Epic --> RSS["#78 RSS content:encoded"]:::active
-  Epic --> BaseURL["#37 baseURL asset links"]:::active
-  Epic --> Slugs["#87 Migration slugs"]:::active
-  Epic --> Fallbacks["#97 404 fallback redirects"]:::active
-  Epic --> Metadata["#100 SEO metadata"]:::active
+  Epic --> Static["#79 Static passthrough"]:::review
+  Epic --> Types["#49 Content types"]:::review
+  Epic --> Redirects["#45 Redirect output"]:::review
+  Epic --> NotFound["#47 404 page"]:::review
+  Epic --> Sitemap["#46 sitemap.xml"]:::review
+  Epic --> RSS["#78 RSS content:encoded"]:::review
+  Epic --> BaseURL["#37 baseURL asset links"]:::review
+  Epic --> Slugs["#87 Migration slugs"]:::review
+  Epic --> Fallbacks["#97 404 fallback redirects"]:::review
+  Epic --> Metadata["#100 SEO metadata"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
 ```
 
 ### #83 Tile catalog
@@ -136,13 +138,13 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::active
+  Epic --> Embed["#80 Safe embed tile"]:::review
   Epic --> Mermaid["#56 Mermaid tile"]:::todo
   Epic --> Charts["#57 Chart tile"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef active fill:#e6f2ff,stroke:#007aff,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #84 Local workflow
@@ -154,7 +156,7 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #85 Renderer cleanup
@@ -169,7 +171,7 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #86 Docs and hygiene
@@ -182,7 +184,7 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ## What actually runs today
