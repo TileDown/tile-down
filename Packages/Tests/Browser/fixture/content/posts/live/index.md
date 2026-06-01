@@ -1,5 +1,6 @@
 ---
 title: Live Post
+type: blog-post
 date: 2026-05-20
 kicker: Release
 description: A published post that appears in the listing and the feed.

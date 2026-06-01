@@ -237,10 +237,15 @@ Posts can declare tags in front matter:
 ```markdown
 ---
 title: Notes from the renderer
+type: blog-post
 date: 2026-05-31
 tags: swift, rendering
 ---
 ```
+
+`type: blog-post` and `type: post` select the built-in article behavior.
+`type: page` and unknown explicit values use the standard page behavior.
+Dated pages under `postsDir` still act as posts when `type:` is omitted.
 
 Tiledown generates static tag pages. Single-tag pages keep `/tags/swift/`.
 Two-tag AND filters are always generated, and larger filters use canonical nested

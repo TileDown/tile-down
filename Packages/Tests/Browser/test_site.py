@@ -111,7 +111,7 @@ def check_article_page(page):
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
 
     article_text = page.inner_text("body")
-    check("article shell renders for dated post", page.locator(".td-article").count() == 1)
+    check("article shell renders for typed post", page.locator(".td-article").count() == 1)
     check("article generated title is primary h1", page.locator("h1").count() == 1 and page.locator(".td-article-title").inner_text() == "Live Post")
     check("article removes duplicate body h1", page.locator(".td-article-body h1").count() == 0)
     check("article body content remains", "Browser checked article" in article_text)
