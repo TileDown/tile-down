@@ -20,6 +20,7 @@ extension TileKit.Site.Generator {
     func contentRedirects(
         _ pages: [TileKit.Site.Page],
         outputRootPath: String,
+        generated: Set<String>,
     ) throws -> [String] {
         var paths: [String] = []
         for page in pages.sorted() {
@@ -28,6 +29,9 @@ extension TileKit.Site.Generator {
                 outputRootPath,
                 page.slug.isEmpty ? "index.html" : page.slug + "/index.html",
             )
+            guard !generated.contains(outputPath) else {
+                throw TileKit.Site.ConfigurationFileError.duplicateOutputPath(outputPath)
+            }
             try fileSystem.writeTextFile(
                 redirectPage(to: target),
                 at: outputPath,
