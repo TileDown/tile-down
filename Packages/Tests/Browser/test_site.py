@@ -264,12 +264,18 @@ def run(page):
     # --- Static passthrough: root files and remapped public assets ---
     cname = page.evaluate("async () => (await fetch('/CNAME')).text()")
     robots = page.evaluate("async () => (await fetch('/robots.txt')).text()")
+    nojekyll_status = page.evaluate("async () => (await fetch('/.nojekyll', {method:'HEAD'})).status")
+    security = page.evaluate("async () => (await fetch('/.well-known/security.txt')).text()")
     passthrough_asset = page.evaluate("async () => (await fetch('/images/passthrough.svg')).status")
     private_source = page.evaluate("async () => (await fetch('/public/images/passthrough.svg')).status")
+    private_hidden_source = page.evaluate("async () => (await fetch('/public/.well-known/security.txt', {method:'HEAD'})).status")
     check("static passthrough publishes root CNAME", cname.strip() == "tiledown.test", cname)
     check("static passthrough publishes robots", "Allow: /" in robots, robots)
+    check("static passthrough publishes dotfile", nojekyll_status == 200, f"status={nojekyll_status}")
+    check("static passthrough publishes well-known", "security@example.test" in security, security)
     check("static passthrough publishes remapped asset", passthrough_asset == 200, f"status={passthrough_asset}")
     check("static passthrough hides source path", private_source == 404, f"status={private_source}")
+    check("static passthrough hides hidden source path", private_hidden_source == 404, f"status={private_hidden_source}")
 
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")

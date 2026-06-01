@@ -18,11 +18,19 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
     func listFilesRecursively(
         at path: String,
     ) throws -> [String] {
+        try listFilesRecursively(at: path, includingHidden: false)
+    }
+
+    func listFilesRecursively(
+        at path: String,
+        includingHidden: Bool,
+    ) throws -> [String] {
         let prefix = path.hasSuffix("/") ? path : path + "/"
         return files.keys
             .filter { $0.hasPrefix(prefix) }
             .map { String($0.dropFirst(prefix.count)) }
             .filter { !$0.isEmpty }
+            .filter { includingHidden || !hasHiddenComponent($0) }
             .sorted()
     }
 
@@ -50,5 +58,13 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
             throw Error.missingFile(sourcePath)
         }
         files[destinationPath] = file
+    }
+
+    private func hasHiddenComponent(
+        _ path: String,
+    ) -> Bool {
+        path.split(separator: "/").contains { component in
+            component.hasPrefix(".")
+        }
     }
 }

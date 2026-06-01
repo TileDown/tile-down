@@ -61,6 +61,37 @@ struct SiteStaticPassthroughTests {
         #expect(home.contains(#"src="https://example.com/images/hero.svg""#))
     }
 
+    @Test("copies explicitly configured hidden deployment paths")
+    func copiesExplicitHiddenDeploymentPaths() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/deployment/.nojekyll": "",
+                "content/public/.well-known/security.txt": "Contact: mailto:security@example.com\n",
+            ],
+        )
+
+        let result = try makeStaticPassthroughGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    staticPassthroughs: [
+                        .init(sourcePath: "deployment/.nojekyll", outputPath: ".nojekyll"),
+                        .init(sourcePath: "public/.well-known", outputPath: ".well-known"),
+                    ],
+                ),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/.nojekyll"] == "")
+        #expect(fileSystem.files["dist/.well-known/security.txt"]?.contains("security@example.com") == true)
+        #expect(fileSystem.files["dist/public/.well-known/security.txt"] == nil)
+        #expect(result.outputPaths.contains("dist/.nojekyll"))
+        #expect(result.outputPaths.contains("dist/.well-known/security.txt"))
+    }
+
     @Test("rejects missing sources")
     func rejectsMissingSources() {
         let fileSystem = MemoryFileSystem(

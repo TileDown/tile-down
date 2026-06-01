@@ -135,6 +135,8 @@ struct SiteConfigurationFileTests {
             static.CNAME: deployment/CNAME
             static.robots.txt: deployment/robots.txt
             static.images: public/images/
+            static..nojekyll: deployment/.nojekyll
+            static..well-known: public/.well-known
             """,
         )
 
@@ -143,6 +145,8 @@ struct SiteConfigurationFileTests {
                 .init(sourcePath: "deployment/CNAME", outputPath: "CNAME"),
                 .init(sourcePath: "deployment/robots.txt", outputPath: "robots.txt"),
                 .init(sourcePath: "public/images", outputPath: "images"),
+                .init(sourcePath: "deployment/.nojekyll", outputPath: ".nojekyll"),
+                .init(sourcePath: "public/.well-known", outputPath: ".well-known"),
             ],
         )
     }
