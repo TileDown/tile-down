@@ -97,6 +97,40 @@ extension SiteGeneratorTests {
         }
     }
 
+    @Test("a slug override cannot contain URL syntax characters", arguments: [
+        "docs?preview",
+        "docs#intro",
+        "docs%2Fintro",
+        #"docs\intro"#,
+        "docs\u{0007}intro",
+    ])
+    func slugOverrideRejectsURLSyntaxCharacters(slug: String) {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/about/index.md": """
+                ---
+                title: About
+                slug: \(slug)
+                ---
+                # About
+                """,
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath(slug)) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+    }
+
     @Test("two pages resolving to the same slug are a typed error")
     func duplicateSlugThrows() {
         let fileSystem = MemoryFileSystem(
