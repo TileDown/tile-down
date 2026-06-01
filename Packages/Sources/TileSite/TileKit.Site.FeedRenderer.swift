@@ -2,8 +2,8 @@ import Foundation
 import TileCore
 
 public extension TileKit.Site {
-    /// Renders the site's RSS feed from dated pages under the site's posts
-    /// directory (`posts/` by default, configurable via `postsDir`).
+    /// Renders the site's RSS feed from dated pages sourced under the site's
+    /// posts directory (`posts/` by default, configurable via `postsDir`).
     struct FeedRenderer: Sendable {
         public init() {}
 

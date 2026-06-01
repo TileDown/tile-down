@@ -1,10 +1,10 @@
 import TileCore
 
 public extension TileKit.Site {
-    /// The site's posts as a Swift collection: every page under the posts
+    /// The site's posts as a Swift collection: every page sourced under the posts
     /// directory whose `date` parses as `yyyy-MM-dd`, newest first (ties broken by
-    /// slug). The section landing page (the bare directory slug) has no `date` and
-    /// so is not a post.
+    /// canonical slug). The section landing page (the bare directory source slug)
+    /// has no `date` and so is not a post.
     ///
     /// Conforming to `RandomAccessCollection` means the on-page listing, the RSS
     /// feed, per-tag filtering, and the latest-posts block all derive from one
@@ -14,15 +14,17 @@ public extension TileKit.Site {
         private let posts: [Page]
 
         /// Selects and orders the posts among `pages` a single time. A page with
-        /// an absent or malformed `date`, or one outside `postsDirectory`, is not
-        /// a post and is omitted.
+        /// an absent or malformed `date`, or one sourced outside `postsDirectory`,
+        /// is not a post and is omitted. The public slug can differ from the source
+        /// slug so migrated posts keep legacy URLs without leaving the post
+        /// collection.
         public init(
             among pages: [Page],
             postsDirectory: String,
         ) {
             posts = pages
                 .filter { page in
-                    page.slug.hasPrefix(postsDirectory + "/")
+                    page.sourceSlug.hasPrefix(postsDirectory + "/")
                         && PostSelection.parsedDate(page.document.frontMatter["date"]) != nil
                 }
                 .sorted { first, second in
