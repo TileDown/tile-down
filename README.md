@@ -53,10 +53,12 @@ Status key:
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
+  Review["PR in review"]:::review
   Epic["Epic grouping"]:::epic
   Todo["Open issue"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7cc,stroke:#d6a800,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
@@ -112,15 +114,19 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::todo
-  Epic --> Types["#49 Content types"]:::todo
-  Epic --> Redirects["#45 Redirect output"]:::todo
-  Epic --> NotFound["#47 404 page"]:::todo
-  Epic --> Sitemap["#46 sitemap.xml"]:::todo
-  Epic --> RSS["#78 RSS content:encoded"]:::todo
-  Epic --> BaseURL["#37 baseURL asset links"]:::todo
+  Epic --> Static["#79 Static passthrough"]:::review
+  Epic --> Types["#49 Content types"]:::review
+  Epic --> Redirects["#45 Redirect output"]:::review
+  Epic --> NotFound["#47 404 page"]:::review
+  Epic --> Sitemap["#46 sitemap.xml"]:::review
+  Epic --> RSS["#78 RSS content:encoded"]:::review
+  Epic --> BaseURL["#37 baseURL asset links"]:::review
+  Epic --> Slugs["#87 Migration slugs"]:::review
+  Epic --> StaticRedirects["#97 Static-host redirects"]:::review
+  Epic --> SEO["#100 SEO metadata"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff7cc,stroke:#d6a800,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 

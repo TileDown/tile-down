@@ -10,8 +10,9 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Browser/ -> Tests/ -> Packages/. The Swift package (and `tiledown`) live here.
 packages="$(cd "$here/../.." && pwd)"
-fixture="$here/fixture/content"
+fixture_source="$here/fixture/content"
 work="$(mktemp -d)"
+fixture="$work/content"
 normal="$work/normal"
 drafts="$work/drafts"
 system_fixture="$work/system-fixture"
@@ -50,6 +51,8 @@ PY
 }
 
 echo "Building fixture (normal + --drafts + system theme)..."
+cp -R "$fixture_source" "$fixture"
+perl -0pi -e "s|^baseURL: .*$|baseURL: http://localhost:$normal_port|m" "$fixture/tiledown.yml"
 ( cd "$packages" && swift run tiledown build-site "$fixture" "$normal" )
 ( cd "$packages" && swift run tiledown build-site --drafts "$fixture" "$drafts" )
 cp -R "$fixture" "$system_fixture"

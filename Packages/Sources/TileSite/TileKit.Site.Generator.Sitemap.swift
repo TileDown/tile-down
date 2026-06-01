@@ -1,3 +1,4 @@
+import Foundation
 import TileCore
 
 extension TileKit.Site.Generator {
@@ -25,6 +26,18 @@ extension TileKit.Site.Generator {
     private func sitemapExcluded(
         _ page: TileKit.Site.Page,
     ) -> Bool {
-        isDraft(page) || page.document.frontMatter["type"]?.lowercased() == "redirect"
+        isDraft(page) || isRedirect(page)
+    }
+
+    private func isRedirect(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        if page.document.frontMatter["type"]?.lowercased() == "redirect" {
+            return true
+        }
+
+        let target = page.document.frontMatter["to"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return target?.isEmpty == false
     }
 }

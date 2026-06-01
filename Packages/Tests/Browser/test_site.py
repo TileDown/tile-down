@@ -268,8 +268,8 @@ def run(page):
 
     # --- Sitemap: published pages present, draft and redirects absent ---
     sitemap = page.evaluate("async () => (await fetch('/sitemap.xml')).text()")
-    check("sitemap has home", "<loc>/</loc>" in sitemap)
-    check("sitemap has live post", "<loc>/posts/live/</loc>" in sitemap)
+    check("sitemap has absolute home", f"<loc>{NORMAL}/</loc>" in sitemap)
+    check("sitemap has absolute live post", f"<loc>{NORMAL}/posts/live/</loc>" in sitemap)
     check("sitemap excludes draft", "/posts/secret/" not in sitemap)
     check("sitemap excludes redirect", "/legacy-live/" not in sitemap)
 
