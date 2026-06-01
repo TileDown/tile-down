@@ -203,6 +203,26 @@ def check_baseurl_subpath(page):
     logo_href = page.get_by_role("link", name="Download logo").get_attribute("href")
     check("baseURL prefixes root-relative asset links", logo_href == BASE + "/docs/assets/logo.svg", str(logo_href))
 
+    page.goto(BASE + "/docs/posts/", wait_until="networkidle")
+    post_sources = page.eval_on_selector_all(
+        ".td-post-card img",
+        "els => els.map(e => e.getAttribute('src')).filter(Boolean)",
+    )
+    check(
+        "baseURL prefixes post-listing thumbnails",
+        BASE + "/docs/assets/hero.svg" in post_sources,
+        str(post_sources),
+    )
+    post_hrefs = page.eval_on_selector_all(
+        ".td-post-card .td-post-thumb",
+        "els => els.map(e => e.getAttribute('href')).filter(Boolean)",
+    )
+    check(
+        "baseURL keeps post-listing links under subpath",
+        BASE + "/docs/posts/live/" in post_hrefs,
+        str(post_hrefs),
+    )
+
 
 def run(page):
     # --- Home: image, table, counter tile ---
@@ -237,6 +257,7 @@ def run(page):
 
     # --- baseURL subpath: root-relative generated URLs still load ---
     check_baseurl_subpath(page)
+    page.goto(NORMAL + "/", wait_until="networkidle")
 
     # --- Dark/light toggle ---
     bg_before = page.evaluate("getComputedStyle(document.body).backgroundColor")
