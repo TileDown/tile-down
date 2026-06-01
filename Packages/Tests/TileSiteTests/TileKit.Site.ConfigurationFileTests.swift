@@ -127,4 +127,33 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("shareLinks: sometimes")
         }
     }
+
+    @Test("parses static passthrough paths")
+    func parsesStaticPassthroughs() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            static.CNAME: deployment/CNAME
+            static.robots.txt: deployment/robots.txt
+            static.images: public/images/
+            """,
+        )
+
+        #expect(
+            file.configuration.staticPassthroughs == [
+                .init(sourcePath: "deployment/CNAME", outputPath: "CNAME"),
+                .init(sourcePath: "deployment/robots.txt", outputPath: "robots.txt"),
+                .init(sourcePath: "public/images", outputPath: "images"),
+            ],
+        )
+    }
+
+    @Test("rejects unsafe static passthrough paths")
+    func rejectsUnsafeStaticPassthroughPaths() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("../CNAME")) {
+            try TileKit.Site.ConfigurationFile.parse("static.../CNAME: deployment/CNAME")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("../secret")) {
+            try TileKit.Site.ConfigurationFile.parse("static.CNAME: ../secret")
+        }
+    }
 }

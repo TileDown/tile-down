@@ -261,6 +261,16 @@ def run(page):
     missing = page.evaluate("async () => (await fetch('/posts/renamed/', {method:'HEAD'})).status")
     check("original folder path is gone", missing == 404, f"status={missing}")
 
+    # --- Static passthrough: root files and remapped public assets ---
+    cname = page.evaluate("async () => (await fetch('/CNAME')).text()")
+    robots = page.evaluate("async () => (await fetch('/robots.txt')).text()")
+    passthrough_asset = page.evaluate("async () => (await fetch('/images/passthrough.svg')).status")
+    private_source = page.evaluate("async () => (await fetch('/public/images/passthrough.svg')).status")
+    check("static passthrough publishes root CNAME", cname.strip() == "tiledown.test", cname)
+    check("static passthrough publishes robots", "Allow: /" in robots, robots)
+    check("static passthrough publishes remapped asset", passthrough_asset == 200, f"status={passthrough_asset}")
+    check("static passthrough hides source path", private_source == 404, f"status={private_source}")
+
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")
     check("feed has live post", "Live Post" in feed)

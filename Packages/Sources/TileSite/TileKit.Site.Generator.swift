@@ -94,29 +94,13 @@ public extension TileKit.Site {
                 feedPath: feedPath,
             )
 
-            for page in pages {
-                let output = try render(
-                    page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: request.configuration,
-                    sitePaths: sitePaths,
-                )
-                try fileSystem.writeTextFile(
-                    output,
-                    at: page.outputPath,
-                )
-                outputPaths.append(page.outputPath)
-            }
-
-            outputPaths += try outboundShims(request: request)
-            try copyAssets(
+            return try writePagesAndAssets(
+                pages: pages,
+                template: template,
                 request: request,
-                generated: Set(outputPaths),
-                outputPaths: &outputPaths,
+                sitePaths: sitePaths,
+                outputPaths: outputPaths,
             )
-
-            return .init(outputPaths: outputPaths)
         }
     }
 }
@@ -233,48 +217,6 @@ private extension TileKit.Site.Generator {
         )
     }
 
-    private func writeFeed(
-        pages: [TileKit.Site.Page],
-        outputRootPath: String,
-        configuration: TileKit.Site.Configuration,
-        outputPaths: inout [String],
-    ) throws -> String {
-        guard let feed = configuration.feed else {
-            return ""
-        }
-
-        let feedFilePath = try outputFilePath(feed.path)
-        let outputPath = join(outputRootPath, feedFilePath)
-        try fileSystem.writeTextFile(
-            TileKit.Site.FeedRenderer().render(
-                feed: feed,
-                siteTitle: siteTitle(
-                    configuration: configuration,
-                    pages: pages,
-                ),
-                baseURL: configuration.baseURL,
-                pages: pages,
-                postsDirectory: configuration.postsDirectory,
-            ),
-            at: outputPath,
-        )
-        outputPaths.append(outputPath)
-        return stylesheetURL(
-            baseURL: configuration.baseURL,
-            fileName: feedFilePath,
-        )
-    }
-
-    private func stylesheetURL(
-        baseURL: String,
-        fileName: String,
-    ) -> String {
-        guard !baseURL.isEmpty else {
-            return "/" + fileName
-        }
-        return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
-    }
-
     /// Loads a single page at a fixed slug and output path, for the single-file
     /// `build`. Content builds go through `loadContentPage`, which can override the
     /// slug from front matter.
@@ -364,29 +306,49 @@ private extension TileKit.Site.Generator {
         )
     }
 
+    func writePagesAndAssets(
+        pages: [TileKit.Site.Page],
+        template: String,
+        request: TileKit.Site.ContentBuildRequest,
+        sitePaths: TileKit.Site.GeneratedSitePaths,
+        outputPaths: [String],
+    ) throws -> TileKit.Site.ContentBuildResult {
+        var outputPaths = outputPaths
+        for page in pages {
+            let output = try render(
+                page: page,
+                pages: pages,
+                template: template,
+                configuration: request.configuration,
+                sitePaths: sitePaths,
+            )
+            try fileSystem.writeTextFile(
+                output,
+                at: page.outputPath,
+            )
+            outputPaths.append(page.outputPath)
+        }
+
+        outputPaths += try outboundShims(request: request)
+        var generatedPaths = Set(outputPaths)
+        try copyStaticPassthroughs(
+            request: request,
+            generated: &generatedPaths,
+            outputPaths: &outputPaths,
+        )
+        try copyAssets(
+            request: request,
+            generated: generatedPaths,
+            outputPaths: &outputPaths,
+        )
+        return .init(outputPaths: outputPaths)
+    }
+
     private func outputPath(
         outputRootPath: String,
         slug: String,
     ) -> String {
         let path = slug.isEmpty ? "index.html" : slug + "/index.html"
         return join(outputRootPath, path)
-    }
-
-    private func outputFilePath(
-        _ path: String,
-    ) throws -> String {
-        var result = path
-        while result.hasPrefix("/") {
-            result.removeFirst()
-        }
-        guard !result.isEmpty else {
-            return "feed.xml"
-        }
-
-        let components = result.split(separator: "/", omittingEmptySubsequences: false)
-        guard components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
-            throw TileKit.Site.ConfigurationFileError.invalidPath(path)
-        }
-        return result
     }
 }

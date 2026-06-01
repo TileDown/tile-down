@@ -7,3 +7,6 @@ rss: true
 rssTitle: Browser Fixture
 rssDescription: A fixture site for the browser test suite.
 shareLinks: true
+static.CNAME: deployment/CNAME
+static.robots.txt: deployment/robots.txt
+static.images: public/images

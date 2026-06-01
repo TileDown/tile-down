@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Static passthrough configuration: `static.<public-path>: <source-path>` in
+  `tiledown.yml` copies files or directories from the content tree to stable
+  public output paths, preserving root deployment files and migrated asset URLs.
+  (#79)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
