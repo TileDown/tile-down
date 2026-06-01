@@ -263,7 +263,46 @@ def run(page):
 
     # --- Migrated post slug outside postsDir ---
     page.goto(NORMAL + "/blog/migrated/", wait_until="networkidle")
-    check("migrated post canonical URL renders", "Migrated Post" in page.inner_text("body"))
+    migrated_text = page.inner_text("body")
+    check("migrated post canonical URL renders", "Migrated Post" in migrated_text)
+    check("migrated post renders article shell", page.locator(".td-article").count() == 1)
+    check(
+        "migrated article generated title is primary h1",
+        page.locator("h1").count() == 1
+        and page.locator(".td-article-title").inner_text() == "Migrated Post",
+    )
+    check(
+        "migrated article removes duplicate body h1",
+        page.locator(".td-article-body h1").count() == 0,
+    )
+    check(
+        "migrated article has readable date",
+        page.locator(".td-article-date").inner_text() == "May 25, 2026",
+    )
+    migrated_permalink = page.locator(".td-article-actions").get_by_role(
+        "link",
+        name="Permalink",
+    ).first
+    check(
+        "migrated article permalink uses canonical URL",
+        migrated_permalink.get_attribute("href") == "/blog/migrated/",
+    )
+    check(
+        "migrated article share link is tappable",
+        can_receive_center_click(page.locator(".td-article-share a").first),
+    )
+    migrated_share_hrefs = page.eval_on_selector_all(
+        ".td-article-share a",
+        "els => els.map(e => e.getAttribute('href'))",
+    )
+    check(
+        "migrated article share URLs use canonical URL",
+        all("%2Fblog%2Fmigrated%2F" in href for href in migrated_share_hrefs),
+        str(migrated_share_hrefs),
+    )
+    with page.expect_navigation(wait_until="networkidle"):
+        click_center(page, migrated_permalink)
+    check("migrated article permalink click stays canonical", page.url.endswith("/blog/migrated/"), page.url)
     migrated_source = page.evaluate("async () => (await fetch('/posts/migrated/', {method:'HEAD'})).status")
     check("migrated source folder path is gone", migrated_source == 404, f"status={migrated_source}")
     page.goto(NORMAL + "/posts/", wait_until="networkidle")
