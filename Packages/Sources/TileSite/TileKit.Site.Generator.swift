@@ -12,7 +12,7 @@ public extension TileKit.Site {
         private let markdownParser: any TileKit.Source.MarkdownParsing
         private let tileParser: any TileKit.Tile.Parsing
         private let htmlRenderer: any TileKit.Output.Rendering
-        private let templateRenderer: any TileKit.Template.Rendering
+        let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
         let imageChecker: any ImageChecking
 
@@ -62,10 +62,9 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let contentPages = try applyingPostsLabel(
-                to: loadPages(request),
-                configuration: request.configuration,
-            )
+            let source = try sourcePages(request)
+            let contentPages = source.contentPages
+            let notFoundPage = source.notFoundPage
             let posts = TileKit.Site.PostCollection(
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
@@ -78,7 +77,7 @@ public extension TileKit.Site {
 
             var outputPaths: [String] = []
             let stylesheetPath = try writeSharedStylesheet(
-                pages: pages,
+                pages: pages + [notFoundPage],
                 outputRootPath: request.outputRootPath,
                 configuration: request.configuration,
                 outputPaths: &outputPaths,
@@ -94,21 +93,20 @@ public extension TileKit.Site {
                 feedPath: feedPath,
             )
 
-            for page in pages {
-                let output = try render(
-                    page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: request.configuration,
-                    sitePaths: sitePaths,
-                )
-                try fileSystem.writeTextFile(
-                    output,
-                    at: page.outputPath,
-                )
-                outputPaths.append(page.outputPath)
-            }
-
+            outputPaths += try writeRenderedPages(
+                pages: pages,
+                template: template,
+                configuration: request.configuration,
+                sitePaths: sitePaths,
+            )
+            let notFoundOutputPath = try writeRenderedPage(
+                page: notFoundPage,
+                pages: pages,
+                template: template,
+                configuration: request.configuration,
+                sitePaths: sitePaths,
+            )
+            outputPaths.append(notFoundOutputPath)
             outputPaths += try outboundShims(request: request)
             try copyAssets(
                 request: request,
@@ -122,7 +120,8 @@ public extension TileKit.Site {
 }
 
 private extension TileKit.Site.Generator {
-    static let sharedStylesheetFileName = "styles.css"
+    static let notFoundSlug = "404"
+    static let notFoundFileName = "404.html"
 
     func loadPages(
         _ request: TileKit.Site.ContentBuildRequest,
@@ -154,6 +153,23 @@ private extension TileKit.Site.Generator {
         return pages
     }
 
+    private func sourcePages(
+        _ request: TileKit.Site.ContentBuildRequest,
+    ) throws -> (contentPages: [TileKit.Site.Page], notFoundPage: TileKit.Site.Page) {
+        let loadedPages = try loadPages(request)
+        let notFoundPage = try notFoundPage(
+            from: loadedPages.first(where: isNotFoundPage),
+            outputRootPath: request.outputRootPath,
+        )
+        let contentPages = applyingPostsLabel(
+            to: loadedPages.filter { page in
+                !isNotFoundPage(page)
+            },
+            configuration: request.configuration,
+        )
+        return (contentPages, notFoundPage)
+    }
+
     /// Applies the configured `postsLabel` to the posts landing page (the page
     /// whose slug is the posts directory), overriding its `title` so navigation
     /// and its heading read the chosen label. An empty label leaves pages as is.
@@ -175,19 +191,6 @@ private extension TileKit.Site.Generator {
         }
     }
 
-    /// Whether a page is a draft, from a truthy `draft` front-matter value.
-    /// Unset or any non-truthy value publishes as normal.
-    func isDraft(
-        _ page: TileKit.Site.Page,
-    ) -> Bool {
-        switch page.document.frontMatter["draft"]?.lowercased() {
-        case "true", "yes":
-            true
-        default:
-            false
-        }
-    }
-
     func template(
         from source: TileKit.Site.TemplateSource,
     ) throws -> String {
@@ -199,38 +202,40 @@ private extension TileKit.Site.Generator {
         }
     }
 
-    /// Merges every page's CSS into one site stylesheet, writes it to the output
-    /// root, records it in `outputPaths`, and returns the URL to link it from
-    /// each page. Returns "" and writes nothing when no page has any CSS, so a
-    /// site without styled tiles emits no stray stylesheet.
-    func writeSharedStylesheet(
-        pages: [TileKit.Site.Page],
+    private func notFoundPage(
+        from sourcePage: TileKit.Site.Page?,
         outputRootPath: String,
-        configuration: TileKit.Site.Configuration,
-        outputPaths: inout [String],
-    ) throws -> String {
-        let tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
-            result.merging(page.stylesheet)
-        }
-        let css = Self.composeStylesheet(
-            theme: configuration.theme,
-            tiles: tiles,
-            fontScale: configuration.fontScale,
-        )
-        guard !css.isEmpty else {
-            return ""
-        }
+    ) throws -> TileKit.Site.Page {
+        var page = try sourcePage ?? defaultNotFoundPage(outputRootPath: outputRootPath)
+        page.slug = Self.notFoundSlug
+        page.outputPath = join(outputRootPath, Self.notFoundFileName)
+        return page
+    }
 
-        let outputPath = join(outputRootPath, Self.sharedStylesheetFileName)
-        try fileSystem.writeTextFile(
-            css,
-            at: outputPath,
+    private func defaultNotFoundPage(
+        outputRootPath: String,
+    ) throws -> TileKit.Site.Page {
+        try makePage(
+            sourcePath: "",
+            outputPath: join(outputRootPath, Self.notFoundFileName),
+            slug: Self.notFoundSlug,
+            document: .init(
+                frontMatter: [
+                    "title": "Page not found",
+                ],
+                body: """
+                # Page not found
+
+                The page you requested could not be found.
+                """,
+            ),
         )
-        outputPaths.append(outputPath)
-        return stylesheetURL(
-            baseURL: configuration.baseURL,
-            fileName: Self.sharedStylesheetFileName,
-        )
+    }
+
+    private func isNotFoundPage(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        page.slug == Self.notFoundSlug
     }
 
     private func writeFeed(
@@ -263,16 +268,6 @@ private extension TileKit.Site.Generator {
             baseURL: configuration.baseURL,
             fileName: feedFilePath,
         )
-    }
-
-    private func stylesheetURL(
-        baseURL: String,
-        fileName: String,
-    ) -> String {
-        guard !baseURL.isEmpty else {
-            return "/" + fileName
-        }
-        return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
     }
 
     /// Loads a single page at a fixed slug and output path, for the single-file
@@ -343,24 +338,6 @@ private extension TileKit.Site.Generator {
             html: artifact.contents,
             stylesheet: artifact.assets.stylesheet,
             javascript: artifact.assets.javascript,
-        )
-    }
-
-    private func render(
-        page: TileKit.Site.Page,
-        pages: [TileKit.Site.Page],
-        template: String,
-        configuration: TileKit.Site.Configuration,
-        sitePaths: TileKit.Site.GeneratedSitePaths,
-    ) throws -> String {
-        try templateRenderer.render(
-            template: template,
-            context: context(
-                page: page,
-                pages: pages,
-                configuration: configuration,
-                sitePaths: sitePaths,
-            ),
         )
     }
 

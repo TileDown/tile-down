@@ -261,6 +261,14 @@ def run(page):
     missing = page.evaluate("async () => (await fetch('/posts/renamed/', {method:'HEAD'})).status")
     check("original folder path is gone", missing == 404, f"status={missing}")
 
+    # --- 404 page: custom source writes root 404.html, not /404/ ---
+    page.goto(NORMAL + "/404.html", wait_until="networkidle")
+    not_found_text = page.inner_text("body")
+    check("custom 404 page renders", page.title() == "Missing in TileDown" and "content/404/index.md" in not_found_text)
+    check("custom 404 uses site chrome", "Built with TileDown" in not_found_text)
+    not_found_folder = page.evaluate("async () => (await fetch('/404/', {method:'HEAD'})).status")
+    check("custom 404 source does not create /404/", not_found_folder == 404, f"status={not_found_folder}")
+
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")
     check("feed has live post", "Live Post" in feed)
