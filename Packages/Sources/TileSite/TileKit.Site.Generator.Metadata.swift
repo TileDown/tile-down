@@ -48,10 +48,7 @@ extension TileKit.Site.Generator {
         pageURL: String,
         baseURL: String,
     ) -> String {
-        guard
-            let source = page.document.frontMatter["image"],
-            !source.isEmpty
-        else {
+        guard let source = heroImageSource(page) else {
             return ""
         }
         return metadataAbsoluteURL(source, pageURL: pageURL, baseURL: baseURL)

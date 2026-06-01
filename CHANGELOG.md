@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Built-in layouts now treat `hero` front matter as a migration-friendly fallback
+  for the canonical `image` field when rendering page hero media, post-card
+  thumbnails, and metadata images. `image` keeps precedence when both are present.
+  (#103)
 - Built-in layouts now emit SEO and social preview metadata from page front
   matter and site configuration: descriptions, canonical links when `baseURL` is
   set, Open Graph and Twitter card tags, absolute preview images, and
