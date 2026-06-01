@@ -215,10 +215,29 @@ def run(page):
     theme = page.evaluate("document.documentElement.getAttribute('data-theme')")
     bg_after = page.evaluate("getComputedStyle(document.body).backgroundColor")
     check("toggle sets data-theme", theme in ("dark", "light"), f"data-theme={theme}")
+    check("toggle selects dark in light media", theme == "dark", f"data-theme={theme}")
     check("toggle changes background", bg_before != bg_after, f"{bg_before}->{bg_after}")
     check("dark hero image visible after toggle", theme == "dark" and dark_hero.is_visible() and not light_hero.is_visible())
     page.reload(wait_until="networkidle")
     check("toggle choice persists", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme)
+    click_center(page, page.get_by_role("link", name="Posts").first)
+    page.wait_for_url("**/posts/")
+    check("toggle choice persists after nav link", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme)
+    listing_light_thumb = page.locator(".td-post-card .td-theme-image-light").first
+    listing_dark_thumb = page.locator(".td-post-card .td-theme-image-dark").first
+    check("dark thumbnail image visible after navigation", listing_dark_thumb.is_visible() and not listing_light_thumb.is_visible())
+    click_center(page, page.locator(".td-post-title").get_by_role("link", name="Live Post").first)
+    page.wait_for_url("**/posts/live/")
+    check("toggle choice persists on article", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme)
+    article_light_hero = page.locator(".td-article-media .td-theme-image-light").first
+    article_dark_hero = page.locator(".td-article-media .td-theme-image-dark").first
+    check("dark article image visible after navigation", article_dark_hero.is_visible() and not article_light_hero.is_visible())
+    page.click("[data-td-theme-toggle]")
+    check("article toggle can select light", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
+    page.go_back(wait_until="load")
+    check("back navigation reapplies stored light theme", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
+    page.go_back(wait_until="load")
+    check("back navigation keeps stored light theme on home", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
 
     # --- Post listing: live present, draft absent ---
     page.goto(NORMAL + "/posts/", wait_until="networkidle")
