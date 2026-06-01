@@ -37,11 +37,13 @@ PY
     NORMAL_URL="http://localhost:$normal_port" \
     DRAFTS_URL="http://localhost:$drafts_port" \
     SYSTEM_URL="http://localhost:$system_port" \
+    NORMAL_ROOT="$normal" \
       "$python" "$here/test_site.py"
   elif command -v uv >/dev/null 2>&1; then
     NORMAL_URL="http://localhost:$normal_port" \
     DRAFTS_URL="http://localhost:$drafts_port" \
     SYSTEM_URL="http://localhost:$system_port" \
+    NORMAL_ROOT="$normal" \
       uv run --with playwright "$python" "$here/test_site.py"
   else
     echo "Python Playwright is not installed. Install it for $python, or install uv for the ephemeral Playwright runner." >&2

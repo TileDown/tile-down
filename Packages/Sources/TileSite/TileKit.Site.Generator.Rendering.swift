@@ -32,7 +32,13 @@ extension TileKit.Site.Generator {
             configuration: configuration,
             sitePaths: sitePaths,
         )
-        try fileSystem.writeTextFile(output, at: page.outputPath)
+        let finalOutput = page.slug == Self.notFoundSlug
+            ? injectNotFoundRedirectScript(
+                into: output,
+                redirects: configuration.notFoundRedirects,
+            )
+            : output
+        try fileSystem.writeTextFile(finalOutput, at: page.outputPath)
         return page.outputPath
     }
 

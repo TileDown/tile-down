@@ -66,4 +66,61 @@ extension SiteGeneratorTests {
         #expect(html.contains("<title>Custom Missing</title><h1>Custom Missing</h1>"))
         #expect(html.contains("This is the site-specific missing page."))
     }
+
+    @Test("content 404 output can include fallback redirects")
+    func notFoundRedirects() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    notFoundRedirects: .init(
+                        exact: [
+                            .init(source: "/cvbuilder", target: "/blog/c-v-builder/"),
+                        ],
+                        prefixes: [
+                            .init(source: "/tag/special/", target: "/posts/special/"),
+                            .init(source: "/tag/", target: "/"),
+                        ],
+                    ),
+                ),
+            ),
+        )
+
+        let html = try #require(fileSystem.files["dist/404.html"])
+        #expect(html.contains("window.location.pathname.toLowerCase()"))
+        #expect(html.contains(#"["/cvbuilder", "/blog/c-v-builder/"]"#))
+        #expect(html.contains(#"["/tag/", "/"]"#))
+        let specialPrefix = try #require(html.range(of: #""/tag/special/""#))
+        let broadPrefix = try #require(html.range(of: #""/tag/""#))
+        #expect(specialPrefix.lowerBound < broadPrefix.lowerBound)
+        #expect(html.contains("window.location.replace(exact[i][1] + suffix)"))
+    }
+
+    @Test("default 404 output has no fallback redirect script")
+    func defaultNotFoundHasNoRedirectScript() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+            ),
+        )
+
+        let html = try #require(fileSystem.files["dist/404.html"])
+        #expect(!html.contains("window.location.pathname.toLowerCase()"))
+    }
 }

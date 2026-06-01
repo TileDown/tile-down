@@ -9,6 +9,8 @@ public extension TileKit.Site {
         case unknownAppearance(String)
         case invalidBoolean(String)
         case invalidPath(String)
+        case invalidRedirectPath(String)
+        case invalidRedirectTarget(String)
         case duplicateSlug(String)
         case invalidLatestPosts(String)
         case invalidFontScale(String)
@@ -29,6 +31,10 @@ public extension TileKit.Site {
                 "Invalid boolean value `\(value)`. Expected `true` or `false`."
             case let .invalidPath(path):
                 "Invalid site configuration path `\(path)`."
+            case let .invalidRedirectPath(path):
+                "Invalid 404 redirect path `\(path)`. Expected a safe root-relative path."
+            case let .invalidRedirectTarget(target):
+                "Invalid 404 redirect target `\(target)`. Expected a safe root-relative path or HTTPS URL."
             case let .duplicateSlug(slug):
                 "Duplicate page slug `\(slug)`. Two pages resolve to the same output path."
             case let .invalidLatestPosts(value):

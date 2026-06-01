@@ -48,6 +48,9 @@ public extension TileKit.Site {
                 if try applyShareLinks(item, to: &result) {
                     continue
                 }
+                if try applyNotFoundRedirect(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,
