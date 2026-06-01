@@ -74,6 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Redirect pages now reject unsafe target URL schemes before emitting meta
+  refresh or fallback links. (#45)
 - Migrated posts with a custom `slug` outside `postsDir` now remain posts. Post
   listings, tag pages, RSS items, and `post:` references use the canonical custom
   URL while selection still follows the source folder. (#87)
