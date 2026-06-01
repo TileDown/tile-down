@@ -95,7 +95,7 @@ flowchart LR
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #17 Assets and theming
@@ -108,7 +108,7 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #82 Static output
@@ -143,7 +143,7 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #84 Local workflow
@@ -155,7 +155,7 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #85 Renderer cleanup
@@ -170,7 +170,7 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #86 Docs and hygiene
@@ -183,7 +183,7 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ## What actually runs today
