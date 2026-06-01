@@ -114,6 +114,38 @@ struct SiteMetadataTests {
         #expect(!home.contains(#"article:published_time"#))
     }
 
+    @Test("malformed absolute metadata image URLs are omitted")
+    func malformedAbsoluteImageURLsAreOmitted() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                image: https:/assets/hero.png
+                ---
+                # Home
+                """,
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(baseURL: "https://example.com"),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<link rel="canonical" href="https://example.com/">"#))
+        #expect(home.contains(#"<meta name="twitter:card" content="summary">"#))
+        #expect(!home.contains(#"property="og:image""#))
+        #expect(!home.contains(#"name="twitter:image""#))
+        #expect(!home.contains(#"property="og:image" content="https:/assets/hero.png""#))
+        #expect(!home.contains(#"name="twitter:image" content="https:/assets/hero.png""#))
+    }
+
     private func assertPageMetadata(
         layout: TileKit.Site.Layout,
         outputPath: String,
