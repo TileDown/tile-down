@@ -56,6 +56,30 @@ struct SimpleMustacheRendererTests {
         #expect(html == "<a href=\"/\">Home</a><a href=\"/blog/\">Blog &lt;News&gt;</a>")
     }
 
+    @Test("renders string sections only when truthy")
+    func rendersStringSectionsOnlyWhenTruthy() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: [
+                "{{#enabled}}enabled{{/enabled}}",
+                "{{#disabledFalse}}false{{/disabledFalse}}",
+                "{{#disabledZero}}zero{{/disabledZero}}",
+                "{{#disabledNo}}no{{/disabledNo}}",
+                "{{#disabledEmpty}}empty{{/disabledEmpty}}",
+            ].joined(separator: "|"),
+            context: [
+                "enabled": "true",
+                "disabledFalse": "false",
+                "disabledZero": "0",
+                "disabledNo": "no",
+                "disabledEmpty": "",
+            ],
+        )
+
+        #expect(html == "enabled||||")
+    }
+
     @Test("renders nested object values")
     func rendersNestedObjectValues() throws {
         let renderer = TileKit.Template.SimpleMustacheRenderer()

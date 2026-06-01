@@ -453,6 +453,11 @@ def run(page):
     check("typed post outside postsDir is in listing", "Typed Article" in listing)
     check("forced page inside postsDir is absent from listing", "Forced Page" not in listing)
 
+    page.goto(NORMAL + "/no-list/", wait_until="networkidle")
+    no_list = page.inner_text("body")
+    check("postList false page has no cards", len(page.query_selector_all(".td-post-card")) == 0)
+    check("postList false page does not leak posts", "Live Post" not in no_list and "Swift Only" not in no_list)
+
     # --- Tag filtering: single tags and tag1 AND tag2 ---
     page.goto(NORMAL + "/tags/swift/", wait_until="networkidle")
     swift_tags = page.inner_text("body")

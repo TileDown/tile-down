@@ -142,6 +142,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (#77)
 - Static passthrough output paths now reject URL syntax characters before
   writing public files. (#79)
+- Mustache string sections now treat empty, whitespace-only, or
+  (case-insensitively) `false`, `0`, or `no` values as falsey, so front-matter
+  gates such as `postList: false` suppress built-in listing output. This applies
+  to every string-valued section, not only `postList`. (#36)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.

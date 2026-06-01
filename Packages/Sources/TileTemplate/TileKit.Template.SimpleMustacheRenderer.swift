@@ -164,7 +164,7 @@ public extension TileKit.Template {
                     scopes: [item] + scopes,
                 )
             case let .string(value):
-                guard !value.isEmpty else {
+                guard Self.stringSectionIsTruthy(value) else {
                     return ""
                 }
                 return try render(
@@ -220,74 +220,87 @@ public extension TileKit.Template {
 
             throw SimpleMustacheRendererError.missingSectionEnd(key)
         }
+    }
+}
 
-        private static func key(
-            in value: Substring,
-        ) -> String {
-            String(value).trimmingCharacters(in: .whitespacesAndNewlines)
+private extension TileKit.Template.SimpleMustacheRenderer {
+    static func key(
+        in value: Substring,
+    ) -> String {
+        String(value).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func sectionName(
+        _ key: String,
+    ) -> String {
+        String(key.dropFirst())
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func stringSectionIsTruthy(
+        _ value: String,
+    ) -> Bool {
+        switch value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "", "false", "0", "no":
+            false
+        default:
+            true
         }
+    }
 
-        private static func sectionName(
-            _ key: String,
-        ) -> String {
-            String(key.dropFirst())
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-
-        private static func lookup(
-            _ key: String,
-            scopes: [Context],
-        ) -> Value? {
-            for scope in scopes {
-                if let direct = scope[key] {
-                    return direct
-                }
-
-                if let nested = nestedValue(
-                    key,
-                    in: scope,
-                ) {
-                    return nested
-                }
+    static func lookup(
+        _ key: String,
+        scopes: [TileKit.Template.Context],
+    ) -> TileKit.Template.Value? {
+        for scope in scopes {
+            if let direct = scope[key] {
+                return direct
             }
 
+            if let nested = nestedValue(
+                key,
+                in: scope,
+            ) {
+                return nested
+            }
+        }
+
+        return nil
+    }
+
+    static func nestedValue(
+        _ key: String,
+        in scope: TileKit.Template.Context,
+    ) -> TileKit.Template.Value? {
+        let parts = key.split(separator: ".").map(String.init)
+        guard
+            let first = parts.first,
+            var value = scope[first]
+        else {
             return nil
         }
 
-        private static func nestedValue(
-            _ key: String,
-            in scope: Context,
-        ) -> Value? {
-            let parts = key.split(separator: ".").map(String.init)
-            guard
-                let first = parts.first,
-                var value = scope[first]
-            else {
+        for part in parts.dropFirst() {
+            guard case let .object(object) = value else {
                 return nil
             }
-
-            for part in parts.dropFirst() {
-                guard case let .object(object) = value else {
-                    return nil
-                }
-                guard let next = object[part] else {
-                    return nil
-                }
-                value = next
+            guard let next = object[part] else {
+                return nil
             }
-
-            return value
+            value = next
         }
 
-        private static func escapeHTML(
-            _ value: String,
-        ) -> String {
-            value
-                .replacingOccurrences(of: "&", with: "&amp;")
-                .replacingOccurrences(of: "<", with: "&lt;")
-                .replacingOccurrences(of: ">", with: "&gt;")
-                .replacingOccurrences(of: "\"", with: "&quot;")
-                .replacingOccurrences(of: "'", with: "&#39;")
-        }
+        return value
+    }
+
+    static func escapeHTML(
+        _ value: String,
+    ) -> String {
+        value
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "'", with: "&#39;")
     }
 }
