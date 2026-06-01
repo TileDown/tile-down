@@ -51,6 +51,52 @@ extension SiteGeneratorTests {
         #expect(fileSystem.files["dist/about/index.html"] == nil)
     }
 
+    @Test("a slug override cannot escape the output root")
+    func slugOverrideRejectsParentDirectorySegments() {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/about/index.md": "---\ntitle: About\nslug: ../escape\n---\n# About",
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("../escape")) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+        #expect(fileSystem.files["escape/index.html"] == nil)
+        #expect(fileSystem.files["dist/../escape/index.html"] == nil)
+    }
+
+    @Test("a slug override cannot contain empty path segments")
+    func slugOverrideRejectsEmptySegments() {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/about/index.md": "---\ntitle: About\nslug: docs//about\n---\n# About",
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("docs//about")) {
+            try makeGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+    }
+
     @Test("two pages resolving to the same slug are a typed error")
     func duplicateSlugThrows() {
         let fileSystem = MemoryFileSystem(

@@ -74,6 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated posts with a custom `slug` outside `postsDir` now remain posts. Post
   listings, tag pages, RSS items, and `post:` references use the canonical custom
   URL while selection still follows the source folder. (#87)
+- Slug overrides now reject `.`, `..`, and interior empty path segments before
+  writing output, so a content file cannot publish outside the output root. (#87)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.

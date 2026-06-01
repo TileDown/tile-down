@@ -307,7 +307,7 @@ private extension TileKit.Site.Generator {
         let document = try markdownParser.parse(
             fileSystem.readTextFile(at: sourcePath),
         )
-        let slug = effectiveSlug(
+        let slug = try effectiveSlug(
             folderSlug: folderSlug,
             frontMatter: document.frontMatter,
         )

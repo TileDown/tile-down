@@ -3,12 +3,13 @@ import TileCore
 extension TileKit.Site.Generator {
     /// The slug a content page publishes under. A non-empty `slug` front-matter
     /// value overrides the folder-derived slug; surrounding slashes are trimmed so
-    /// `slug: /custom/` and `slug: custom` resolve to the same path. An unset,
-    /// empty, or slash-only value keeps the folder slug.
+    /// `slug: /custom/` and `slug: custom` resolve to the same path. Interior
+    /// empty segments, `.`, and `..` are rejected because this value becomes an
+    /// output path. An unset, empty, or slash-only value keeps the folder slug.
     func effectiveSlug(
         folderSlug: String,
         frontMatter: [String: String],
-    ) -> String {
+    ) throws -> String {
         guard let override = frontMatter["slug"], !override.isEmpty else {
             return folderSlug
         }
@@ -19,7 +20,15 @@ extension TileKit.Site.Generator {
         while slug.hasSuffix("/") {
             slug = slug.dropLast()
         }
-        return slug.isEmpty ? folderSlug : String(slug)
+        guard !slug.isEmpty else {
+            return folderSlug
+        }
+        let result = String(slug)
+        let components = result.split(separator: "/", omittingEmptySubsequences: false)
+        guard components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
+            throw TileKit.Site.ConfigurationFileError.invalidPath(override)
+        }
+        return result
     }
 
     /// Ensures no two pages resolve to the same slug. Two pages sharing a slug
