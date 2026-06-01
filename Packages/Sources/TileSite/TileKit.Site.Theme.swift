@@ -1,4 +1,4 @@
-// swiftlint:disable line_length
+// swiftlint:disable line_length type_body_length
 // The theme is CSS; its lines cannot wrap without changing the stylesheet, so line
 // length is disabled for this CSS-only file.
 import TileCore
@@ -123,6 +123,29 @@ public extension TileKit.Site {
         .td-main .td-hero { display: block; width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto clamp(3rem, 7vw, 5rem); }
         .td-main .td-theme-image.td-hero { display: block; }
         .td-main .td-theme-image.td-hero img { width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto; }
+        .td-article { display: block; }
+        .td-article-header { margin-block: 0 clamp(2.5rem, 7vw, 4.5rem); }
+        .td-article-meta { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin-block: 0 1rem; color: var(--td-muted); font-size: 0.84rem; font-weight: 700; text-transform: uppercase; }
+        .td-article-date { color: var(--td-muted); font-weight: 600; text-transform: none; }
+        .td-main .td-article-title { max-width: 13ch; margin-block: 0 1.25rem; font-size: clamp(2.45rem, 8vw, 5rem); line-height: 0.98; letter-spacing: 0; }
+        .td-article-dek { max-width: 40rem; color: var(--td-muted); font-size: clamp(1.15rem, 2.8vw, 1.65rem); line-height: 1.28; }
+        .td-article-actions, .td-article-share { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1.6rem 0; }
+        .td-article-share { margin-block-start: 0.8rem; }
+        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.9rem; border: 1px solid var(--td-border); border-radius: 999px; background: var(--td-surface); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+        .td-article-actions a:hover, .td-article-share a:hover { border-color: var(--td-accent); color: var(--td-accent); }
+        .td-article-tags { margin-block: 1.1rem 0; }
+        .td-article-media { margin-block: 0 clamp(2rem, 6vw, 4rem); }
+        .td-main .td-article-media .td-hero { max-height: clamp(18rem, 54vh, 34rem); margin: 0 auto; }
+        .td-main .td-article-media .td-theme-image.td-hero img { max-height: clamp(18rem, 54vh, 34rem); }
+        .td-article-body { max-width: 39rem; margin-inline: auto; }
+        .td-article-body > :first-child { margin-top: 0; }
+        .td-related { margin-block: clamp(3rem, 8vw, 5rem) 0; padding-block: 1.5rem 0; border-top: 1px solid var(--td-border); }
+        .td-related h2 { margin-block: 0 1rem; font-size: 1.15rem; }
+        .td-related-list { list-style: none; display: grid; gap: 0.9rem; padding: 0; margin: 0; }
+        .td-related-list li { display: grid; gap: 0.15rem; padding-block: 0.85rem; border-bottom: 1px solid var(--td-border); }
+        .td-related-list a { color: var(--td-ink); font-weight: 700; text-decoration: none; }
+        .td-related-list a:hover { color: var(--td-accent); }
+        .td-related-list time { color: var(--td-muted); font-size: 0.86rem; }
         .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 8rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 8rem; height: 6rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; }
@@ -237,6 +260,29 @@ public extension TileKit.Site {
         .td-main .td-hero { display: block; width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto clamp(3rem, 7vw, 5rem); }
         .td-main .td-theme-image.td-hero { display: block; }
         .td-main .td-theme-image.td-hero img { width: auto; max-width: 100%; max-height: clamp(14rem, 38vh, 24rem); object-fit: contain; margin: 0 auto; }
+        .td-article { display: block; }
+        .td-article-header { margin-block: 0 clamp(2.5rem, 7vw, 4.5rem); }
+        .td-article-meta { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin-block: 0 1rem; color: var(--td-muted); font-size: 0.84rem; font-weight: 700; text-transform: uppercase; }
+        .td-article-date { color: var(--td-muted); font-weight: 600; text-transform: none; }
+        .td-main .td-article-title { max-width: 13ch; margin-block: 0 1.25rem; font-size: clamp(2.45rem, 8vw, 5rem); line-height: 0.98; letter-spacing: 0; }
+        .td-article-dek { max-width: 40rem; color: var(--td-muted); font-size: clamp(1.15rem, 2.8vw, 1.65rem); line-height: 1.28; }
+        .td-article-actions, .td-article-share { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1.6rem 0; }
+        .td-article-share { margin-block-start: 0.8rem; }
+        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.95rem; border: 1px solid var(--td-border); border-radius: 999px; background: var(--td-elevated); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; box-shadow: none; }
+        .td-article-actions a:hover, .td-article-share a:hover { border-color: var(--td-accent); color: var(--td-accent); }
+        .td-article-tags { margin-block: 1.1rem 0; }
+        .td-article-media { margin-block: 0 clamp(2rem, 6vw, 4rem); }
+        .td-main .td-article-media .td-hero { max-height: clamp(18rem, 54vh, 34rem); margin: 0 auto; }
+        .td-main .td-article-media .td-theme-image.td-hero img { max-height: clamp(18rem, 54vh, 34rem); }
+        .td-article-body { max-width: 39rem; margin-inline: auto; }
+        .td-article-body > :first-child { margin-top: 0; }
+        .td-related { margin-block: clamp(3rem, 8vw, 5rem) 0; padding-block: 1.5rem 0; border-top: 1px solid var(--td-border); }
+        .td-related h2 { margin-block: 0 1rem; font-size: 1.15rem; }
+        .td-related-list { list-style: none; display: grid; gap: 0.9rem; padding: 0; margin: 0; }
+        .td-related-list li { display: grid; gap: 0.15rem; padding-block: 0.85rem; border-bottom: 1px solid var(--td-border); }
+        .td-related-list a { color: var(--td-ink); font-weight: 700; text-decoration: none; }
+        .td-related-list a:hover { color: var(--td-accent); }
+        .td-related-list time { color: var(--td-muted); font-size: 0.86rem; }
         .td-posts { list-style: none; padding: 6rem 0 0; margin: 0; display: flex; flex-direction: column; gap: 3rem; }
         .td-post-card { display: grid; grid-template-columns: 9rem 1fr; gap: 1.25rem; align-items: start; }
         .td-posts .td-post-thumb img { width: 9rem; height: 6.5rem; object-fit: cover; border-radius: var(--td-radius); margin: 0; box-shadow: var(--td-shadow); }
@@ -273,4 +319,4 @@ public extension TileKit.Site {
     }
 }
 
-// swiftlint:enable line_length
+// swiftlint:enable line_length type_body_length

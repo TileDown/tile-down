@@ -48,6 +48,10 @@ public extension TileKit.Site {
         /// verbatim. Empty by default. For providers whose snippet belongs before
         /// `</body>` rather than in the head.
         public var analyticsBodyEnd: String
+        /// Whether built-in article pages include static social share links.
+        /// Disabled by default so a site only emits third-party share URLs when it
+        /// opts in.
+        public var shareLinks: Bool
 
         public init(
             title: String = "",
@@ -63,6 +67,7 @@ public extension TileKit.Site {
             outboundLinks: [String: String] = [:],
             analyticsHead: String = "",
             analyticsBodyEnd: String = "",
+            shareLinks: Bool = false,
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -77,6 +82,7 @@ public extension TileKit.Site {
             self.outboundLinks = outboundLinks
             self.analyticsHead = analyticsHead
             self.analyticsBodyEnd = analyticsBodyEnd
+            self.shareLinks = shareLinks
         }
     }
 }

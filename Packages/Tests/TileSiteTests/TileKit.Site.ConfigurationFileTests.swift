@@ -114,4 +114,17 @@ struct SiteConfigurationFileTests {
         #expect(bare.configuration.analyticsHead.isEmpty)
         #expect(bare.configuration.analyticsBodyEnd.isEmpty)
     }
+
+    @Test("share links are an opt-in site setting")
+    func parsesShareLinks() throws {
+        let off = try TileKit.Site.ConfigurationFile.parse("title: Demo")
+        #expect(!off.configuration.shareLinks)
+
+        let enabled = try TileKit.Site.ConfigurationFile.parse("shareLinks: true")
+        #expect(enabled.configuration.shareLinks)
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidBoolean("sometimes")) {
+            try TileKit.Site.ConfigurationFile.parse("shareLinks: sometimes")
+        }
+    }
 }

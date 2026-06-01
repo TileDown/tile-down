@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Default article pages for dated posts in the built-in layouts, with a
+  newsroom-style header, dek, hero media, body, related posts, and optional
+  static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
 - Multi-tag AND filtering: generated tag pages now include canonical static
   paths for one-tag and two-tag filters, plus larger filters when all selected
   tags co-occur on at least one post, capped at three selected tags to keep

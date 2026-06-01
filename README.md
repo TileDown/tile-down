@@ -80,9 +80,14 @@ layout: top-nav
 theme: system
 rss: true
 rssPath: feed.xml
+shareLinks: true
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
 ```
+
+When `shareLinks: true` is set, built-in article pages include static share links
+for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a
+published site.
 
 Posts can declare tags in front matter:
 

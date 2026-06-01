@@ -45,6 +45,9 @@ public extension TileKit.Site {
                 if applyAnalytics(item, to: &result) {
                     continue
                 }
+                if try applyShareLinks(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,
@@ -270,28 +273,28 @@ public extension TileKit.Site {
             }
             return result
         }
-
-        private static func socialLabel(
-            for key: String,
-        ) throws -> String {
-            let value = String(key.dropFirst("social.".count))
-            guard !value.isEmpty else {
-                throw ConfigurationFileError.unknownKey(key)
-            }
-
-            return switch value {
-            case "github":
-                "GitHub"
-            case "linkedin":
-                "LinkedIn"
-            case let value:
-                value
-            }
-        }
     }
 }
 
 private extension TileKit.Site.ConfigurationFile {
+    static func socialLabel(
+        for key: String,
+    ) throws -> String {
+        let value = String(key.dropFirst("social.".count))
+        guard !value.isEmpty else {
+            throw TileKit.Site.ConfigurationFileError.unknownKey(key)
+        }
+
+        return switch value {
+        case "github":
+            "GitHub"
+        case "linkedin":
+            "LinkedIn"
+        case let value:
+            value
+        }
+    }
+
     /// Records a `generate.<name>: <command>` content generator, returning true
     /// when the line is a generator setting so the parser stops dispatching it.
     /// The command value is split on whitespace into command + arguments.
@@ -367,6 +370,19 @@ private extension TileKit.Site.ConfigurationFile {
         default:
             return false
         }
+        return true
+    }
+
+    /// Parses the opt-in article share-link switch separately from the scalar
+    /// dispatch so the scalar switch stays small enough to read.
+    static func applyShareLinks(
+        _ item: (key: String, value: String),
+        to result: inout Self,
+    ) throws -> Bool {
+        guard item.key == "shareLinks" else {
+            return false
+        }
+        result.configuration.shareLinks = try boolean(item.value)
         return true
     }
 }
