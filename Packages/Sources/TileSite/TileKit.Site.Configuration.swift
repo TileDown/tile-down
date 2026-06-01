@@ -21,9 +21,9 @@ public extension TileKit.Site {
         public var feed: Feed?
         /// How the site offers dark and light appearance. Defaults to `.toggle`.
         public var appearance: Appearance
-        /// The content directory whose dated pages count as posts for the listing
-        /// (`site.posts`) and the RSS feed. A slug-style path with no surrounding
-        /// slashes (e.g. `posts`, `blog`, `writing/notes`). Defaults to `posts`.
+        /// The compatibility content directory whose dated pages count as posts
+        /// when `type:` is absent. A slug-style path with no surrounding slashes
+        /// (e.g. `posts`, `blog`, `writing/notes`). Defaults to `posts`.
         public var postsDirectory: String
         /// How many of the newest posts `site.latestPosts` exposes (for a home-page
         /// "recent posts" block). Defaults to 3; a value <= 0 yields no latest posts.
