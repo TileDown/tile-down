@@ -156,6 +156,18 @@ def check_article_page(page):
         "" if media_box is None or body_box is None else f"gap={body_box['y'] - (media_box['y'] + media_box['height']):.0f}",
     )
     check("article related posts render", "More updates" in article_text and "Swift Only" in article_text)
+    embed = page.locator(".td-embed iframe").first
+    embed_box = box(page, ".td-embed-frame")
+    check("article embed iframe renders", embed.count() == 1)
+    check(
+        "article embed uses safe provider URL",
+        embed.get_attribute("src") == "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    )
+    check(
+        "article embed keeps responsive ratio",
+        embed_box is not None and abs((embed_box["width"] / embed_box["height"]) - (16 / 9)) < 0.05,
+        "" if embed_box is None else f"{embed_box['width']:.0f}x{embed_box['height']:.0f}",
+    )
 
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
@@ -271,6 +283,8 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
+        page.route("https://www.youtube-nocookie.com/**", lambda route: route.fulfill(status=204, body=""))
+        page.route("https://player.vimeo.com/**", lambda route: route.fulfill(status=204, body=""))
         try:
             run(page)
         finally:

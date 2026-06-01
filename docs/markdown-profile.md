@@ -40,6 +40,26 @@ block or inline, is **escaped rather than passed through**: authored or remote
 HTML never executes in generated output. This is Tiledown's escape-by-default
 security posture, not a CommonMark default.
 
+## Embeds
+
+Safe iframe and video embeds use the built-in `embed` tile. Raw iframe HTML is
+not passed through.
+
+```markdown
+:::tile embed
+url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+title: Demo video
+aspectRatio: 16/9
+:::
+```
+
+`url` is required. `title` is optional and escaped into the generated HTML.
+`aspectRatio` is optional, defaults to `16/9`, and must be two positive integers
+separated by `/`. YouTube and Vimeo URLs render as lazy responsive iframes. Direct
+HTTPS `.mp4`, `.webm`, and `.ogg` URLs render as responsive `<video controls>`
+embeds. Other schemes, providers, file types, and malformed ratios fail the
+build.
+
 ## Canonical form
 
 `TileKit.Site.DocumentSerializer` is the source of truth for "one official
