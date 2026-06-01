@@ -44,7 +44,10 @@ extension SiteGeneratorTests {
                 # Custom Missing
 
                 This is the site-specific missing page.
+
+                ![Missing diagram](missing.svg)
                 """,
+                "content/404/missing.svg": "<svg/>",
                 "templates/page.html": template,
             ],
         )
@@ -59,10 +62,14 @@ extension SiteGeneratorTests {
         )
 
         #expect(result.outputPaths.contains("dist/404.html"))
+        #expect(result.outputPaths.contains("dist/missing.svg"))
         #expect(fileSystem.files["dist/404/index.html"] == nil)
+        #expect(fileSystem.files["dist/404/missing.svg"] == nil)
+        #expect(fileSystem.files["dist/missing.svg"] == "<svg/>")
         let html = try #require(fileSystem.files["dist/404.html"])
         #expect(html.contains(#"<nav><a href="/">Home</a></nav>"#))
         #expect(!html.contains(#"href="/404/""#))
+        #expect(html.contains(#"<img src="missing.svg" alt="Missing diagram">"#))
         #expect(html.contains("<title>Custom Missing</title><h1>Custom Missing</h1>"))
         #expect(html.contains("This is the site-specific missing page."))
     }

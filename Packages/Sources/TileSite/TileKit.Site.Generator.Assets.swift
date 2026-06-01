@@ -22,15 +22,25 @@ extension TileKit.Site.Generator {
     func copyAssets(
         request: TileKit.Site.ContentBuildRequest,
         generated: Set<String>,
+        notFoundAssetDirectory: String? = nil,
         outputPaths: inout [String],
     ) throws {
         let relativePaths = try fileSystem.listFilesRecursively(
             at: request.contentRootPath,
         )
+        var copiedDestinations = Set(outputPaths)
         for relativePath in relativePaths where isAsset(relativePath) {
-            let destination = join(request.outputRootPath, relativePath)
+            let outputRelativePath = outputAssetPath(
+                for: relativePath,
+                notFoundAssetDirectory: notFoundAssetDirectory,
+            )
+            let destination = join(request.outputRootPath, outputRelativePath)
             // Never let a content file overwrite a generated page/stylesheet/feed.
-            guard !generated.contains(destination) else {
+            // Asset-to-asset collisions are also skipped so remapped 404 assets
+            // cannot overwrite a root asset that was copied earlier.
+            guard !generated.contains(destination),
+                  !copiedDestinations.contains(destination)
+            else {
                 continue
             }
             try fileSystem.copyFile(
@@ -38,6 +48,7 @@ extension TileKit.Site.Generator {
                 to: destination,
             )
             outputPaths.append(destination)
+            copiedDestinations.insert(destination)
         }
     }
 
@@ -50,6 +61,23 @@ extension TileKit.Site.Generator {
         }
         let fileName = path.split(separator: "/").last.map(String.init) ?? path
         return !Self.nonAssetFileNames.contains(fileName)
+    }
+
+    func outputAssetPath(
+        for relativePath: String,
+        notFoundAssetDirectory: String?,
+    ) -> String {
+        guard let notFoundAssetDirectory,
+              !notFoundAssetDirectory.isEmpty
+        else {
+            return relativePath
+        }
+
+        let prefix = notFoundAssetDirectory + "/"
+        guard relativePath.hasPrefix(prefix) else {
+            return relativePath
+        }
+        return String(relativePath.dropFirst(prefix.count))
     }
 
     /// Runs the injected image-checking pass over the content's image assets.
