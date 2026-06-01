@@ -70,6 +70,13 @@ def box(page, selector):
     return page.locator(selector).first.bounding_box()
 
 
+def meta_content(page, selector):
+    locator = page.locator(selector).first
+    if locator.count() == 0:
+        return None
+    return locator.get_attribute("content")
+
+
 def visible_theme_image_box(page, selector):
     return page.eval_on_selector(
         selector,
@@ -112,6 +119,9 @@ def check_article_page(page):
 
     article_text = page.inner_text("body")
     check("article shell renders for dated post", page.locator(".td-article").count() == 1)
+    check("article metadata type", meta_content(page, 'meta[property="og:type"]') == "article")
+    check("article metadata description", meta_content(page, 'meta[name="description"]') == "A published post that appears in the listing and the feed.")
+    check("article metadata published time", meta_content(page, 'meta[property="article:published_time"]') == "2026-05-20T00:00:00Z")
     check("article generated title is primary h1", page.locator("h1").count() == 1 and page.locator(".td-article-title").inner_text() == "Live Post")
     check("article removes duplicate body h1", page.locator(".td-article-body h1").count() == 0)
     check("article body content remains", "Browser checked article" in article_text)
@@ -184,6 +194,10 @@ def run(page):
     page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
     check("home title", page.title() == "Home", page.title())
+    check("home metadata description", meta_content(page, 'meta[name="description"]') == "A fixture home page for generated site behavior.")
+    check("home metadata open graph", meta_content(page, 'meta[property="og:type"]') == "website")
+    check("home metadata twitter card", meta_content(page, 'meta[name="twitter:card"]') == "summary")
+    check("home has no relative canonical", page.locator('link[rel="canonical"]').count() == 0)
     footer_credit = page.locator(".td-built").inner_text()
     check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
 

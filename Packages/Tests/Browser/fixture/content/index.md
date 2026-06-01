@@ -1,5 +1,6 @@
 ---
 title: Home
+description: A fixture home page for generated site behavior.
 image: /assets/hero.svg
 imageDark: /assets/hero-dark.svg
 ---
