@@ -129,11 +129,17 @@ def check_article_page(page):
     check("article has kicker", page.locator(".td-article-kicker").text_content() == "Release")
     check("article has dek", "A published post" in page.locator(".td-article-dek").inner_text())
 
-    click_center(page, page.locator(".td-article-actions").get_by_role("link", name="Permalink").first)
-    page.wait_for_load_state("networkidle")
+    with page.expect_navigation(wait_until="networkidle"):
+        click_center(
+            page,
+            page.locator(".td-article-actions").get_by_role("link", name="Permalink").first,
+        )
     check("article permalink click stays on article", page.url.endswith("/posts/live/"), page.url)
-    click_center(page, page.locator(".td-article-actions").get_by_role("link", name="RSS").first)
-    page.wait_for_load_state("networkidle")
+    with page.expect_navigation(wait_until="networkidle"):
+        click_center(
+            page,
+            page.locator(".td-article-actions").get_by_role("link", name="RSS").first,
+        )
     check("article RSS action opens feed", page.url.endswith("/feed.xml"), page.url)
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
 

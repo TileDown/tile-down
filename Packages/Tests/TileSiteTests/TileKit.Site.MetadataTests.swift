@@ -40,6 +40,46 @@ struct SiteMetadataTests {
         #expect(post.contains(#"<meta name="twitter:card" content="summary_large_image">"#))
     }
 
+    @Test("metadata uses explicit output slugs")
+    func customSlugMetadata() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/renamed/index.md": """
+                ---
+                title: Renamed Post
+                date: 2026-05-28
+                description: Custom slug summary.
+                image: media/hero.png
+                slug: posts/custom-slug
+                ---
+                # Renamed
+                """,
+            ],
+        )
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    title: "Metadata Site",
+                    baseURL: "https://example.com/docs",
+                ),
+            ),
+        )
+
+        let post = try #require(fileSystem.files["dist/posts/custom-slug/index.html"])
+        let canonicalURL = "https://example.com/docs/posts/custom-slug/"
+        let imageURL = "https://example.com/docs/posts/custom-slug/media/hero.png"
+        #expect(fileSystem.files["dist/posts/renamed/index.html"] == nil)
+        #expect(post.contains(#"<link rel="canonical" href="\#(canonicalURL)">"#))
+        #expect(post.contains(#"<meta property="og:url" content="\#(canonicalURL)">"#))
+        #expect(post.contains(#"<meta property="og:type" content="article">"#))
+        #expect(post.contains(#"<meta property="og:image" content="\#(imageURL)">"#))
+        #expect(post.contains(#"<meta name="twitter:image" content="\#(imageURL)">"#))
+    }
+
     @Test("optional metadata is omitted when no absolute public URL is available")
     func optionalMetadataOmittedWithoutBaseURL() throws {
         let fileSystem = MemoryFileSystem(
@@ -59,6 +99,7 @@ struct SiteMetadataTests {
                 contentRootPath: "content",
                 template: .layout(.topNav),
                 outputRootPath: "dist",
+                configuration: .init(baseURL: "/docs"),
             ),
         )
 
@@ -67,6 +108,7 @@ struct SiteMetadataTests {
         #expect(home.contains(#"<meta name="twitter:card" content="summary">"#))
         #expect(!home.contains(#"rel="canonical""#))
         #expect(!home.contains(#"name="description""#))
+        #expect(!home.contains(#"property="og:url""#))
         #expect(!home.contains(#"property="og:image""#))
         #expect(!home.contains(#"name="twitter:image""#))
         #expect(!home.contains(#"article:published_time"#))
