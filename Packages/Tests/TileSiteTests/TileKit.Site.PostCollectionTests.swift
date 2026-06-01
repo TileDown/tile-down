@@ -35,6 +35,22 @@ struct SitePostCollectionTests {
         #expect(posts.map(\.slug) == ["blog/only"])
     }
 
+    @Test("explicit post types select posts outside postsDir")
+    func explicitPostTypes() {
+        let posts = TileKit.Site.PostCollection(
+            among: [
+                page("writing/typed", date: "2026-05-22", type: "blog-post"),
+                page("notes/typed", date: "2026-05-23", type: "post"),
+                page("writing/no-date", date: nil, type: "blog-post"),
+                page("posts/forced-page", date: "2026-05-24", type: "page"),
+                page("posts/unknown", date: "2026-05-25", type: "essay"),
+            ],
+            postsDirectory: "posts",
+        )
+
+        #expect(posts.map(\.slug) == ["notes/typed", "writing/typed"])
+    }
+
     @Test("Page is Hashable and Comparable, keyed on slug")
     func pageConformances() {
         let postA = page("posts/a", date: "2026-05-01")
@@ -61,6 +77,7 @@ struct SitePostCollectionTests {
         _ slug: String,
         date: String?,
         tags: String? = nil,
+        type: String? = nil,
     ) -> TileKit.Site.Page {
         var frontMatter: [String: String] = ["title": slug.isEmpty ? "Home" : slug]
         if let date {
@@ -68,6 +85,9 @@ struct SitePostCollectionTests {
         }
         if let tags {
             frontMatter["tags"] = tags
+        }
+        if let type {
+            frontMatter["type"] = type
         }
         return .init(
             sourcePath: slug + "/index.md",

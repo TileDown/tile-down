@@ -24,6 +24,61 @@ extension SiteGeneratorTests {
         #expect(css.contains(".td-related-list"))
     }
 
+    @Test("type front matter selects built-in article behavior")
+    func articleLayoutForExplicitPostType() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/writing/typed/index.md": """
+                ---
+                title: Typed Article
+                type: blog-post
+                date: 2026-05-30
+                description: Article selected by type.
+                ---
+                # Typed Article
+
+                The article shell comes from type metadata.
+                """,
+                "content/posts/forced-page/index.md": """
+                ---
+                title: Forced Page
+                type: page
+                date: 2026-05-31
+                ---
+                # Forced Page
+
+                This remains a standard page.
+                """,
+                "content/posts/unknown/index.md": """
+                ---
+                title: Unknown Type
+                type: essay
+                date: 2026-06-01
+                ---
+                # Unknown Type
+
+                Unknown explicit types fall back to page behavior.
+                """,
+            ],
+        )
+
+        try buildArticleLayoutFixture(fileSystem: fileSystem)
+
+        let article = try #require(fileSystem.files["dist/writing/typed/index.html"])
+        #expect(article.contains(#"<article class="td-article">"#))
+        #expect(article.contains(#"<span class="td-article-kicker">Blog Post</span>"#))
+        #expect(article.contains(#"<h1 class="td-article-title">Typed Article</h1>"#))
+
+        let forcedPage = try #require(fileSystem.files["dist/posts/forced-page/index.html"])
+        #expect(forcedPage.contains(#"<main class="td-main"><h1>Forced Page</h1>"#))
+        #expect(!forcedPage.contains(#"<article class="td-article">"#))
+
+        let unknownType = try #require(fileSystem.files["dist/posts/unknown/index.html"])
+        #expect(unknownType.contains(#"<main class="td-main"><h1>Unknown Type</h1>"#))
+        #expect(!unknownType.contains(#"<article class="td-article">"#))
+    }
+
     private func articleLayoutFileSystem() -> MemoryFileSystem {
         MemoryFileSystem(
             files: [
