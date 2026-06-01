@@ -11,6 +11,14 @@ extension TileKit.Site.Generator {
         ]
     }
 
+    static var markdownExtensions: Set<String> {
+        [".md", ".markdown"]
+    }
+
+    static var imageExtensions: Set<String> {
+        [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"]
+    }
+
     /// Copies every content asset verbatim into the output, preserving its
     /// relative path unless a custom 404 page needs local assets remapped beside
     /// `404.html`. Markdown is always source, build inputs are skipped, configured
@@ -18,13 +26,11 @@ extension TileKit.Site.Generator {
     /// explicit public paths, and generated output paths are never overwritten.
     func copyAssets(
         request: TileKit.Site.ContentBuildRequest,
+        relativePaths: [String],
         generated: Set<String>,
         notFoundAssetDirectory: String? = nil,
         outputPaths: inout [String],
     ) throws {
-        let relativePaths = try fileSystem.listFilesRecursively(
-            at: request.contentRootPath,
-        )
         let staticPassthroughs = try normalizedStaticPassthroughs(
             request.configuration.staticPassthroughs,
         )
@@ -64,11 +70,18 @@ extension TileKit.Site.Generator {
         generated: inout Set<String>,
         outputPaths: inout [String],
     ) throws {
+        let staticPassthroughs = try normalizedStaticPassthroughs(
+            request.configuration.staticPassthroughs,
+        )
+        guard !staticPassthroughs.isEmpty else {
+            return
+        }
+
         let relativePaths = try fileSystem.listFilesRecursively(
             at: request.contentRootPath,
             includingHidden: true,
         )
-        for passthrough in try normalizedStaticPassthroughs(request.configuration.staticPassthroughs) {
+        for passthrough in staticPassthroughs {
             let copies = try staticCopies(
                 for: passthrough,
                 relativePaths: relativePaths,
@@ -90,8 +103,7 @@ extension TileKit.Site.Generator {
     func isAsset(
         _ path: String,
     ) -> Bool {
-        let lowercased = path.lowercased()
-        if lowercased.hasSuffix(".md") || lowercased.hasSuffix(".markdown") {
+        if hasExtension(path, in: Self.markdownExtensions) {
             return false
         }
         let fileName = path.split(separator: "/").last.map(String.init) ?? path
@@ -171,11 +183,8 @@ extension TileKit.Site.Generator {
     /// Runs the injected image-checking pass over the content's image assets.
     /// The default checker does nothing; a real one can reject a build here.
     func runImageCheck(
-        request: TileKit.Site.ContentBuildRequest,
+        relativePaths: [String],
     ) throws {
-        let relativePaths = try fileSystem.listFilesRecursively(
-            at: request.contentRootPath,
-        )
         try imageChecker.check(
             imagePaths: relativePaths.filter(isImage),
         )
@@ -184,9 +193,15 @@ extension TileKit.Site.Generator {
     func isImage(
         _ path: String,
     ) -> Bool {
-        let imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"]
+        hasExtension(path, in: Self.imageExtensions)
+    }
+
+    func hasExtension(
+        _ path: String,
+        in extensions: Set<String>,
+    ) -> Bool {
         let lowercased = path.lowercased()
-        return imageExtensions.contains { lowercased.hasSuffix($0) }
+        return extensions.contains { lowercased.hasSuffix($0) }
     }
 
     /// Joins a parent path and child with a single separator. Internal so the

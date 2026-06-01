@@ -8,6 +8,7 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
     }
 
     var files: [String: String]
+    private(set) var listedPaths: [String] = []
 
     init(
         files: [String: String],
@@ -25,6 +26,7 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
         at path: String,
         includingHidden: Bool,
     ) throws -> [String] {
+        listedPaths.append(path)
         let prefix = path.hasSuffix("/") ? path : path + "/"
         return files.keys
             .filter { $0.hasPrefix(prefix) }

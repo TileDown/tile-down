@@ -167,6 +167,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   containing `<` or `>` was previously emitted raw into the page. (#40)
 - Demo tile renderers now use scoped `line_length` exceptions around embedded
   CSS payloads so CSS can stay authored as CSS. (#35)
+- Site content builds now list the content tree once and reuse that path list for
+  page discovery, image checks, and asset copying. (#41)
 - Posts are modeled as `TileKit.Site.PostCollection`, a `RandomAccessCollection`
   that owns the newest-first, date-valid selection once. The listing, the RSS
   feed, per-tag filtering, and the latest-posts block derive from it via
