@@ -71,6 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- RSS `content:encoded` now rewrites generated post links and image sources to
+  absolute public URLs when `baseURL` is configured. (#78)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.

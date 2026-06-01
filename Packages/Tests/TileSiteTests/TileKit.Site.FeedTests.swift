@@ -39,6 +39,14 @@ struct SiteFeedTests {
             description: The first post.
             ---
             # First
+
+            Body with AT&T <R&D>, [root link](/about/), [relative link](local/page/),
+            [fragment link](#details), [external link](https://external.example/path), and
+            [email](mailto:hello@example.com). An [empty link]().
+
+            ![Root hero](/assets/hero.png)
+
+            ![Relative hero](image.png)
             """,
             "content/posts/second/index.md": """
             ---
@@ -113,6 +121,15 @@ struct SiteFeedTests {
         #expect(feed.contains(#"xmlns:content="http://purl.org/rss/1.0/modules/content/""#))
         #expect(feed.contains("<content:encoded><![CDATA[<h1>First</h1>"))
         #expect(feed.contains("<content:encoded><![CDATA[<h1>Second</h1>"))
+        #expect(feed.contains("AT&amp;T &lt;R&amp;D&gt;"))
+        #expect(feed.contains(#"<a href="https://example.com/about/">root link</a>"#))
+        #expect(feed.contains(#"<a href="https://example.com/posts/first/local/page/">relative link</a>"#))
+        #expect(feed.contains(#"<a href="https://example.com/posts/first/#details">fragment link</a>"#))
+        #expect(feed.contains(#"<a href="https://external.example/path">external link</a>"#))
+        #expect(feed.contains(#"<a href="mailto:hello@example.com">email</a>"#))
+        #expect(feed.contains(#"<a href="">empty link</a>"#))
+        #expect(feed.contains(#"src="https://example.com/assets/hero.png""#))
+        #expect(feed.contains(#"src="https://example.com/posts/first/image.png""#))
         // Reader-facing channel metadata: the Atom namespace, a declared
         // language, a self-referencing Atom link, and permalink guids.
         #expect(feed.contains(#"xmlns:atom="http://www.w3.org/2005/Atom""#))
