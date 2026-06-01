@@ -265,7 +265,11 @@ def run(page):
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")
     check("feed has live post", "Live Post" in feed)
     check("feed includes rendered post body", "<content:encoded>" in feed and "Browser checked article" in feed)
-    check("feed includes post links and images", 'href="/about/"' in feed and 'src="/assets/logo.svg"' in feed)
+    check("feed item URL is absolute", f"<link>{NORMAL}/posts/live/</link>" in feed)
+    check(
+        "feed includes absolute post links and images",
+        f'href="{NORMAL}/about/"' in feed and f'src="{NORMAL}/assets/logo.svg"' in feed,
+    )
     check("feed excludes draft", "Secret Draft" not in feed)
 
 
