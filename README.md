@@ -1,5 +1,11 @@
 # Tiledown
 
+**Project website: [tiledown.com](https://tiledown.com/)**
+
+**Follow updates on [@diyamantina](https://x.com/diyamantina).**
+
+![Tiledown site preview](https://tiledown.com/assets/site-preview-dark.svg)
+
 A Swift static site generator with a Markdown-canonical source format and a typed
 tile model. Authors write a constrained Markdown profile; the parser turns it into
 a tree of typed tiles, which render to static HTML, CSS, and (for interactive
