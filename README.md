@@ -37,6 +37,50 @@ The architecture and the planned road are real and written down:
 - [docs/decisions/](docs/decisions/) - accepted architecture decisions.
 - [docs/research/](docs/research/) - the research behind the source-model pivot.
 
+## Roadmap
+
+The public issue tracker is organized into epics. This diagram includes every
+open public issue as of June 1, 2026.
+
+```mermaid
+flowchart TD
+  Start["0.1.0 engine slice"] --> Roadmap["Roadmap to a usable static site generator"]
+
+  Roadmap --> Theme["#17 Epic: site-scoped assets and theming"]
+  Theme --> ThemeProps["#20 Site theme and theme properties"]
+  Theme --> ThemePersist["#77 Theme choice persistence"]
+
+  Roadmap --> Output["#82 Epic: launch-ready static output"]
+  Output --> StaticFiles["#79 Static passthrough"]
+  Output --> ContentTypes["#49 Content types"]
+  Output --> Redirects["#45 Redirect output"]
+  Output --> NotFound["#47 404 page"]
+  Output --> Sitemap["#46 sitemap.xml"]
+  Output --> FullRSS["#78 RSS content:encoded"]
+  Output --> BaseURL["#37 baseURL asset links"]
+
+  Roadmap --> Tiles["#83 Epic: authoring tile catalog"]
+  Tiles --> Embed["#80 Safe embed tile"]
+  Tiles --> Mermaid["#56 Mermaid tile"]
+  Tiles --> Charts["#57 Chart tile"]
+
+  Roadmap --> Workflow["#84 Epic: local author workflow and verification"]
+  Workflow --> Serve["#33 tiledown serve"]
+  Workflow --> BrowserGate["#60 Browser-test gate docs"]
+
+  Roadmap --> Renderer["#85 Epic: renderer correctness and cleanup"]
+  Renderer --> BoolFM["#36 Boolean front matter"]
+  Renderer --> StrictSections["#38 Mustache section typo detection"]
+  Renderer --> EscapeHTML["#40 Shared HTML escaping"]
+  Renderer --> OneWalk["#41 Single content tree walk"]
+  Renderer --> CSSLint["#35 Embedded CSS lint posture"]
+
+  Roadmap --> Docs["#86 Epic: documentation and contribution hygiene"]
+  Docs --> Contributing["#58 CONTRIBUTING refresh"]
+  Docs --> ImportContract["#59 TileSite import contract"]
+  Docs --> NextSteps["#61 NEXT_STEPS refresh"]
+```
+
 ## What actually runs today
 
 From `Packages/`:
