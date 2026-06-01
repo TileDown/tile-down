@@ -160,4 +160,17 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("static.CNAME: ../secret")
         }
     }
+
+    @Test("rejects static passthrough output URL syntax characters", arguments: [
+        "images?preview",
+        "images#hero",
+        "images%2Fhero",
+        #"images\hero"#,
+        "images\u{0007}hero",
+    ])
+    func rejectsStaticPassthroughOutputURLSyntaxCharacters(outputPath: String) {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath(outputPath)) {
+            try TileKit.Site.ConfigurationFile.parse("static.\(outputPath): public/images")
+        }
+    }
 }

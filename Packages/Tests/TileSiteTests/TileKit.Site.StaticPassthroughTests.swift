@@ -54,6 +54,8 @@ struct SiteStaticPassthroughTests {
         #expect(result.outputPaths.contains("dist/images/icons/icon.png"))
 
         // Configured source trees are private inputs, not mirrored public output.
+        #expect(fileSystem.files["dist/deployment/CNAME"] == nil)
+        #expect(fileSystem.files["dist/deployment/robots.txt"] == nil)
         #expect(fileSystem.files["dist/public/images/hero.svg"] == nil)
         #expect(fileSystem.files["dist/private/downloads/resume.pdf"] == nil)
 
@@ -155,6 +157,59 @@ struct SiteStaticPassthroughTests {
                     configuration: .init(
                         staticPassthroughs: [
                             .init(sourcePath: "../secret", outputPath: "secret.txt"),
+                        ],
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test("validates direct API output paths")
+    func validatesDirectAPIOutputPaths() {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/public/images/hero.svg": "<svg/>",
+            ],
+        )
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("images?preview")) {
+            _ = try makeStaticPassthroughGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .layout(.topNav),
+                    outputRootPath: "dist",
+                    configuration: .init(
+                        staticPassthroughs: [
+                            .init(sourcePath: "public/images", outputPath: "images?preview"),
+                        ],
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test("validates mapped directory output paths", arguments: [
+        "hero?preview.svg",
+        "hero#preview.svg",
+        "hero%2Fpreview.svg",
+        #"hero\preview.svg"#,
+    ])
+    func validatesMappedDirectoryOutputPaths(fileName: String) {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/public/images/\(fileName)": "<svg/>",
+            ],
+        )
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("images/\(fileName)")) {
+            _ = try makeStaticPassthroughGenerator(fileSystem: fileSystem).buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .layout(.topNav),
+                    outputRootPath: "dist",
+                    configuration: .init(
+                        staticPassthroughs: [
+                            .init(sourcePath: "public/images", outputPath: "images"),
                         ],
                     ),
                 ),
