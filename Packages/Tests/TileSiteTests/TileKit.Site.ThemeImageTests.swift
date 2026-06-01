@@ -44,6 +44,9 @@ struct SiteThemeImageTests {
         let css = try #require(fileSystem.files["dist/styles.css"])
         #expect(css.contains(#"[data-theme="dark"] .td-theme-image .td-theme-image-light"#))
         #expect(css.contains("prefers-color-scheme: dark"))
+        #expect(css.contains(".td-main .td-theme-image.td-hero { display: block; }"))
+        #expect(css.contains("max-height: clamp(14rem, 38vh, 24rem)"))
+        #expect(css.contains("margin: 0 auto clamp(3rem, 7vw, 5rem);"))
     }
 
     @Test("single hero images keep the plain image markup")
