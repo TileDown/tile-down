@@ -27,7 +27,7 @@ Markdown is real CommonMark via
 [swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
-write an RSS feed from pages under `posts/`.
+write an RSS feed from the shared post collection.
 
 Still missing before it is a usable static site generator: project scaffolding
 (`tiledown init`), a dev server and watch mode, named tile types (`youtube-video`,
