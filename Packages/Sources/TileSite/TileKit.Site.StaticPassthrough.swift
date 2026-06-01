@@ -24,17 +24,17 @@ extension TileKit.Site.StaticPassthrough {
         outputPath: String,
     ) throws {
         try self.init(
-            sourcePath: Self.normalizedPath(sourcePath),
-            outputPath: Self.normalizedPath(outputPath),
+            sourcePath: Self.normalizedSourcePath(sourcePath),
+            outputPath: Self.normalizedOutputPath(outputPath),
         )
     }
 
     /// Normalizes configured file paths to safe slash paths relative to the
     /// content/output root.
-    static func normalizedPath(
+    static func normalizedSourcePath(
         _ value: String,
     ) throws -> String {
-        var path = value.trimmingCharacters(in: .whitespaces)[...]
+        var path = value.trimmingCharacters(in: .whitespacesAndNewlines)[...]
         while path.hasPrefix("/") {
             path = path.dropFirst()
         }
@@ -50,6 +50,22 @@ extension TileKit.Site.StaticPassthrough {
             omittingEmptySubsequences: false,
         )
         guard components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
+            throw TileKit.Site.ConfigurationFileError.invalidPath(value)
+        }
+        return normalized
+    }
+
+    static func normalizedOutputPath(
+        _ value: String,
+    ) throws -> String {
+        let normalized = try normalizedSourcePath(value)
+        guard normalized.unicodeScalars.allSatisfy({ scalar in
+            scalar.value > 0x1F && scalar.value != 0x7F
+        }),
+            !normalized.contains(where: { character in
+                character == "#" || character == "%" || character == "?" || character == "\\"
+            })
+        else {
             throw TileKit.Site.ConfigurationFileError.invalidPath(value)
         }
         return normalized

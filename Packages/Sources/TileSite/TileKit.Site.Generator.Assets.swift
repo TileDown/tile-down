@@ -128,13 +128,16 @@ extension TileKit.Site.Generator {
         }
 
         let directoryPrefix = passthrough.sourcePath + "/"
-        let nested = relativePaths
+        let nested = try relativePaths
             .filter { $0.hasPrefix(directoryPrefix) }
             .map { sourcePath in
                 let suffix = String(sourcePath.dropFirst(directoryPrefix.count))
+                let outputPath = try TileKit.Site.StaticPassthrough.normalizedOutputPath(
+                    join(passthrough.outputPath, suffix),
+                )
                 return StaticCopy(
                     sourcePath: sourcePath,
-                    outputPath: join(passthrough.outputPath, suffix),
+                    outputPath: outputPath,
                 )
             }
         guard !nested.isEmpty else {
