@@ -24,6 +24,9 @@ extension TileKit.Site.Generator {
             page,
             baseURL: configuration.baseURL,
             posts: pagePosts(for: page, among: posts),
+            sitePosts: Array(posts),
+            postsDirectory: configuration.postsDirectory,
+            shareLinksEnabled: configuration.shareLinks,
         )
         result["pages"] = .list(
             pages.map { page in
@@ -228,6 +231,9 @@ extension TileKit.Site.Generator {
         _ page: TileKit.Site.Page,
         baseURL: String = "",
         posts: [TileKit.Site.Page] = [],
+        sitePosts: [TileKit.Site.Page] = [],
+        postsDirectory: String = "posts",
+        shareLinksEnabled: Bool = false,
     ) -> TileKit.Template.Value {
         var context = pageContext(
             page,
@@ -245,6 +251,18 @@ extension TileKit.Site.Generator {
         let filtersByTags = !TileKit.Site.Tags.filterSlugs(of: page).isEmpty
         context["hasPosts"] = .string(posts.isEmpty ? "" : "true")
         context["emptyPosts"] = .string(posts.isEmpty && listsPosts && filtersByTags ? "true" : "")
+        let isPost = pageIsPost(page, postsDirectory: postsDirectory)
+        context["standardPage"] = .string(isPost ? "" : "true")
+        if isPost {
+            context["article"] = .object(
+                articleContext(
+                    page,
+                    sitePosts: sitePosts,
+                    baseURL: baseURL,
+                    shareLinksEnabled: shareLinksEnabled,
+                ),
+            )
+        }
         return .object(context)
     }
 
@@ -276,6 +294,9 @@ extension TileKit.Site.Generator {
                 for: page.slug,
                 baseURL: baseURL,
             ),
+        )
+        context["displayDate"] = .string(
+            TileKit.Site.PostSelection.displayDate(page.document.frontMatter["date"]),
         )
         // Non-empty on the tags landing page and any per-tag page, gating the
         // sticky tag bar that lets a reader jump between tags.
@@ -309,25 +330,6 @@ extension TileKit.Site.Generator {
         context["hasTags"] = .string(tags.isEmpty ? "" : "true")
         context["assets"] = assetsValue(page)
         return context
-    }
-
-    /// The rendered HTML for the recent-posts placement marker (`:::recent:::` on
-    /// its own line), as CommonMark renders it: a paragraph of that literal text.
-    private static let recentMarkerHTML = "<p>:::recent:::</p>"
-
-    /// Splits a page's rendered HTML at the recent-posts marker so a layout can
-    /// render the recent block in its place. Returns the body before the marker
-    /// and the body after it (the marker removed). With no marker the whole body
-    /// is the head and the tail is empty, preserving the cards-after-body default.
-    private func recentSplit(
-        _ html: String,
-    ) -> (head: String, tail: String) {
-        guard let range = html.range(of: Self.recentMarkerHTML) else {
-            return (html, "")
-        }
-        let head = String(html[..<range.lowerBound])
-        let tail = String(html[range.upperBound...])
-        return (head, tail)
     }
 
     func assetsValue(

@@ -48,6 +48,24 @@ def click_center(page, locator):
     page.mouse.up()
 
 
+def can_receive_center_click(locator):
+    locator.wait_for(state="visible")
+    locator.scroll_into_view_if_needed()
+    box = locator.bounding_box()
+    if box is None:
+        return False
+    x = box["x"] + box["width"] / 2
+    y = box["y"] + box["height"] / 2
+    handle = locator.element_handle()
+    return handle.evaluate(
+        """(element, point) => {
+            const hit = document.elementFromPoint(point.x, point.y);
+            return hit === element || element.contains(hit);
+        }""",
+        {"x": x, "y": y},
+    )
+
+
 def box(page, selector):
     return page.locator(selector).first.bounding_box()
 
@@ -84,6 +102,79 @@ def check_hero_rhythm(page, name):
         name,
         gap >= 48 and title_visible and image_visible,
         f"gap={gap:.0f}, titleBottom={heading_box['y'] + heading_box['height']:.0f}, imageHeight={hero_image_box['height']:.0f}",
+    )
+
+
+def check_article_page(page):
+    page.set_viewport_size({"width": 1024, "height": 900})
+    page.emulate_media(color_scheme="light")
+    page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
+
+    article_text = page.inner_text("body")
+    check("article shell renders for dated post", page.locator(".td-article").count() == 1)
+    check("article generated title is primary h1", page.locator("h1").count() == 1 and page.locator(".td-article-title").inner_text() == "Live Post")
+    check("article removes duplicate body h1", page.locator(".td-article-body h1").count() == 0)
+    check("article body content remains", "Browser checked article" in article_text)
+    check("article has readable date", page.locator(".td-article-date").inner_text() == "May 20, 2026")
+    check("article has kicker", page.locator(".td-article-kicker").text_content() == "Release")
+    check("article has dek", "A published post" in page.locator(".td-article-dek").inner_text())
+
+    click_center(page, page.locator(".td-article-actions").get_by_role("link", name="Permalink").first)
+    page.wait_for_load_state("networkidle")
+    check("article permalink click stays on article", page.url.endswith("/posts/live/"), page.url)
+    click_center(page, page.locator(".td-article-actions").get_by_role("link", name="RSS").first)
+    page.wait_for_load_state("networkidle")
+    check("article RSS action opens feed", page.url.endswith("/feed.xml"), page.url)
+    page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
+
+    broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
+    check("article images load", broken == 0, f"{broken} broken")
+    share_hrefs = page.eval_on_selector_all(
+        ".td-article-share a",
+        "els => els.map(e => [e.textContent, e.getAttribute('href'), e.getAttribute('target'), e.getAttribute('rel')])",
+    )
+    check(
+        "article share links are configured",
+        [item[0] for item in share_hrefs] == ["X", "LinkedIn", "Facebook", "Email"]
+        and "%2Fposts%2Flive%2F" in share_hrefs[0][1]
+        and share_hrefs[3][1].startswith("mailto:?subject=Live%20Post")
+        and all(item[2] == "_blank" and item[3] == "noopener" for item in share_hrefs),
+        str(share_hrefs),
+    )
+    check("article share link is tappable", can_receive_center_click(page.locator(".td-article-share a").first))
+    article_hero = visible_theme_image_box(page, ".td-article-media .td-theme-image.td-hero")
+    body_box = box(page, ".td-article-body")
+    media_box = box(page, ".td-article-media")
+    check(
+        "article hero is prominent",
+        article_hero is not None and article_hero["height"] >= 300 and article_hero["width"] >= 480,
+        "" if article_hero is None else f"{article_hero['width']:.0f}x{article_hero['height']:.0f}",
+    )
+    check(
+        "article media leaves body spacing",
+        media_box is not None and body_box is not None and body_box["y"] - (media_box["y"] + media_box["height"]) >= 32,
+        "" if media_box is None or body_box is None else f"gap={body_box['y'] - (media_box['y'] + media_box['height']):.0f}",
+    )
+    check("article related posts render", "More updates" in article_text and "Swift Only" in article_text)
+
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
+    title_box = box(page, ".td-article-title")
+    dek_box = box(page, ".td-article-dek")
+    actions_box = box(page, ".td-article-actions")
+    share_box = box(page, ".td-article-share")
+    mobile_media_box = box(page, ".td-article-media")
+    check(
+        "article mobile title fits viewport",
+        title_box is not None and title_box["x"] >= 0 and title_box["x"] + title_box["width"] <= page.viewport_size["width"],
+        "" if title_box is None else f"x={title_box['x']:.0f}, width={title_box['width']:.0f}",
+    )
+    check(
+        "article mobile spacing is ordered",
+        title_box is not None and dek_box is not None and actions_box is not None and share_box is not None and mobile_media_box is not None
+        and title_box["y"] + title_box["height"] < dek_box["y"]
+        and actions_box["y"] + actions_box["height"] < share_box["y"]
+        and share_box["y"] + share_box["height"] < mobile_media_box["y"],
     )
 
 
@@ -154,6 +245,9 @@ def run(page):
     page.goto(NORMAL + "/tags/release/swift/", wait_until="networkidle")
     both_tags = page.inner_text("body")
     check("release AND swift lists matching post", "Live Post" in both_tags and "Swift Only" not in both_tags)
+
+    # --- Article page: newsroom-style post layout ---
+    check_article_page(page)
 
     # --- Drafts: 404 in normal, present in --drafts build ---
     status = page.evaluate("async () => (await fetch('/posts/secret/', {method:'HEAD'})).status")
