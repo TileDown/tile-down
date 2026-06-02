@@ -211,6 +211,10 @@ def check_article_page(page):
         "article mermaid rethemes after toggle",
         page.evaluate("window.__tdMermaidConfig && window.__tdMermaidConfig.theme") == toggled_mermaid_theme,
     )
+    check("article chart renders static svg", page.locator(".td-chart .td-chart-svg").count() == 1)
+    chart_text = page.locator(".td-chart").inner_text()
+    check("article chart keeps labels and series", "Release metrics" in chart_text and "Downloads" in chart_text and "Jan" in chart_text)
+    check("article chart emits no script", "<script" not in page.locator(".td-chart").inner_html())
 
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")

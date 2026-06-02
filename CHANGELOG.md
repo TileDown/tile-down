@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Static SVG charts through the built-in `chart` tile, with exact `:::chart`
+  shorthand parsing, typed inline data validation, themed bar/line/pie/doughnut
+  and scatter SVG output, no browser JavaScript, docs, examples, and Playwright
+  coverage. (#57)
 - Mermaid diagrams through the built-in `mermaid` tile, with exact
   `:::mermaid` shorthand parsing, canonical `:::tile mermaid` serialization,
   escaped diagram source, a pinned client-side Mermaid runtime, and Playwright

@@ -130,6 +130,30 @@ struct TileDirectiveParserTests {
         )
     }
 
+    @Test("parses exact chart shorthand as a tile directive")
+    func parsesChartShorthand() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            :::chart
+            type: bar
+            labels: Jan, Feb
+            series.Releases: 4, 7
+            :::
+            """,
+        )
+
+        guard case let .tile(tile) = blocks.first else {
+            Issue.record("Expected a tile block")
+            return
+        }
+
+        #expect(tile.typeID == "chart")
+        #expect(tile.property(named: "type") == .string("bar"))
+        #expect(tile.property(named: "series.Releases") == .string("4, 7"))
+    }
+
     @Test("throws on missing closing fence")
     func throwsOnMissingClosingFence() {
         let parser = TileKit.Tile.DirectiveParser()
