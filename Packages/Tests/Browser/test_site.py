@@ -129,7 +129,7 @@ def check_article_page(page):
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
 
     article_text = page.inner_text("body")
-    check("article shell renders for dated post", page.locator(".td-article").count() == 1)
+    check("article shell renders for typed post", page.locator(".td-article").count() == 1)
     check("article generated title is primary h1", page.locator("h1").count() == 1 and page.locator(".td-article-title").inner_text() == "Live Post")
     check("article removes duplicate body h1", page.locator(".td-article-body h1").count() == 0)
     check("article body content remains", "Browser checked article" in article_text)
@@ -296,6 +296,8 @@ def run(page):
     check("draft absent from listing", "Secret Draft" not in listing)
     check("live post in listing", "Live Post" in listing)
     check("redirect absent from listing", "Old Live Redirect" not in listing)
+    check("typed post outside postsDir is in listing", "Typed Article" in listing)
+    check("forced page inside postsDir is absent from listing", "Forced Page" not in listing)
 
     # --- Tag filtering: single tags and tag1 AND tag2 ---
     page.goto(NORMAL + "/tags/swift/", wait_until="networkidle")
@@ -318,6 +320,14 @@ def run(page):
 
     # --- Article page: newsroom-style post layout ---
     check_article_page(page)
+    page.goto(NORMAL + "/writing/typed/", wait_until="networkidle")
+    typed_article = page.inner_text("body")
+    check("typed post outside postsDir renders article shell", page.locator(".td-article").count() == 1)
+    check("typed post outside postsDir has blog kicker", page.locator(".td-article-kicker").text_content() == "Blog Post")
+    check("typed post outside postsDir body remains", "Browser checked typed article" in typed_article)
+    page.goto(NORMAL + "/posts/forced-page/", wait_until="networkidle")
+    forced_page = page.inner_text("body")
+    check("type page inside postsDir renders standard page", page.locator(".td-article").count() == 0 and "Browser checked forced page" in forced_page)
 
     # --- Drafts: 404 in normal, present in --drafts build ---
     status = page.evaluate("async () => (await fetch('/posts/secret/', {method:'HEAD'})).status")
@@ -425,6 +435,8 @@ def run(page):
         "feed includes absolute post links and images",
         f'href="{NORMAL}/about/"' in feed and f'src="{NORMAL}/assets/logo.svg"' in feed,
     )
+    check("feed has typed post outside postsDir", "Typed Article" in feed)
+    check("feed excludes forced page", "Forced Page" not in feed)
     check("feed excludes draft", "Secret Draft" not in feed)
     check("feed excludes redirect", "Old Live Redirect" not in feed)
 
