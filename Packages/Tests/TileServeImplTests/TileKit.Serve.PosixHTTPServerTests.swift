@@ -86,6 +86,22 @@ struct PosixHTTPServerTests {
         #expect(response.hasSuffix("Home"))
     }
 
+    @Test("stop unblocks a waiting server")
+    func stopUnblocksWaitingServer() throws {
+        let fixture = try makeFixture()
+        defer { try? FileManager.default.removeItem(at: fixture) }
+        try write("Home", to: fixture.appendingPathComponent("index.html"))
+
+        let server = TileKit.Serve.PosixHTTPServer()
+        let running = try server.start(
+            configuration: .init(rootPath: fixture.path, port: 0),
+            responder: .init(rootPath: fixture.path, fileManager: .default),
+        )
+
+        running.stop()
+        running.wait()
+    }
+
     private func fetch(
         _ url: URL,
     ) async throws -> FetchResult {

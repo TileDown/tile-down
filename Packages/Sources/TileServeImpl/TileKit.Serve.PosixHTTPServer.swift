@@ -162,6 +162,7 @@ private final class Running: TileKit.Serve.RunningServer, @unchecked Sendable {
         }
         didStop = true
         thread?.cancel()
+        wakeAcceptLoop()
         shutdownSocket(descriptor)
         closeSocket(descriptor)
     }
@@ -181,8 +182,35 @@ private final class Running: TileKit.Serve.RunningServer, @unchecked Sendable {
             guard client >= 0 else {
                 break
             }
+            guard !Thread.current.isCancelled else {
+                closeSocket(client)
+                break
+            }
             handle(client)
             closeSocket(client)
+        }
+    }
+
+    private func wakeAcceptLoop() {
+        let client = socket(AF_INET, streamSocketType, 0)
+        guard client >= 0 else {
+            return
+        }
+        defer { closeSocket(client) }
+
+        var address = sockaddr_in()
+        address.sin_family = sa_family_t(AF_INET)
+        address.sin_port = in_port_t(url.port ?? 0).bigEndian
+        address.sin_addr.s_addr = inet_addr("127.0.0.1")
+
+        _ = withUnsafePointer(to: &address) { pointer in
+            pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                DarwinGlibc.connect(
+                    client,
+                    $0,
+                    socklen_t(MemoryLayout<sockaddr_in>.size),
+                )
+            }
         }
     }
 
@@ -314,6 +342,18 @@ private enum DarwinGlibc {
             Darwin.bind(descriptor, address, length)
         #elseif canImport(Glibc)
             Glibc.bind(descriptor, address, length)
+        #endif
+    }
+
+    static func connect(
+        _ descriptor: Int32,
+        _ address: UnsafePointer<sockaddr>,
+        _ length: socklen_t,
+    ) -> Int32 {
+        #if canImport(Darwin)
+            Darwin.connect(descriptor, address, length)
+        #elseif canImport(Glibc)
+            Glibc.connect(descriptor, address, length)
         #endif
     }
 }
