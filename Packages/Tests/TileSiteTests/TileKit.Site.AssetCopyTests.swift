@@ -29,6 +29,7 @@ struct SiteAssetCopyTests {
                 """,
                 "content/posts/post/cover.jpg": "JPG-BYTES",
                 "content/posts/post/draft.md": "# Draft",
+                "content/posts/post/notes.markdown": "# Notes",
                 "templates/page.html": template,
             ],
         )
@@ -53,6 +54,7 @@ struct SiteAssetCopyTests {
         #expect(fileSystem.files["dist/index.md"] == nil)
         #expect(fileSystem.files["dist/posts/post/index.md"] == nil)
         #expect(fileSystem.files["dist/posts/post/draft.md"] == nil)
+        #expect(fileSystem.files["dist/posts/post/notes.markdown"] == nil)
     }
 
     @Test("does not copy build inputs or clobber generated output")
@@ -125,6 +127,40 @@ struct SiteAssetCopyTests {
 
         // Only image extensions reach the checker; the JSON asset does not.
         #expect(checker.checkedPaths == ["assets/logo.svg", "assets/photo.jpeg"])
+    }
+
+    @Test("content builds list the content tree once")
+    func contentBuildListsContentTreeOnce() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                ---
+                # Home
+                """,
+                "content/assets/logo.svg": "<svg/>",
+                "content/assets/data.json": "{}",
+                "templates/page.html": "{{{ contents }}}",
+            ],
+        )
+        let checker = RecordingImageChecker()
+
+        _ = try makeGenerator(
+            fileSystem: fileSystem,
+            imageChecker: checker,
+        ).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(fileSystem.listedPaths == ["content"])
+        #expect(checker.checkedPaths == ["assets/logo.svg"])
+        #expect(fileSystem.files["dist/assets/data.json"] == "{}")
     }
 
     @Test("a throwing image checker fails the build")

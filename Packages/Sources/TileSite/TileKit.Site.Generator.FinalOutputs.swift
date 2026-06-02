@@ -10,6 +10,7 @@ extension TileKit.Site.Generator {
         var sitePaths: TileKit.Site.GeneratedSitePaths
         var initialOutputPaths: [String]
         var notFoundAssetDirectory: String?
+        var relativePaths: [String]
     }
 
     func writeFinalOutputs(
@@ -48,6 +49,7 @@ extension TileKit.Site.Generator {
         )
         try copyAssets(
             request: plan.request,
+            relativePaths: plan.relativePaths,
             generated: generatedPaths,
             notFoundAssetDirectory: plan.notFoundAssetDirectory,
             outputPaths: &outputPaths,
