@@ -2,8 +2,18 @@ import TileCore
 
 public extension TileKit.Site {
     protocol FileSystem {
+        /// Lists non-hidden regular files below `path`, returned as slash paths
+        /// relative to that root.
         func listFilesRecursively(
             at path: String,
+        ) throws -> [String]
+
+        /// Lists regular files below `path`, optionally including hidden files
+        /// and hidden directories when a caller explicitly needs deployment
+        /// files such as `.nojekyll` or `.well-known/security.txt`.
+        func listFilesRecursively(
+            at path: String,
+            includingHidden: Bool,
         ) throws -> [String]
 
         func readTextFile(
@@ -23,5 +33,14 @@ public extension TileKit.Site {
             from sourcePath: String,
             to destinationPath: String,
         ) throws
+    }
+}
+
+public extension TileKit.Site.FileSystem {
+    func listFilesRecursively(
+        at path: String,
+        includingHidden _: Bool,
+    ) throws -> [String] {
+        try listFilesRecursively(at: path)
     }
 }

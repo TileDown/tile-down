@@ -5,12 +5,14 @@ extension TileKit.Site {
     /// to a real URL and a display name, against registries the engine already owns.
     ///
     /// Built once per content build from the full page set, the configured posts
-    /// directory, the site's tags, the configured social links, and the configured
-    /// outbound link shims. `resolve` returns nil for a key with no matching target
-    /// so the caller can report it as a broken reference.
+    /// source directory, the site's tags, the configured social links, and the
+    /// configured outbound link shims. `resolve` returns nil for a key with no
+    /// matching target so the caller can report it as a broken reference.
     struct ReferenceResolver {
         let pageURLBySlug: [String: String]
         let titleBySlug: [String: String]
+        let postURLBySourceSlug: [String: String]
+        let postTitleBySourceSlug: [String: String]
         let tagURLBySlug: [String: String]
         let tagLabelBySlug: [String: String]
         let socialURLByKey: [String: String]
@@ -46,8 +48,8 @@ extension TileKit.Site {
             _ key: String,
         ) -> (url: String, displayName: String)? {
             let slug = postsDirectory + "/" + key
-            guard let url = pageURLBySlug[slug] else { return nil }
-            return (url, titleBySlug[slug] ?? key)
+            guard let url = postURLBySourceSlug[slug] else { return nil }
+            return (url, postTitleBySourceSlug[slug] ?? key)
         }
 
         private func resolveTag(

@@ -46,9 +46,26 @@ public extension TileKit.Site {
         {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
+          function storedTheme() {
+            try {
+              var saved = localStorage.getItem('td-theme');
+              return saved === 'dark' || saved === 'light' ? saved : '';
+            } catch (e) {
+              return '';
+            }
+          }
+          function applyStoredTheme() {
+            var saved = storedTheme();
+            if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
+          }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
-          try { var saved = localStorage.getItem('td-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+          applyStoredTheme();
+          window.addEventListener('pageshow', applyStoredTheme);
+          window.addEventListener('storage', function (event) {
+            if (event.key === 'td-theme') applyStoredTheme();
+          });
           document.addEventListener('DOMContentLoaded', function () {
             var button = document.querySelector('[data-td-theme-toggle]');
             if (!button) return;
@@ -62,7 +79,7 @@ public extension TileKit.Site {
           });
         })();
         </script>{{/site.appearanceToggle}}
-        <title>{{ page.title }}</title>
+        \(metadataHead)
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
@@ -90,9 +107,26 @@ public extension TileKit.Site {
         {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
+          function storedTheme() {
+            try {
+              var saved = localStorage.getItem('td-theme');
+              return saved === 'dark' || saved === 'light' ? saved : '';
+            } catch (e) {
+              return '';
+            }
+          }
+          function applyStoredTheme() {
+            var saved = storedTheme();
+            if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
+          }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
-          try { var saved = localStorage.getItem('td-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+          applyStoredTheme();
+          window.addEventListener('pageshow', applyStoredTheme);
+          window.addEventListener('storage', function (event) {
+            if (event.key === 'td-theme') applyStoredTheme();
+          });
           document.addEventListener('DOMContentLoaded', function () {
             var button = document.querySelector('[data-td-theme-toggle]');
             if (!button) return;
@@ -106,7 +140,7 @@ public extension TileKit.Site {
           });
         })();
         </script>{{/site.appearanceToggle}}
-        <title>{{ page.title }}</title>
+        \(metadataHead)
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
@@ -125,6 +159,23 @@ public extension TileKit.Site {
         {{#site.analyticsBodyEnd}}{{{ site.analyticsBodyEnd }}}{{/site.analyticsBodyEnd}}
         </body>
         </html>
+        """
+
+        private static let metadataHead = """
+        <title>{{ page.metadata.title }}</title>
+        {{#page.metadata.description}}<meta name="description" content="{{ page.metadata.description }}">{{/page.metadata.description}}
+        {{#page.metadata.canonicalURL}}<link rel="canonical" href="{{ page.metadata.canonicalURL }}">{{/page.metadata.canonicalURL}}
+        <meta property="og:title" content="{{ page.metadata.title }}">
+        <meta property="og:type" content="{{ page.metadata.openGraphType }}">
+        {{#page.metadata.description}}<meta property="og:description" content="{{ page.metadata.description }}">{{/page.metadata.description}}
+        {{#page.metadata.canonicalURL}}<meta property="og:url" content="{{ page.metadata.canonicalURL }}">{{/page.metadata.canonicalURL}}
+        {{#page.metadata.siteTitle}}<meta property="og:site_name" content="{{ page.metadata.siteTitle }}">{{/page.metadata.siteTitle}}
+        {{#page.metadata.imageURL}}<meta property="og:image" content="{{ page.metadata.imageURL }}">{{/page.metadata.imageURL}}
+        <meta name="twitter:card" content="{{ page.metadata.twitterCard }}">
+        <meta name="twitter:title" content="{{ page.metadata.title }}">
+        {{#page.metadata.description}}<meta name="twitter:description" content="{{ page.metadata.description }}">{{/page.metadata.description}}
+        {{#page.metadata.imageURL}}<meta name="twitter:image" content="{{ page.metadata.imageURL }}">{{/page.metadata.imageURL}}
+        {{#page.metadata.articlePublishedTime}}<meta property="article:published_time" content="{{ page.metadata.articlePublishedTime }}">{{/page.metadata.articlePublishedTime}}
         """
     }
 }

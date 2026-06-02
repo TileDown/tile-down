@@ -2,8 +2,9 @@ import Foundation
 import TileCore
 
 public extension TileKit.Site {
-    /// Renders the site's RSS feed from dated pages under the site's posts
-    /// directory (`posts/` by default, configurable via `postsDir`).
+    /// Renders the site's RSS feed from the shared post collection. Explicit
+    /// `type: post` pages and compatible dated pages under `postsDir` use the same
+    /// ordering and date-validity rules.
     struct FeedRenderer: Sendable {
         public init() {}
 
@@ -60,6 +61,11 @@ public extension TileKit.Site {
             let description = page.document.frontMatter["description"] ?? title
             let pubDate = page.document.frontMatter["date"].flatMap(rssDate)
             let pubDateXML = pubDate.map { "<pubDate>\(xmlEscaped($0))</pubDate>\n" } ?? ""
+            let contentHTML = feedContentHTML(
+                page,
+                pagePath: path,
+                baseURL: baseURL,
+            )
 
             return """
             <item>
@@ -67,9 +73,130 @@ public extension TileKit.Site {
             <link>\(xmlEscaped(absolutePath))</link>
             <guid isPermaLink="true">\(xmlEscaped(absolutePath))</guid>
             \(pubDateXML)<description>\(xmlEscaped(description))</description>
-            <content:encoded>\(cdata(page.html))</content:encoded>
+            <content:encoded>\(cdata(contentHTML))</content:encoded>
             </item>
             """
+        }
+
+        private func feedContentHTML(
+            _ page: Page,
+            pagePath: String,
+            baseURL: String,
+        ) -> String {
+            guard !baseURL.isEmpty else {
+                return page.html
+            }
+
+            return absolutizeAttributes(
+                page.html,
+                pagePath: pagePath,
+                baseURL: baseURL,
+            )
+        }
+
+        private func absolutizeAttributes(
+            _ html: String,
+            pagePath: String,
+            baseURL: String,
+        ) -> String {
+            var output = ""
+            var remainder = html[...]
+            while let attributeRange = remainder.range(of: #" (href|src)=""#, options: .regularExpression) {
+                output += remainder[..<attributeRange.upperBound]
+                remainder = remainder[attributeRange.upperBound...]
+                guard let endQuote = remainder.firstIndex(of: "\"") else {
+                    output += remainder
+                    return output
+                }
+                let value = String(remainder[..<endQuote])
+                output += feedURL(
+                    value,
+                    pagePath: pagePath,
+                    baseURL: baseURL,
+                )
+                remainder = remainder[endQuote...]
+            }
+            output += remainder
+            return output
+        }
+
+        private func feedURL(
+            _ value: String,
+            pagePath: String,
+            baseURL: String,
+        ) -> String {
+            guard !value.isEmpty, !isExternalURL(value) else {
+                return value
+            }
+
+            let resolvedPath = resolvedSitePath(
+                value,
+                pagePath: pagePath,
+            )
+            return absoluteURL(
+                baseURL: baseURL,
+                path: resolvedPath,
+            )
+        }
+
+        private func isExternalURL(
+            _ value: String,
+        ) -> Bool {
+            let lowercased = value.lowercased()
+            return lowercased.hasPrefix("http://")
+                || lowercased.hasPrefix("https://")
+                || lowercased.hasPrefix("mailto:")
+                || lowercased.hasPrefix("tel:")
+                || lowercased.hasPrefix("data:")
+                || lowercased.hasPrefix("//")
+        }
+
+        private func resolvedSitePath(
+            _ value: String,
+            pagePath: String,
+        ) -> String {
+            let parts = splitURLSuffix(value)
+            let rawPath = parts.path
+            let path = rawPath.hasPrefix("/")
+                ? rawPath
+                : pagePath + rawPath
+            return normalizedPath(path) + parts.suffix
+        }
+
+        private func splitURLSuffix(
+            _ value: String,
+        ) -> (path: String, suffix: String) {
+            guard let suffixIndex = value.firstIndex(where: { $0 == "?" || $0 == "#" }) else {
+                return (value, "")
+            }
+            return (
+                String(value[..<suffixIndex]),
+                String(value[suffixIndex...]),
+            )
+        }
+
+        private func normalizedPath(
+            _ path: String,
+        ) -> String {
+            let keepsTrailingSlash = path.hasSuffix("/")
+            var components: [String] = []
+            for component in path.split(separator: "/", omittingEmptySubsequences: true) {
+                switch component {
+                case ".":
+                    continue
+                case "..":
+                    if !components.isEmpty {
+                        components.removeLast()
+                    }
+                default:
+                    components.append(String(component))
+                }
+            }
+            let normalized = "/" + components.joined(separator: "/")
+            if keepsTrailingSlash, normalized != "/" {
+                return normalized + "/"
+            }
+            return normalized
         }
 
         private func url(

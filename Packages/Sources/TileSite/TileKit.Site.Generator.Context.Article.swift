@@ -25,8 +25,10 @@ extension TileKit.Site.Generator {
         _ page: TileKit.Site.Page,
         postsDirectory: String,
     ) -> Bool {
-        page.slug.hasPrefix(postsDirectory + "/")
-            && TileKit.Site.PostSelection.parsedDate(page.document.frontMatter["date"]) != nil
+        TileKit.Site.ContentType.isPost(
+            page,
+            postsDirectory: postsDirectory,
+        )
     }
 
     func articleContext(
@@ -131,10 +133,7 @@ extension TileKit.Site.Generator {
         if let kicker = page.document.frontMatter["kicker"], !kicker.isEmpty {
             return kicker
         }
-        if let type = page.document.frontMatter["type"], !type.isEmpty {
-            return type
-        }
-        return "Article"
+        return TileKit.Site.ContentType.articleKicker(for: page)
     }
 
     private func stripLeadingHeading(
