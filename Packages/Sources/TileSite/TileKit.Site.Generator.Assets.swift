@@ -12,13 +12,10 @@ extension TileKit.Site.Generator {
     }
 
     /// Copies every content asset verbatim into the output, preserving its
-    /// relative path. Markdown is always source (an `index.md` becomes a page and
-    /// any other `.md` is ignored), build inputs such as `tiledown.yml` and OS
-    /// metadata are skipped, and a file whose destination collides with an
-    /// already-generated output (a page, the stylesheet, the feed) is skipped so
-    /// content cannot clobber generated output. One rule covers both a page-local
-    /// image beside its `index.md` and a site-level `assets/` tree, so a Markdown
-    /// image resolves once its file lands in the output.
+    /// relative path unless a custom 404 page needs local assets remapped beside
+    /// `404.html`. Markdown is always source, build inputs are skipped, configured
+    /// static passthrough sources are skipped here because they are copied by their
+    /// explicit public paths, and generated output paths are never overwritten.
     func copyAssets(
         request: TileKit.Site.ContentBuildRequest,
         generated: Set<String>,
@@ -28,16 +25,22 @@ extension TileKit.Site.Generator {
         let relativePaths = try fileSystem.listFilesRecursively(
             at: request.contentRootPath,
         )
+        let staticPassthroughs = try normalizedStaticPassthroughs(
+            request.configuration.staticPassthroughs,
+        )
         var copiedDestinations = Set(outputPaths)
         for relativePath in relativePaths where isAsset(relativePath) {
+            guard !isStaticPassthroughSource(
+                relativePath,
+                passthroughs: staticPassthroughs,
+            ) else {
+                continue
+            }
             let outputRelativePath = outputAssetPath(
                 for: relativePath,
                 notFoundAssetDirectory: notFoundAssetDirectory,
             )
             let destination = join(request.outputRootPath, outputRelativePath)
-            // Never let a content file overwrite a generated page/stylesheet/feed.
-            // Asset-to-asset collisions are also skipped so remapped 404 assets
-            // cannot overwrite a root asset that was copied earlier.
             guard !generated.contains(destination),
                   !copiedDestinations.contains(destination)
             else {
@@ -49,6 +52,38 @@ extension TileKit.Site.Generator {
             )
             outputPaths.append(destination)
             copiedDestinations.insert(destination)
+        }
+    }
+
+    /// Copies explicitly configured static files and directories to the public
+    /// paths named in site configuration. These run before ordinary asset mirroring
+    /// so a migration can keep a private source layout while preserving public
+    /// URLs such as `/CNAME`, `/robots.txt`, or `/images/...`.
+    func copyStaticPassthroughs(
+        request: TileKit.Site.ContentBuildRequest,
+        generated: inout Set<String>,
+        outputPaths: inout [String],
+    ) throws {
+        let relativePaths = try fileSystem.listFilesRecursively(
+            at: request.contentRootPath,
+            includingHidden: true,
+        )
+        for passthrough in try normalizedStaticPassthroughs(request.configuration.staticPassthroughs) {
+            let copies = try staticCopies(
+                for: passthrough,
+                relativePaths: relativePaths,
+            )
+            for copy in copies {
+                let destination = join(request.outputRootPath, copy.outputPath)
+                guard generated.insert(destination).inserted else {
+                    throw TileKit.Site.ConfigurationFileError.duplicateOutputPath(copy.outputPath)
+                }
+                try fileSystem.copyFile(
+                    from: join(request.contentRootPath, copy.sourcePath),
+                    to: destination,
+                )
+                outputPaths.append(destination)
+            }
         }
     }
 
@@ -78,6 +113,59 @@ extension TileKit.Site.Generator {
             return relativePath
         }
         return String(relativePath.dropFirst(prefix.count))
+    }
+
+    private func isStaticPassthroughSource(
+        _ relativePath: String,
+        passthroughs: [TileKit.Site.StaticPassthrough],
+    ) -> Bool {
+        passthroughs.contains { passthrough in
+            relativePath == passthrough.sourcePath
+                || relativePath.hasPrefix(passthrough.sourcePath + "/")
+        }
+    }
+
+    private func normalizedStaticPassthroughs(
+        _ passthroughs: [TileKit.Site.StaticPassthrough],
+    ) throws -> [TileKit.Site.StaticPassthrough] {
+        try passthroughs.map { passthrough in
+            try .init(
+                validatingSourcePath: passthrough.sourcePath,
+                outputPath: passthrough.outputPath,
+            )
+        }
+    }
+
+    private func staticCopies(
+        for passthrough: TileKit.Site.StaticPassthrough,
+        relativePaths: [String],
+    ) throws -> [StaticCopy] {
+        if relativePaths.contains(passthrough.sourcePath) {
+            return [
+                .init(
+                    sourcePath: passthrough.sourcePath,
+                    outputPath: passthrough.outputPath,
+                ),
+            ]
+        }
+
+        let directoryPrefix = passthrough.sourcePath + "/"
+        let nested = try relativePaths
+            .filter { $0.hasPrefix(directoryPrefix) }
+            .map { sourcePath in
+                let suffix = String(sourcePath.dropFirst(directoryPrefix.count))
+                let outputPath = try TileKit.Site.StaticPassthrough.normalizedOutputPath(
+                    join(passthrough.outputPath, suffix),
+                )
+                return StaticCopy(
+                    sourcePath: sourcePath,
+                    outputPath: outputPath,
+                )
+            }
+        guard !nested.isEmpty else {
+            throw TileKit.Site.ConfigurationFileError.missingStaticPath(passthrough.sourcePath)
+        }
+        return nested
     }
 
     /// Runs the injected image-checking pass over the content's image assets.
@@ -118,4 +206,9 @@ extension TileKit.Site.Generator {
 
         return parent + "/" + child
     }
+}
+
+private struct StaticCopy: Equatable {
+    var sourcePath: String
+    var outputPath: String
 }

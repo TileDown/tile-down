@@ -11,3 +11,8 @@ shareLinks: true
 notFoundRedirect.exact./legacy-post: /posts/live/
 notFoundRedirect.prefix./old-tags/special/: /posts/live/
 notFoundRedirect.prefix./old-tags/: /tags/
+static.CNAME: deployment/CNAME
+static.robots.txt: deployment/robots.txt
+static.images: public/images
+static..nojekyll: deployment/.nojekyll
+static..well-known: public/.well-known

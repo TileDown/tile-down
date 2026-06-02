@@ -10,8 +10,8 @@ extension TileKit.Site.Generator {
         baseURL: String = "",
     ) -> TileKit.Template.Context? {
         guard
-            let source = page.document.frontMatter["image"],
-            !source.isEmpty
+            let rawSource = page.document.frontMatter["image"],
+            !rawSource.isEmpty
         else {
             return nil
         }
@@ -19,7 +19,7 @@ extension TileKit.Site.Generator {
         let title = page.document.frontMatter["title"] ?? ""
         let darkSource = page.document.frontMatter["imageDark"]
             .flatMap { $0.isEmpty ? nil : $0 }
-        let resolvedSource = baseURLPrefixedRootRelativeURL(source, baseURL: baseURL)
+        let resolvedSource = baseURLPrefixedRootRelativeURL(rawSource, baseURL: baseURL)
         let resolvedDarkSource = darkSource.map { source in
             baseURLPrefixedRootRelativeURL(source, baseURL: baseURL)
         }
