@@ -66,7 +66,8 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let source = try sourcePages(request)
+            let relativePaths = try fileSystem.listFilesRecursively(at: request.contentRootPath)
+            let source = try sourcePages(request, relativePaths: relativePaths)
             let contentPages = source.contentPages
             let redirectPages = source.redirectPages
             let notFoundPage = source.notFoundPage
@@ -78,7 +79,7 @@ public extension TileKit.Site {
             try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 
-            try runImageCheck(request: request)
+            try runImageCheck(relativePaths: relativePaths)
 
             var outputPaths: [String] = []
             let stylesheetPath = try writeSharedStylesheet(
@@ -112,6 +113,7 @@ public extension TileKit.Site {
                 sitePaths: sitePaths,
                 initialOutputPaths: outputPaths,
                 notFoundAssetDirectory: source.notFoundAssetDirectory,
+                relativePaths: relativePaths,
             ))
             return .init(outputPaths: finalOutputPaths)
         }
@@ -126,10 +128,8 @@ extension TileKit.Site.Generator {
 private extension TileKit.Site.Generator {
     func loadPages(
         _ request: TileKit.Site.ContentBuildRequest,
+        relativePaths: [String],
     ) throws -> [TileKit.Site.Page] {
-        let relativePaths = try fileSystem.listFilesRecursively(
-            at: request.contentRootPath,
-        )
         let locations = contentDiscovery.discover(
             relativePaths: relativePaths,
         )
@@ -156,8 +156,9 @@ private extension TileKit.Site.Generator {
 
     private func sourcePages(
         _ request: TileKit.Site.ContentBuildRequest,
+        relativePaths: [String],
     ) throws -> SourcePages {
-        let loadedPages = try loadPages(request)
+        let loadedPages = try loadPages(request, relativePaths: relativePaths)
         let sourceNotFoundPage = loadedPages.first(where: isNotFoundPage)
         let notFoundPage = try notFoundPage(
             from: sourceNotFoundPage,
