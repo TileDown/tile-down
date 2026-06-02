@@ -89,6 +89,11 @@ public extension TileKit.Site {
                 configuration: request.configuration,
                 outputPaths: &outputPaths,
             )
+            try writeSitemap(
+                pages: pages,
+                request: request,
+                outputPaths: &outputPaths,
+            )
             let sitePaths = TileKit.Site.GeneratedSitePaths(
                 stylesheetPath: stylesheetPath,
                 feedPath: feedPath,
