@@ -7,6 +7,7 @@ extension TileKit.Site.Generator {
     /// same dark-mode selectors as the built-in themes.
     func heroImageContext(
         _ page: TileKit.Site.Page,
+        baseURL: String = "",
     ) -> TileKit.Template.Context? {
         guard
             let source = page.document.frontMatter["image"],
@@ -18,20 +19,24 @@ extension TileKit.Site.Generator {
         let title = page.document.frontMatter["title"] ?? ""
         let darkSource = page.document.frontMatter["imageDark"]
             .flatMap { $0.isEmpty ? nil : $0 }
+        let resolvedSource = baseURLPrefixedRootRelativeURL(source, baseURL: baseURL)
+        let resolvedDarkSource = darkSource.map { source in
+            baseURLPrefixedRootRelativeURL(source, baseURL: baseURL)
+        }
         return [
-            "src": .string(source),
-            "darkSrc": .string(darkSource ?? ""),
+            "src": .string(resolvedSource),
+            "darkSrc": .string(resolvedDarkSource ?? ""),
             "alt": .string(title),
-            "hasDark": .string(darkSource == nil ? "" : "true"),
+            "hasDark": .string(resolvedDarkSource == nil ? "" : "true"),
             "heroHTML": .string(imageHTML(
-                source: source,
-                darkSource: darkSource,
+                source: resolvedSource,
+                darkSource: resolvedDarkSource,
                 alt: title,
                 className: "td-hero",
             )),
             "thumbnailHTML": .string(imageHTML(
-                source: source,
-                darkSource: darkSource,
+                source: resolvedSource,
+                darkSource: resolvedDarkSource,
                 alt: title,
                 className: "td-post-thumb-image",
             )),

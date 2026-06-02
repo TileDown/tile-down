@@ -37,10 +37,14 @@ public extension TileKit.Site {
         public func build(
             _ request: BuildRequest,
         ) throws -> BuildResult {
-            let page = try loadPage(
+            var page = try loadPage(
                 sourcePath: request.sourcePath,
                 outputPath: request.outputPath,
                 slug: "",
+            )
+            page.html = rewriteRootRelativeURLs(
+                in: page.html,
+                baseURL: request.configuration.baseURL,
             )
             let template = try fileSystem.readTextFile(at: request.templatePath)
             let output = try render(
