@@ -26,10 +26,12 @@ extension SiteGeneratorTests {
         #expect(
             result.outputPaths == [
                 "dist/feed.xml",
+                "dist/sitemap.xml",
                 "dist/index.html",
                 "dist/posts/index.html",
                 "dist/posts/live/index.html",
                 "dist/tags/release/index.html",
+                "dist/404.html",
                 "dist/old-post/index.html",
             ],
         )
@@ -157,7 +159,13 @@ extension SiteGeneratorTests {
             ),
         )
 
-        #expect(result.outputPaths == ["dist/old-post/index.html"])
+        #expect(
+            result.outputPaths == [
+                "dist/sitemap.xml",
+                "dist/404.html",
+                "dist/old-post/index.html",
+            ],
+        )
         #expect(fileSystem.files["dist/old-post/index.html"]?.contains("/posts/live/") == true)
     }
 

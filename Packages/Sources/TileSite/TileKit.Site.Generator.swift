@@ -103,42 +103,17 @@ public extension TileKit.Site {
                 feedPath: feedPath,
             )
 
-            outputPaths += try writeRenderedPages(
+            let finalOutputPaths = try writeFinalOutputs(.init(
                 pages: pages,
+                notFoundPage: notFoundPage,
+                redirectPages: redirectPages,
                 template: template,
-                configuration: request.configuration,
+                request: request,
                 sitePaths: sitePaths,
-            )
-            let notFoundOutputPath = try writeRenderedPage(
-                page: notFoundPage,
-                pages: pages,
-                template: template,
-                configuration: request.configuration,
-                sitePaths: sitePaths,
-            )
-            outputPaths.append(notFoundOutputPath)
-            outputPaths += try contentRedirects(
-                redirectPages,
-                outputRootPath: request.outputRootPath,
-                generated: Set(outputPaths),
-            )
-            outputPaths += try outboundShims(
-                request: request,
-                generated: Set(outputPaths),
-            )
-            var generatedPaths = Set(outputPaths)
-            try copyStaticPassthroughs(
-                request: request,
-                generated: &generatedPaths,
-                outputPaths: &outputPaths,
-            )
-            try copyAssets(
-                request: request,
-                generated: generatedPaths,
+                initialOutputPaths: outputPaths,
                 notFoundAssetDirectory: source.notFoundAssetDirectory,
-                outputPaths: &outputPaths,
-            )
-            return .init(outputPaths: outputPaths)
+            ))
+            return .init(outputPaths: finalOutputPaths)
         }
     }
 }
@@ -259,6 +234,7 @@ private extension TileKit.Site.Generator {
         try makePage(
             sourcePath: "",
             outputPath: join(outputRootPath, Self.notFoundFileName),
+            sourceSlug: Self.notFoundSlug,
             slug: Self.notFoundSlug,
             document: .init(
                 frontMatter: [

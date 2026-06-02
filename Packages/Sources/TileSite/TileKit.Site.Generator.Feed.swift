@@ -33,16 +33,6 @@ extension TileKit.Site.Generator {
         )
     }
 
-    func stylesheetURL(
-        baseURL: String,
-        fileName: String,
-    ) -> String {
-        guard !baseURL.isEmpty else {
-            return "/" + fileName
-        }
-        return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
-    }
-
     private func outputFilePath(
         _ path: String,
     ) throws -> String {
