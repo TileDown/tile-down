@@ -18,6 +18,11 @@ public extension TileKit.Site {
         case invalidFontScale(String)
         case unknownThemeProperty(String)
         case invalidThemePropertyValue(String)
+        case invalidGeneratorCommand(String)
+        case invalidServiceBindingKey(String)
+        case invalidServiceBindingMode(serviceID: String, mode: String)
+        case invalidServiceBindingAvailability(serviceID: String, availability: String)
+        case missingServiceBindingField(serviceID: String, field: String)
 
         public var description: String {
             switch self {
@@ -54,6 +59,16 @@ public extension TileKit.Site {
             case let .invalidThemePropertyValue(value):
                 "Invalid theme property value `\(value)`. Expected a non-empty CSS value " +
                     "without semicolons, braces, or comments."
+            case let .invalidGeneratorCommand(value):
+                "Invalid content generator command `\(value)`. Expected shell-style arguments."
+            case let .invalidServiceBindingKey(key):
+                "Invalid service binding key `\(key)`. Expected service.<id>.<field>."
+            case let .invalidServiceBindingMode(serviceID, mode):
+                "Invalid mode `\(mode)` for service binding `\(serviceID)`."
+            case let .invalidServiceBindingAvailability(serviceID, availability):
+                "Invalid availability `\(availability)` for service binding `\(serviceID)`."
+            case let .missingServiceBindingField(serviceID, field):
+                "Missing service binding field `\(field)` for service `\(serviceID)`."
             }
         }
     }

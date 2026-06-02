@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Service-form contract bindings in `tiledown.yml`: `service.<id>.contract`,
+  `service.<id>.mode`, optional `service.<id>.proxyRoute`, and optional
+  `service.<id>.availability` now populate the CLI's local contract resolver for
+  `build-site`. Contract files under the content root are treated as private
+  build inputs and are not copied into the generated output. (#120)
 - Local preview server: `tiledown serve [--drafts] [--port N] [--output DIR]
   <content-dir>` builds a content directory and serves the generated static files
   from `127.0.0.1`, with directory `index.html` resolution, common content types,
@@ -90,8 +95,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `build-site` runs each command (as a subprocess, in the content directory,
   ordered by name) before reading content, so a custom Swift package or any
   executable can write Tiledown Markdown into the content tree from structured
-  data (e.g. a CV page from JSON). A generator that exits non-zero fails the
-  build. The generated page is ordinary content from then on.
+  data (e.g. a CV page from JSON). Generator commands support shell-style
+  quoting and backslash escaping for arguments with spaces. A generator that
+  exits non-zero fails the build. The generated page is ordinary content from
+  then on. (#119)
 - A sticky tag bar on the tags landing and every per-tag page: all tags as
   larger pills, the current tag marked, an accent `Clear` pill that returns to
   all articles, and tapping the current tag toggles it off. Hidden when the site
@@ -125,6 +132,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Root-relative Markdown `href` and `src` values rewritten with `baseURL` now
+  escape the configured base URL before emitting HTML attributes, preserving
+  already-escaped query strings while preventing a malformed base URL from
+  breaking out of the attribute. (#118)
 - Redirect pages now reject unsafe target URL schemes before emitting meta
   refresh or fallback links. (#45)
 - Migrated posts with a custom `slug` outside `postsDir` now remain posts. Post

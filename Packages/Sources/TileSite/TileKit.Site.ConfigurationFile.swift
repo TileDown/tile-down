@@ -14,15 +14,20 @@ public extension TileKit.Site {
         /// Pre-build content generators (`generate.<name>: <command>`), ordered by
         /// name. The composition root runs these before the content build.
         public var generators: [ContentGenerator]
+        /// Service contract bindings declared in the project file. The composition
+        /// root resolves and injects the concrete service-contract loader.
+        public var serviceBindings: [ServiceBindingConfiguration]
 
         public init(
             configuration: Configuration = .init(),
             layout: Layout = .topNav,
             generators: [ContentGenerator] = [],
+            serviceBindings: [ServiceBindingConfiguration] = [],
         ) {
             self.configuration = configuration
             self.layout = layout
             self.generators = generators
+            self.serviceBindings = serviceBindings
         }
 
         public static func parse(
@@ -31,6 +36,7 @@ public extension TileKit.Site {
             var result = ConfigurationFile()
             var feed = result.configuration.feed
             var feedEnabled: Bool?
+            var serviceBindings: [String: ServiceBindingBuilder] = [:]
 
             for item in try entries(in: source) {
                 if try applySocialLink(item, to: &result) {
@@ -39,7 +45,11 @@ public extension TileKit.Site {
                 if applyOutboundLink(item, to: &result) {
                     continue
                 }
-                if applyGenerator(item, to: &result) {
+                if try applyBuildInputSetting(
+                    item,
+                    to: &result,
+                    serviceBindings: &serviceBindings,
+                ) {
                     continue
                 }
                 if applyAnalytics(item, to: &result) {
@@ -73,6 +83,7 @@ public extension TileKit.Site {
             )
             // Order generators by name so the run order is deterministic.
             result.generators.sort { $0.name < $1.name }
+            result.serviceBindings = try resolvedServiceBindings(from: serviceBindings)
             return result
         }
 
@@ -90,26 +101,6 @@ public extension TileKit.Site {
                     url: item.value,
                 ),
             )
-            return true
-        }
-
-        private static func applyFeedSetting(
-            _ item: (key: String, value: String),
-            feed: inout Feed?,
-            feedEnabled: inout Bool?,
-        ) throws -> Bool {
-            switch item.key {
-            case "rss":
-                feedEnabled = try boolean(item.value)
-            case "rssPath":
-                feed = updatingFeed(feed, path: item.value)
-            case "rssTitle":
-                feed = updatingFeed(feed, title: item.value)
-            case "rssDescription":
-                feed = updatingFeed(feed, description: item.value)
-            default:
-                return false
-            }
             return true
         }
 
@@ -141,20 +132,6 @@ public extension TileKit.Site {
                 result.configuration.fontScale = try fontScale(from: item.value)
             default:
                 throw ConfigurationFileError.unknownKey(item.key)
-            }
-        }
-
-        private static func resolvedFeed(
-            _ feed: Feed?,
-            feedEnabled: Bool?,
-        ) -> Feed? {
-            switch feedEnabled {
-            case .some(true):
-                feed ?? .init()
-            case .some(false):
-                nil
-            case nil:
-                feed
             }
         }
 
@@ -251,7 +228,7 @@ public extension TileKit.Site {
             return directory.isEmpty ? "posts" : String(directory)
         }
 
-        private static func boolean(
+        static func boolean(
             _ value: String,
         ) throws -> Bool {
             switch value {
@@ -262,25 +239,6 @@ public extension TileKit.Site {
             default:
                 throw ConfigurationFileError.invalidBoolean(value)
             }
-        }
-
-        private static func updatingFeed(
-            _ existing: Feed?,
-            path: String? = nil,
-            title: String? = nil,
-            description: String? = nil,
-        ) -> Feed {
-            var result = existing ?? .init()
-            if let path {
-                result.path = path
-            }
-            if let title {
-                result.title = title
-            }
-            if let description {
-                result.description = description
-            }
-            return result
         }
     }
 }
@@ -302,27 +260,6 @@ private extension TileKit.Site.ConfigurationFile {
         case let value:
             value
         }
-    }
-
-    /// Records a `generate.<name>: <command>` content generator, returning true
-    /// when the line is a generator setting so the parser stops dispatching it.
-    /// The command value is split on whitespace into command + arguments.
-    static func applyGenerator(
-        _ item: (key: String, value: String),
-        to result: inout Self,
-    ) -> Bool {
-        guard item.key.hasPrefix("generate.") else {
-            return false
-        }
-        let name = String(item.key.dropFirst("generate.".count))
-        let command = item.value
-            .split(separator: " ", omittingEmptySubsequences: true)
-            .map(String.init)
-        guard !name.isEmpty, !command.isEmpty else {
-            return false
-        }
-        result.generators.append(TileKit.Site.ContentGenerator(name: name, command: command))
-        return true
     }
 
     /// Parses a `latestPosts` count: a non-negative integer. A malformed value

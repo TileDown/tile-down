@@ -20,6 +20,8 @@ struct SiteBaseURLTests {
 
                 [Guide](/files/guide.pdf)
 
+                [Search](/search?q=a&b=c)
+
                 ![Relative](assets/local.svg)
 
                 [CDN](//cdn.example.com/file.css)
@@ -43,9 +45,41 @@ struct SiteBaseURLTests {
         let home = try #require(fileSystem.files["dist/index.html"])
         #expect(home.contains(#"<img src="https://example.com/docs/assets/logo.svg" alt="Logo">"#))
         #expect(home.contains(#"<a href="https://example.com/docs/files/guide.pdf">Guide</a>"#))
+        #expect(home.contains(#"<a href="https://example.com/docs/search?q=a&amp;b=c">Search</a>"#))
         #expect(home.contains(#"<img src="assets/local.svg" alt="Relative">"#))
         #expect(home.contains(#"<a href="//cdn.example.com/file.css">CDN</a>"#))
         #expect(home.contains(#"&lt;img src="/raw-html.png"&gt;"#))
+    }
+
+    @Test("rewritten baseURL values are escaped in content attributes")
+    func rewrittenBaseURLValuesAreEscaped() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                # Home
+
+                ![Logo](/assets/logo.svg)
+
+                [Guide](/files/guide.pdf)
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(baseURL: #"https://example.com" onclick="bad"#),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(!home.contains(#"onclick="bad"#))
+        #expect(home.contains(#"<img src="https://example.com&quot; onclick=&quot;bad/assets/logo.svg" alt="Logo">"#))
+        #expect(home.contains(#"<a href="https://example.com&quot; onclick=&quot;bad/files/guide.pdf">Guide</a>"#))
     }
 
     @Test("built-in layouts prefix root-relative hero images with baseURL")

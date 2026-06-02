@@ -42,6 +42,9 @@ extension TileKit.Site.Generator {
             ) else {
                 continue
             }
+            guard !request.privateSourcePaths.contains(relativePath) else {
+                continue
+            }
             let outputRelativePath = outputAssetPath(
                 for: relativePath,
                 notFoundAssetDirectory: notFoundAssetDirectory,

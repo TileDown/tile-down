@@ -216,9 +216,9 @@ Not implemented yet:
 |---|---|
 | Canonical source | full document round-trip is implemented (tiles + prose normalized to one canonical form); a typed in-memory prose tree for the future editor and richer JSON is not built (prose round-trips through canonical strings, not stored AST nodes) |
 | Output | HTML and JSON both render through the `TileKit.Output.Rendering` seam (`TileKit.Output.HTMLRenderer` and `JSONRenderer`); RSS exists for content builds, not yet as a general output renderer |
-| Site config | flat `tiledown.yml` loading exists for site title, base URL, layout, theme, RSS, and footer social links; service binding config is not loaded from the project file yet |
+| Site config | flat `tiledown.yml` loading exists for site title, base URL, layout, theme, RSS, footer social links, content generators, static passthroughs, redirects, and local service bindings |
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
-| Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
+| Built-in tile wiring | `service-form`, `callout`, `counter`, `embed`, `chart`, and `mermaid` are registered; `poll`, comments, email response, and dedicated provider tiles remain future work |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |
 | CLI workflow | `init`, `watch`, and proxy support; static localhost `serve` exists |
 
@@ -1194,8 +1194,9 @@ on concrete service-form behavior: the CLI registers
 still knows only about `TileKit.Tile.Rendering` through the injected registry.
 Service bindings are modeled by `TileKit.Service.Binding`, and
 `TileKit.Service.LocalFileContractResolver` (in `TileServiceImpl`) resolves a
-contract from a binding's local file. Bindings are still direct values; the CLI's
-resolver stays empty until a config file format can populate it.
+contract from a binding's local file. The CLI reads local service bindings from
+`tiledown.yml` using `service.<id>.contract`, `service.<id>.mode`, optional
+`service.<id>.proxyRoute`, and optional `service.<id>.availability`.
 
 Canonical serialization is complete for the whole document:
 `TileKit.Tile.DirectiveSerializer` canonicalizes tiles (preserving unknown types

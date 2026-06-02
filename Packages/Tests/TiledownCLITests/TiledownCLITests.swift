@@ -47,6 +47,8 @@ extension TiledownCLITests {
             FileManager.default.fileExists(atPath: generated.path),
             "generator did not produce \(generated.path)",
         )
+        let generatedHTML = try String(contentsOf: generated, encoding: .utf8)
+        #expect(generatedHTML.contains("<h1>Extra Page</h1>"))
     }
 
     @Test("build-site reads tiledown.yml for layout theme footer links and RSS")
@@ -119,7 +121,7 @@ extension TiledownCLITests {
         )
     }
 
-    private func makeContentFixture() throws -> ContentFixture {
+    func makeContentFixture() throws -> ContentFixture {
         let fileManager = FileManager.default
         let root = fileManager.temporaryDirectory
             .appendingPathComponent(
@@ -176,7 +178,7 @@ extension TiledownCLITests {
     ) throws {
         try """
         title: Generator Demo
-        generate.extra: bash gen.sh
+        generate.extra: bash gen.sh "Extra Page"
         """.write(
             to: content.appendingPathComponent("tiledown.yml"),
             atomically: true,
@@ -186,7 +188,7 @@ extension TiledownCLITests {
         try """
         #!/bin/bash
         mkdir -p extra
-        printf -- '---\\ntitle: Extra\\n---\\n# Extra\\n' > extra/index.md
+        printf -- "---\\ntitle: %s\\n---\\n# %s\\n" "$1" "$1" > extra/index.md
         """.write(
             to: content.appendingPathComponent("gen.sh"),
             atomically: true,
@@ -232,7 +234,7 @@ extension TiledownCLITests {
         #expect(css.contains(".td-header {"))
     }
 
-    private func runTiledown(
+    func runTiledown(
         arguments: [String],
         currentDirectory: URL? = nil,
     ) throws -> ProcessResult {
@@ -364,13 +366,13 @@ extension TiledownCLITests {
     }
 }
 
-private struct ContentFixture: Equatable {
+struct ContentFixture: Equatable {
     var root: URL
     var content: URL
     var output: URL
 }
 
-private struct ProcessResult: Equatable {
+struct ProcessResult: Equatable {
     var status: Int32
     var stdout: String
     var stderr: String
