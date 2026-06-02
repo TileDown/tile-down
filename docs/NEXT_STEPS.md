@@ -1,7 +1,7 @@
 # Next Steps
 
-Current implementation plan for Tiledown after the first tile renderer registry
-slice.
+Current implementation plan for Tiledown after the current static-site and tile
+registry slices.
 
 ## Purpose
 
@@ -33,6 +33,8 @@ The repository currently has:
 - `Examples/minimal-site/`, a small content-only demo with about, contact, posts,
   footer social links, the `system` theme, and RSS.
 - Page-local tile CSS and browser JavaScript exposed to templates.
+- Built-in `callout`, `counter`, `embed`, `chart`, `mermaid`, and
+  `service-form` tile renderers registered by the CLI.
 - Service manifest and service operation contract models.
 - `service-form` request validation, binding, and generated browser output for
   `remote` and `proxy` modes.
@@ -42,9 +44,10 @@ The repository currently has:
   registers it in `TileKit.Tile.Registry` for the `service-form` type id.
 
 The wiring slice is done: a `:::tile service-form` block now renders through the
-normal site pipeline. The CLI's contract resolver is still empty, so a
-service-form tile fails with a typed missing-service error until CLI config
-loading can populate service bindings.
+normal site pipeline. The CLI reads `service.<id>.*` bindings from
+`tiledown.yml`, resolves local contract files through
+`TileKit.Service.LocalFileContractResolver`, and keeps in-root contract files out
+of the public output.
 
 ## Working Constraints
 
@@ -92,12 +95,16 @@ holds `TileKit.Service.LocalFileContractResolver`, the concrete file-backed
 `ContractResolving` that reads a binding's file and decodes a `Contract`. New
 `ContractResolutionError` cases cover unreadable and malformed files.
 
-Bindings are constructed as direct values; a config file format is deferred until
-CLI config loading needs it ("add YAML only when needed"). HTTP loading stays for
-a later `TileServiceImpl` slice. Covered by `TileServiceImplTests`: resolve from a
-file, missing service, unreadable file, malformed file, availability carried, and
-a file-resolved contract rendering through the service-form path without leaking
-server credentials.
+Bindings can be declared in `tiledown.yml` with
+`service.<id>.contract`, `service.<id>.mode`, optional
+`service.<id>.proxyRoute`, and optional `service.<id>.availability`. The CLI
+maps those project-file values to `TileKit.Service.Binding`, resolves local
+contract files at render time, and marks in-root contract files as private build
+inputs so they are not mirrored into `dist/`. HTTP loading stays for a later
+`TileServiceImpl` slice. Covered by `TileServiceImplTests`, `TileSiteTests`, and
+`TiledownCLITests`: resolve from a file, missing service, unreadable file,
+malformed file, availability carried, project-file parsing, `build-site`
+service-form rendering, and no server credential or contract-file leak.
 
 ### 3. Add derived JSON output (done)
 
@@ -215,19 +222,20 @@ Acceptance:
 - Page-specific data remains per tile.
 - Asset ordering is deterministic.
 
-### 6. Add the first named tiles
+### 6. Expand named tiles
 
-Implement named tiles only after the generic mechanics exist.
+The first named tile set is no longer hypothetical. The CLI registers static
+`callout`, local `counter`, safe `embed`, static SVG `chart`, client-side
+`mermaid`, and contract-backed `service-form` renderers.
 
-Recommended order:
+Remaining recommended order:
 
 | Tile | First mode | Why |
 |---|---|---|
-| `youtube-video` | `static` | proves safe iframe embeds and provider manifests |
 | `poll` | `local` | proves browser-local state and localStorage conventions |
 | `email-response` | `proxy` | proves secret-backed action tiles |
 | `comments` | `remote` or `proxy` | proves public widget and private API branches |
-| `chart` | `static` or `build` | proves structured data display and future asset handling |
+| provider-specific tiles, if needed | `static` | extend safe `embed` only when a provider needs typed authoring |
 
 Acceptance:
 
@@ -262,7 +270,8 @@ content types.
 | tile registry registration | CLI or future composition target |
 | site generator orchestration | `TileSite` |
 | local filesystem I/O | `TileSiteImpl` |
-| future local or HTTP service contract loading | future `TileServiceImpl` |
+| local service contract loading | `TileServiceImpl` |
+| future HTTP service contract loading | future `TileServiceImpl` |
 | output renderer seam, registry, and JSON renderer (feed renderers later) | `TileOutput` |
 | future asset declarations and transforms | future `TileAsset` |
 | future diagnostics sink if warnings grow | future `TileDiagnostics` |

@@ -48,9 +48,15 @@ extension Command {
         outputRootPath: String,
         includeDrafts: Bool,
     ) throws {
-        let generator = makeGenerator()
         let configurationFile = try loadConfigurationFile(
             contentRootPath: contentRootPath,
+        )
+        let serviceBindings = try configuredServiceBindings(
+            from: configurationFile.serviceBindings,
+            contentRootPath: contentRootPath,
+        )
+        let generator = makeGenerator(
+            serviceBindings: serviceBindings.bindings,
         )
         try runContentGenerators(
             configurationFile.generators,
@@ -67,30 +73,35 @@ extension Command {
                 template: template,
                 outputRootPath: outputRootPath,
                 configuration: configurationFile.configuration,
+                privateSourcePaths: serviceBindings.privateSourcePaths,
                 includeDrafts: includeDrafts,
             ),
         )
     }
 
-    func makeGenerator() -> TileKit.Site.Generator {
+    func makeGenerator(
+        serviceBindings: [TileKit.Service.Binding] = [],
+    ) -> TileKit.Site.Generator {
         .init(
             fileSystem: TileKit.Site.LocalFileSystem(
                 fileManager: .default,
             ),
             markdownParser: TileKit.Source.FrontMatterParser(),
             tileParser: TileKit.Tile.DirectiveParser(),
-            htmlRenderer: makeHTMLRenderer(),
+            htmlRenderer: makeHTMLRenderer(serviceBindings: serviceBindings),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
         )
     }
 
-    func makeHTMLRenderer() -> TileKit.Output.HTMLRenderer {
+    func makeHTMLRenderer(
+        serviceBindings: [TileKit.Service.Binding] = [],
+    ) -> TileKit.Output.HTMLRenderer {
         .init(
             markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
                 passthroughSchemes: TileKit.Site.Reference.schemes,
             ),
-            tileRegistry: makeTileRegistry(),
+            tileRegistry: makeTileRegistry(serviceBindings: serviceBindings),
         )
     }
 
@@ -144,12 +155,13 @@ extension Command {
         return .init()
     }
 
-    func makeTileRegistry() -> TileKit.Tile.Registry {
-        // The resolver is empty until config loading can populate service contracts.
-        // A service-form tile therefore fails with a typed missing-service error
-        // rather than silently rendering nothing.
+    func makeTileRegistry(
+        serviceBindings: [TileKit.Service.Binding] = [],
+    ) -> TileKit.Tile.Registry {
         let serviceForm = TileKit.ServiceForm.TileRenderer(
-            resolver: TileKit.Service.InMemoryContractResolver(),
+            resolver: TileKit.Service.LocalFileContractResolver(
+                bindings: serviceBindings,
+            ),
         )
 
         return TileKit.Tile.Registry()
@@ -177,5 +189,98 @@ extension Command {
                 TileKit.Tile.MermaidRenderer(),
                 for: TileKit.Tile.MermaidRenderer.typeID,
             )
+    }
+
+    func configuredServiceBindings(
+        from configurations: [TileKit.Site.ServiceBindingConfiguration],
+        contentRootPath: String,
+    ) throws -> (bindings: [TileKit.Service.Binding], privateSourcePaths: Set<String>) {
+        let bindings = try configurations.map { configuration in
+            try serviceBinding(
+                from: configuration,
+                contentRootPath: contentRootPath,
+            )
+        }
+        return (
+            bindings,
+            Set(
+                configurations.compactMap {
+                    privateSourcePath(
+                        $0.contractPath,
+                        contentRootPath: contentRootPath,
+                    )
+                },
+            ),
+        )
+    }
+
+    private func serviceBinding(
+        from configuration: TileKit.Site.ServiceBindingConfiguration,
+        contentRootPath: String,
+    ) throws -> TileKit.Service.Binding {
+        guard let mode = TileKit.Service.Mode(rawValue: configuration.mode) else {
+            throw TileKit.Site.ConfigurationFileError.invalidServiceBindingMode(
+                serviceID: configuration.serviceID,
+                mode: configuration.mode,
+            )
+        }
+        guard let availability = TileKit.Service.Availability(
+            rawValue: configuration.availability,
+        ) else {
+            throw TileKit.Site.ConfigurationFileError.invalidServiceBindingAvailability(
+                serviceID: configuration.serviceID,
+                availability: configuration.availability,
+            )
+        }
+        return .init(
+            serviceID: configuration.serviceID,
+            source: .localFile(path: serviceContractPath(
+                configuration.contractPath,
+                contentRootPath: contentRootPath,
+            )),
+            mode: mode,
+            proxyRoute: configuration.proxyRoute,
+            availability: availability,
+        )
+    }
+
+    private func serviceContractPath(
+        _ path: String,
+        contentRootPath: String,
+    ) -> String {
+        guard !path.hasPrefix("/") else {
+            return URL(fileURLWithPath: path).standardizedFileURL.path
+        }
+        return contentRootURL(contentRootPath)
+            .appendingPathComponent(path)
+            .standardizedFileURL
+            .path
+    }
+
+    private func privateSourcePath(
+        _ path: String,
+        contentRootPath: String,
+    ) -> String? {
+        let root = contentRootURL(contentRootPath).path
+        let rootPrefix = root.hasSuffix("/") ? root : root + "/"
+        let contractPath = serviceContractPath(
+            path,
+            contentRootPath: contentRootPath,
+        )
+        guard contractPath.hasPrefix(rootPrefix) else {
+            return nil
+        }
+        let relativePath = String(contractPath.dropFirst(rootPrefix.count))
+        return relativePath.isEmpty ? nil : relativePath
+    }
+
+    private func contentRootURL(
+        _ contentRootPath: String,
+    ) -> URL {
+        URL(
+            fileURLWithPath: contentRootPath,
+            relativeTo: URL(fileURLWithPath: FileManager.default.currentDirectoryPath),
+        )
+        .standardizedFileURL
     }
 }

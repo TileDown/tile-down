@@ -13,10 +13,10 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 > The repository is named `tile-down`; the product and CLI are `tiledown`.
 
-## Status: early, not usable yet
+## Status: early, not production-ready yet
 
-Tiledown is at version `0.1.0` and is **not yet a usable static site generator.**
-Do not adopt it for a real site.
+Tiledown is at version `0.1.0` and is **not yet a production-ready static site
+generator.** Do not adopt it for a site that needs a stable toolchain.
 
 What works today is a real but partial slice. The engine builds, and the CLI can
 build a single Markdown file through a Mustache-style template, or build a folder
@@ -28,14 +28,16 @@ Markdown is real CommonMark via
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
 write an RSS feed from the shared post collection. The CLI also has a local
-preview server through `tiledown serve`.
+preview server through `tiledown serve`. Built-in tile rendering is wired for
+`callout`, `counter`, `embed`, `chart`, `mermaid`, and `service-form`. A
+`service-form` tile can load a local service contract declared in `tiledown.yml`.
 
-Still missing before it is a usable static site generator: project scaffolding
-(`tiledown init`), watch mode, named tile types (`youtube-video`, `poll`, and the
-rest), and a full asset pipeline
-(transforms, minification). The internals for typed tiles and a service-backed
-form exist and are tested, but only the service-form tile is wired in; the rest
-are not yet a usable authoring workflow.
+Still missing before it is production-ready: project scaffolding (`tiledown init`),
+watch mode, action tiles such as `poll`, comments, and email-response, runtime
+proxy support for deployed service calls, and a full asset pipeline (transforms,
+minification). Service contracts can be read from local files at build time; HTTP
+contract loading, health checks, and production proxy hosting are still future
+work.
 
 The architecture and the planned road are real and written down:
 
@@ -75,7 +77,7 @@ flowchart TD
   Current --> CommonMark["CommonMark parsing"]:::done
   Current --> Themes["Built-in layout and system theme"]:::done
   Current --> Tags["Posts, tags, RSS, latest posts"]:::done
-  Current --> TilesNow["Callout, counter, service-form internals"]:::done
+  Current --> TilesNow["Callout, counter, embed, chart, mermaid, service-form"]:::done
   Current --> Outputs["HTML, CSS, JSON, canonical fmt"]:::done
   Current --> BrowserGate["Local Playwright browser gate"]:::done
 
@@ -142,6 +144,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
+  Epic --> DemoTiles["Callout and counter demo tiles"]:::done
   Epic --> Embed["#80 Safe embed tile"]:::done
   Epic --> Mermaid["#56 Mermaid tile"]:::done
   Epic --> Charts["#57 Chart tile"]:::done
@@ -269,6 +272,29 @@ tiles reskin together.
 When `shareLinks: true` is set, built-in article pages include static share links
 for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a
 published site.
+
+Declare local service contracts for `service-form` tiles in `tiledown.yml`:
+
+```yaml
+service.calculator.contract: contracts/calculator.json
+service.calculator.mode: proxy
+service.calculator.proxyRoute: /_td/services/calculator
+```
+
+Then use the service id from Markdown:
+
+```markdown
+:::tile service-form
+id: price-calculator
+service: calculator
+operation: positive-decimal-calculation
+mode: proxy
+submitLabel: Calculate
+:::
+```
+
+The contract file is consumed by the build and is not copied into the generated
+site output.
 
 Fallback 404 redirects help migrated static sites preserve old URLs on hosts
 without wildcard redirect files. `notFoundRedirect.exact.<path>` redirects one

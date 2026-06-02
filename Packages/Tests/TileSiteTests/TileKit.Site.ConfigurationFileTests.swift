@@ -90,12 +90,35 @@ struct SiteConfigurationFileTests {
         let file = try TileKit.Site.ConfigurationFile.parse(
             """
             generate.zed: swift run Zed
-            generate.cv: swift run GenerateCV --out content/cv/index.md
+            generate.cv: swift run GenerateCV --title "My CV" --out 'content/cv page/index.md'
+            generate.escaped: printf escaped\\ value
             """,
         )
         // Ordered by name (cv before zed), command split into parts.
-        #expect(file.generators.map(\.name) == ["cv", "zed"])
-        #expect(file.generators.first?.command == ["swift", "run", "GenerateCV", "--out", "content/cv/index.md"])
+        #expect(file.generators.map(\.name) == ["cv", "escaped", "zed"])
+        #expect(
+            file.generators.first?.command == [
+                "swift",
+                "run",
+                "GenerateCV",
+                "--title",
+                "My CV",
+                "--out",
+                "content/cv page/index.md",
+            ],
+        )
+        #expect(file.generators[1].command == ["printf", "escaped value"])
+    }
+
+    @Test("rejects malformed content generator commands")
+    func rejectsMalformedContentGeneratorCommands() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidGeneratorCommand(#"swift run "broken"#)) {
+            try TileKit.Site.ConfigurationFile.parse(#"generate.cv: swift run "broken"#)
+        }
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidGeneratorCommand(#"swift run \"#)) {
+            try TileKit.Site.ConfigurationFile.parse(#"generate.cv: swift run \"#)
+        }
     }
 
     @Test("parses opt-in analytics snippets")
