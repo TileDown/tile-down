@@ -37,6 +37,15 @@ struct TileDirectiveSerializerTests {
         mode: proxy
         :::
         """,
+        """
+        :::tile mermaid
+        title: Release flow
+        definition: |
+          graph TD
+            A[Start] --> B{OK?}
+            B -->|yes| C[Ship]
+        :::
+        """,
     ]
 
     // PutGet: parsing the serialized form of a parsed tree yields the same tree.
@@ -101,6 +110,36 @@ struct TileDirectiveSerializerTests {
             options:
             - Xcode
             - VS Code
+            :::
+            """,
+        )
+    }
+
+    @Test("emits multiline string properties as literal blocks")
+    func multilineStringOutput() {
+        let tile = TileKit.Tile.Instance(
+            typeID: "mermaid",
+            properties: [
+                .init(
+                    key: "definition",
+                    value: .string(
+                        """
+                        graph TD
+                          A[Start] --> B{OK?}
+                          B -->|yes| C[Ship]
+                        """,
+                    ),
+                ),
+            ],
+        )
+
+        #expect(
+            serializer.serialize([.tile(tile)]) == """
+            :::tile mermaid
+            definition: |
+              graph TD
+                A[Start] --> B{OK?}
+                B -->|yes| C[Ship]
             :::
             """,
         )

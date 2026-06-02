@@ -72,7 +72,7 @@ public extension TileKit.Tile {
             lines: [String],
             startIndex: Int,
         ) throws -> (instance: Instance, nextIndex: Int) {
-            let typeID = try parseTypeID(
+            let header = try parseHeader(
                 from: lines[startIndex],
                 lineNumber: startIndex + 1,
             )
@@ -84,9 +84,10 @@ public extension TileKit.Tile {
                 if isClosingFence(line) {
                     return try (
                         .init(
-                            typeID: typeID,
+                            typeID: header.typeID,
                             properties: parseProperties(
                                 bodyLines,
+                                rawDefinitionKey: header.rawDefinitionKey,
                                 firstLineNumber: startIndex + 2,
                             ),
                             children: [],
@@ -102,108 +103,6 @@ public extension TileKit.Tile {
             throw DirectiveParserError.missingClosingFence(line: startIndex + 1)
         }
 
-        private func parseProperties(
-            _ lines: [String],
-            firstLineNumber: Int,
-        ) throws -> [Property] {
-            var properties: [Property] = []
-            var index = 0
-
-            while index < lines.count {
-                guard !trimmed(lines[index]).isEmpty else {
-                    index += 1
-                    continue
-                }
-
-                let parsed = try parseProperty(
-                    lines: lines,
-                    index: index,
-                    firstLineNumber: firstLineNumber,
-                )
-                properties.append(parsed.property)
-                index = parsed.nextIndex
-            }
-
-            return properties
-        }
-
-        private func parseProperty(
-            lines: [String],
-            index: Int,
-            firstLineNumber: Int,
-        ) throws -> (property: Property, nextIndex: Int) {
-            let line = lines[index]
-            guard let separatorIndex = line.firstIndex(of: ":") else {
-                throw invalidPropertyLine(
-                    line,
-                    lineNumber: firstLineNumber + index,
-                )
-            }
-
-            let key = trimmed(String(line[..<separatorIndex]))
-            guard !key.isEmpty else {
-                throw invalidPropertyLine(
-                    line,
-                    lineNumber: firstLineNumber + index,
-                )
-            }
-
-            let rawValue = trimmed(String(line[line.index(after: separatorIndex)...]))
-            guard rawValue.isEmpty else {
-                return (
-                    .init(
-                        key: key,
-                        value: .string(rawValue),
-                    ),
-                    index + 1,
-                )
-            }
-
-            let parsedList = parseList(
-                lines: lines,
-                startIndex: index + 1,
-            )
-            guard !parsedList.items.isEmpty else {
-                return (
-                    .init(
-                        key: key,
-                        value: .string(""),
-                    ),
-                    index + 1,
-                )
-            }
-
-            return (
-                .init(
-                    key: key,
-                    value: .list(parsedList.items),
-                ),
-                parsedList.nextIndex,
-            )
-        }
-
-        private func parseList(
-            lines: [String],
-            startIndex: Int,
-        ) -> (items: [String], nextIndex: Int) {
-            var items: [String] = []
-            var index = startIndex
-
-            while index < lines.count {
-                let line = trimmed(lines[index])
-                guard line.hasPrefix("- ") else {
-                    break
-                }
-
-                let item = String(line.dropFirst(2))
-                    .trimmingCharacters(in: .whitespaces)
-                items.append(item)
-                index += 1
-            }
-
-            return (items, index)
-        }
-
         private func flushMarkdown(
             markdownLines: inout [String],
             blocks: inout [Block],
@@ -217,56 +116,6 @@ public extension TileKit.Tile {
                 blocks.append(.markdown(markdown))
             }
             markdownLines.removeAll()
-        }
-
-        private func parseTypeID(
-            from line: String,
-            lineNumber: Int,
-        ) throws -> String {
-            let prefix = ":::tile"
-            let line = trimmed(line)
-            let typeID = line.dropFirst(prefix.count)
-                .trimmingCharacters(in: .whitespaces)
-
-            guard !typeID.isEmpty else {
-                throw DirectiveParserError.invalidHeader(
-                    line: lineNumber,
-                    text: line,
-                )
-            }
-
-            return typeID
-        }
-
-        private func isTileDirectiveStart(
-            _ line: String,
-        ) -> Bool {
-            let line = trimmed(line)
-            return line == ":::tile"
-                || line.hasPrefix(":::tile ")
-                || line.hasPrefix(":::tile\t")
-        }
-
-        private func isClosingFence(
-            _ line: String,
-        ) -> Bool {
-            trimmed(line) == ":::"
-        }
-
-        private func invalidPropertyLine(
-            _ text: String,
-            lineNumber: Int,
-        ) -> DirectiveParserError {
-            .invalidPropertyLine(
-                line: lineNumber,
-                text: text,
-            )
-        }
-
-        private func trimmed(
-            _ value: String,
-        ) -> String {
-            value.trimmingCharacters(in: .whitespaces)
         }
     }
 }

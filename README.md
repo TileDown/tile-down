@@ -106,9 +106,10 @@ flowchart LR
 ```mermaid
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::review
-  Epic --> Persistence["#77 Theme choice persistence"]:::review
+  Epic --> Theme["#20 Site theme and theme properties"]:::done
+  Epic --> Persistence["#77 Theme choice persistence"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
@@ -119,18 +120,19 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::review
-  Epic --> Types["#49 Content types"]:::review
-  Epic --> Redirects["#45 Redirect output"]:::review
-  Epic --> NotFound["#47 404 page"]:::review
-  Epic --> Sitemap["#46 sitemap.xml"]:::review
-  Epic --> RSS["#78 RSS content:encoded"]:::review
-  Epic --> BaseURL["#37 baseURL asset links"]:::review
-  Epic --> Slugs["#87 Migration slugs"]:::review
-  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::review
-  Epic --> SEO["#100 SEO metadata"]:::review
-  Epic --> HeroFM["#103 Hero front matter"]:::review
+  Epic --> Static["#79 Static passthrough"]:::done
+  Epic --> Types["#49 Content types"]:::done
+  Epic --> Redirects["#45 Redirect output"]:::done
+  Epic --> NotFound["#47 404 page"]:::done
+  Epic --> Sitemap["#46 sitemap.xml"]:::done
+  Epic --> RSS["#78 RSS content:encoded"]:::done
+  Epic --> BaseURL["#37 baseURL asset links"]:::done
+  Epic --> Slugs["#87 Migration slugs"]:::done
+  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::done
+  Epic --> SEO["#100 SEO metadata"]:::done
+  Epic --> HeroFM["#103 Hero front matter"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
@@ -141,10 +143,11 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::review
-  Epic --> Mermaid["#56 Mermaid tile"]:::todo
-  Epic --> Charts["#57 Chart tile"]:::todo
+  Epic --> Embed["#80 Safe embed tile"]:::done
+  Epic --> Mermaid["#56 Mermaid tile"]:::done
+  Epic --> Charts["#57 Chart tile"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827

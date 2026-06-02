@@ -51,11 +51,19 @@ public extension TileKit.Tile {
         ) -> [String] {
             switch property.value {
             case let .string(value):
-                value.isEmpty
-                    ? ["\(property.key):"]
-                    : ["\(property.key): \(value)"]
+                if value.isEmpty {
+                    return ["\(property.key):"]
+                }
+                guard value.contains("\n") else {
+                    return ["\(property.key): \(value)"]
+                }
+
+                return ["\(property.key): |"]
+                    + value
+                    .split(separator: "\n", omittingEmptySubsequences: false)
+                    .map { "  \($0)" }
             case let .list(items):
-                ["\(property.key):"] + items.map { "- \($0)" }
+                return ["\(property.key):"] + items.map { "- \($0)" }
             }
         }
     }
