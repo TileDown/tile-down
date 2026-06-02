@@ -22,18 +22,15 @@ public extension TileKit.Tile {
                 <p class="td-callout-body">\(TileKit.HTML.escape(body))</p>
                 </div>
                 """,
+                // Tile CSS is authored as CSS. Keep line_length disabled only
+                // for the embedded payload, then restore it for Swift code.
+                // swiftlint:disable line_length
                 css: """
-                .td-callout {
-                  border: 1px solid var(--td-border);
-                  border-left: 4px solid var(--td-accent);
-                  border-radius: var(--td-radius);
-                  background: var(--td-surface);
-                  padding: 1rem 1.25rem;
-                  margin-block: 1.5rem;
-                }
+                .td-callout { border: 1px solid var(--td-border); border-left: 4px solid var(--td-accent); border-radius: var(--td-radius); background: var(--td-surface); padding: 1rem 1.25rem; margin-block: 1.5rem; }
                 .td-callout-title { margin: 0 0 0.35rem; font-weight: 700; color: var(--td-ink); }
                 .td-callout-body { margin: 0; color: var(--td-muted); }
                 """,
+                // swiftlint:enable line_length
             )
         }
     }

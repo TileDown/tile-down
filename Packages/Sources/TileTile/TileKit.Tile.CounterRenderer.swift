@@ -22,19 +22,15 @@ public extension TileKit.Tile {
                 <span class="td-counter-value" data-td-counter-value>0</span>
                 </div>
                 """,
+                // Tile CSS is authored as CSS. Keep line_length disabled only
+                // for the embedded payload, then restore it for Swift code.
+                // swiftlint:disable line_length
                 css: """
                 .td-counter { display: inline-flex; align-items: center; gap: 0.75rem; margin-block: 1.5rem; }
-                .td-counter-button {
-                  cursor: pointer;
-                  border: 1px solid var(--td-border);
-                  border-radius: var(--td-radius);
-                  background: var(--td-accent);
-                  color: #fff;
-                  padding: 0.5rem 1rem;
-                  font: inherit;
-                }
+                .td-counter-button { cursor: pointer; border: 1px solid var(--td-border); border-radius: var(--td-radius); background: var(--td-accent); color: #fff; padding: 0.5rem 1rem; font: inherit; }
                 .td-counter-value { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--td-ink); }
                 """,
+                // swiftlint:enable line_length
                 javascript: """
                 document.querySelectorAll('[data-td-counter]').forEach(function (root) {
                   var button = root.querySelector('.td-counter-button');
