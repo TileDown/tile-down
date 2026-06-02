@@ -116,22 +116,19 @@ extension TileKit.Site.Generator {
     private func redirectPage(
         to target: String,
     ) -> String {
-        let escaped = target
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "\"", with: "&quot;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
+        let escapedAttribute = TileKit.HTML.escapeAttribute(target)
+        let escapedText = TileKit.HTML.escapeText(target)
         return [
             "<!doctype html>",
             "<html lang=\"en\">",
             "<head>",
             "<meta charset=\"utf-8\">",
             "<title>Redirecting</title>",
-            "<link rel=\"canonical\" href=\"\(escaped)\">",
-            "<meta http-equiv=\"refresh\" content=\"0; url=\(escaped)\">",
+            "<link rel=\"canonical\" href=\"\(escapedAttribute)\">",
+            "<meta http-equiv=\"refresh\" content=\"0; url=\(escapedAttribute)\">",
             "</head>",
             "<body>",
-            "<p>Redirecting to <a href=\"\(escaped)\">\(escaped)</a>.</p>",
+            "<p>Redirecting to <a href=\"\(escapedAttribute)\">\(escapedText)</a>.</p>",
             "</body>",
             "</html>",
         ].joined(separator: "\n")

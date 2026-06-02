@@ -159,6 +159,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- HTML escaping now routes through one shared `TileKit.HTML` helper used by
+  template, tile, Markdown, service-form, and site-output renderers. Attribute
+  contexts now consistently escape `>` and `'` alongside `&`, `<`, and `"`, and
+  the generated redirect page escapes its target separately for attribute and
+  text contexts, closing a markup-injection gap where a redirect target
+  containing `<` or `>` was previously emitted raw into the page. (#40)
 - Posts are modeled as `TileKit.Site.PostCollection`, a `RandomAccessCollection`
   that owns the newest-first, date-valid selection once. The listing, the RSS
   feed, per-tag filtering, and the latest-posts block derive from it via

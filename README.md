@@ -174,7 +174,7 @@ flowchart TD
   Epic["#85 Renderer correctness and cleanup"]:::epic
   Epic --> BooleanFM["#36 Boolean front matter"]:::done
   Epic --> Mustache["#38 Mustache section typo detection"]:::done
-  Epic --> Escaping["#40 Shared HTML escaping"]:::todo
+  Epic --> Escaping["#40 Shared HTML escaping"]:::done
   Epic --> ContentWalk["#41 Single content tree walk"]:::todo
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 

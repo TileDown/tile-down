@@ -304,16 +304,12 @@ private struct HTMLVisitor: MarkupVisitor {
     private func escape(
         _ value: String,
     ) -> String {
-        value
-            .replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
+        TileKit.HTML.escapeText(value)
     }
 
     private func escapeAttribute(
         _ value: String,
     ) -> String {
-        escape(value)
-            .replacingOccurrences(of: "\"", with: "&quot;")
+        TileKit.HTML.escapeAttribute(value)
     }
 }
