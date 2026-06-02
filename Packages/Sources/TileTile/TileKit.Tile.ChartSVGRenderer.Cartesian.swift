@@ -101,6 +101,7 @@ extension ChartSVGRenderer {
                     yPosition: min(valueY, zeroY),
                     width: barWidth - 2,
                     height: abs(zeroY - valueY),
+                    title: tooltipText(data, seriesIndex: seriesIndex, index: valueIndex, value: value),
                 )
             }
         }.joined(separator: "\n")
@@ -121,8 +122,12 @@ extension ChartSVGRenderer {
             let points = series.values.enumerated().map { index, value in
                 point(index: index, value: value, plot: plot)
             }
-            let circles = points.map {
-                pointCircle(seriesIndex: seriesIndex, point: $0)
+            let circles = series.values.enumerated().map { index, value in
+                pointCircle(
+                    seriesIndex: seriesIndex,
+                    point: points[index],
+                    title: tooltipText(data, seriesIndex: seriesIndex, index: index, value: value),
+                )
             }.joined(separator: "\n")
             guard !pointsOnly else {
                 return circles
@@ -190,6 +195,7 @@ extension ChartSVGRenderer {
         yPosition: Double,
         width: Double,
         height: Double,
+        title: String = "",
     ) -> String {
         """
         <rect
@@ -199,13 +205,14 @@ extension ChartSVGRenderer {
           width="\(format(width))"
           height="\(format(height))"
           rx="4"
-        ></rect>
+        >\(markTitle(title))</rect>
         """
     }
 
     func pointCircle(
         seriesIndex: Int,
         point: ChartPoint,
+        title: String = "",
     ) -> String {
         """
         <circle
@@ -213,7 +220,7 @@ extension ChartSVGRenderer {
           cx="\(format(point.xPosition))"
           cy="\(format(point.yPosition))"
           r="4"
-        ></circle>
+        >\(markTitle(title))</circle>
         """
     }
 

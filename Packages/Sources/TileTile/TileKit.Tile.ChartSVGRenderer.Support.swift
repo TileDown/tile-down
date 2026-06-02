@@ -167,6 +167,30 @@ extension ChartSVGRenderer {
             .replacingOccurrences(of: #"\.?0+$"#, with: "", options: .regularExpression)
     }
 
+    /// A native SVG `<title>` child, shown as a browser tooltip on hover. Empty
+    /// for unlabelled marks. This is the zero-JavaScript hover affordance.
+    func markTitle(
+        _ text: String,
+    ) -> String {
+        text.isEmpty ? "" : "<title>\(escapeHTML(text))</title>"
+    }
+
+    /// The hover tooltip text for a cartesian mark: `label: value`, prefixed with
+    /// the series name when more than one series shares the plot.
+    func tooltipText(
+        _ data: ChartData,
+        seriesIndex: Int,
+        index: Int,
+        value: Double,
+    ) -> String {
+        let label = data.labels.indices.contains(index) ? data.labels[index] : ""
+        let head = label.isEmpty ? formatValue(value) : "\(label): \(formatValue(value))"
+        guard data.series.count > 1, data.series.indices.contains(seriesIndex) else {
+            return head
+        }
+        return "\(data.series[seriesIndex].name), \(head)"
+    }
+
     func escapeHTML(
         _ value: String,
     ) -> String {

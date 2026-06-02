@@ -283,6 +283,21 @@ struct ChartFenceRenderingTests {
         #expect(placements.allSatisfy { $0.row == 0 })
     }
 
+    @Test("a chart fence stays static: native title tooltips, no interactive hook")
+    func fenceIsStaticWithTitleTooltips() throws {
+        let chart = try ChartFence.parse(
+            """
+            type: bar
+            categories: A, B
+            series: Series = 1, 2
+            """,
+        )
+        let svg = ChartSVGRenderer().render(chart)
+
+        #expect(svg.contains("<title>"))
+        #expect(!svg.contains("data-td-chart-interactive"))
+    }
+
     @Test("bar fence renders axis captions when provided")
     func barRendersAxisCaptions() throws {
         let chart = try ChartFence.parse(

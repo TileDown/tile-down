@@ -19,10 +19,54 @@ public extension TileKit.Tile {
 
             let chart = try ChartData(tile)
             return .init(
-                html: ChartSVGRenderer().render(chart),
+                html: ChartSVGRenderer().render(chart, interactive: true),
                 css: Self.css,
+                javascript: Self.javascript,
             )
         }
+
+        /// The interactive tile ships a small tooltip runtime; the static Markdown
+        /// ` ```chart ` fence renders the same SVG with native `<title>` tooltips
+        /// and no script. Browser JavaScript is allowed only for client-side tiles.
+        static let javascript = """
+        (function () {
+          var charts = document.querySelectorAll('.td-chart[data-td-chart-interactive]:not([data-td-chart-bound])');
+          if (charts.length === 0) return;
+          var tip = document.querySelector('.td-chart-tip');
+          if (!tip) {
+            tip = document.createElement('div');
+            tip.className = 'td-chart-tip';
+            tip.setAttribute('role', 'status');
+            document.body.appendChild(tip);
+          }
+          function hide() { tip.style.opacity = '0'; }
+          function show(text) { tip.textContent = text; tip.style.opacity = '1'; }
+          charts.forEach(function (chart) {
+            chart.setAttribute('data-td-chart-bound', 'true');
+            var marks = chart.querySelectorAll('.td-chart-bar, .td-chart-slice, .td-chart-point');
+            marks.forEach(function (mark) {
+              var node = mark.querySelector('title');
+              var text = node ? node.textContent : '';
+              if (node) { node.remove(); }
+              if (!text) { return; }
+              mark.setAttribute('tabindex', '0');
+              mark.addEventListener('pointerenter', function () { show(text); });
+              mark.addEventListener('pointermove', function (event) {
+                tip.style.left = (event.clientX + 12) + 'px';
+                tip.style.top = (event.clientY + 12) + 'px';
+              });
+              mark.addEventListener('pointerleave', hide);
+              mark.addEventListener('focus', function () {
+                var box = mark.getBoundingClientRect();
+                tip.style.left = box.left + 'px';
+                tip.style.top = Math.max(8, box.top - 8) + 'px';
+                show(text);
+              });
+              mark.addEventListener('blur', hide);
+            });
+          });
+        })();
+        """
 
         /// Shared by the property-authored chart tile and the Markdown ` ```chart `
         /// fence renderer so both emit one identical stylesheet.
@@ -93,6 +137,31 @@ public extension TileKit.Tile {
         [data-theme="dark"] .td-chart-series-3 { color: #ff453a; }
         [data-theme="dark"] .td-chart-series-4 { color: #bf5af2; }
         [data-theme="dark"] .td-chart-series-5 { color: #7d7aff; }
+        .td-chart-bar, .td-chart-slice, .td-chart-point, .td-chart-line {
+          transition: filter 0.12s ease, stroke-width 0.12s ease;
+        }
+        .td-chart-bar:hover, .td-chart-slice:hover { filter: brightness(1.15); }
+        .td-chart-point:hover { stroke-width: 5; }
+        .td-chart-line:hover { stroke-width: 4; }
+        .td-chart[data-td-chart-interactive] :is(.td-chart-bar, .td-chart-slice, .td-chart-point) { cursor: pointer; }
+        .td-chart-tip {
+          position: fixed;
+          z-index: 40;
+          left: 0;
+          top: 0;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.1s ease;
+          background: var(--td-ink);
+          color: var(--td-surface);
+          padding: 0.32rem 0.55rem;
+          border-radius: 0.45rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+          line-height: 1.3;
+          max-width: 18rem;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+        }
         """
     }
 }
