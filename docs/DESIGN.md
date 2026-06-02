@@ -23,6 +23,12 @@ emits HTML plus page-local tile CSS and browser JavaScript fragments. JSON is a
 derived format for tests, debugging, interchange, and future editor internals,
 not the primary source file.
 
+The unit of output is the **page**: one rendered HTML document composed, in
+source order, of prose (Markdown), static capability blocks (math, charts, and
+graphs rendered to SVG, MathML, or a client runtime), and interactive tiles.
+Tiles are the interactive layer, not the center; static rich content is authored
+as Markdown, never as a tile.
+
 The generator aims for Toucan-level SSG functionality first: content loading,
 front matter, content types, queries, scopes, Mustache-style templates, assets,
 Markdown rendering, outlines, reading time, and build/serve/watch workflows.
@@ -187,6 +193,25 @@ JavaScript fragments. `TileSite` keeps Markdown blocks and tile blocks in source
 order, joins HTML fragments into `page.contents.html`, and exposes collected
 tile assets as `page.assets.css`, `page.assets.javascript`, `assets.css`, and
 `assets.javascript`.
+
+**Composition model (page-centric).** The page is the composition unit: one
+rendered HTML document assembled, in source order, from three kinds of block.
+**Prose** is CommonMark rendered to HTML. **Static capabilities** are rich static
+content authored in Markdown notation (math `$...$` and `$$...$$`, fenced `chart`
+and `mermaid` blocks) and rendered into the page as SVG, MathML, or a client
+runtime. **Interactive tiles** are the typed tile system, reserved for
+interactive or stateful components. The page joins each block's HTML in source
+order and aggregates the collected CSS and JavaScript into the final static file.
+Tiles are one of the three kinds, not the root abstraction; the typed tile tree
+remains the structural backbone for the interactive blocks.
+
+The dividing line is **interactivity**, not rendering location: static content is
+a Markdown capability even when a client runtime draws it in the browser, and only
+interactive or stateful components are tiles. The same visual content can have
+both homes. A chart or diagram with inline static data is a Markdown capability; a
+chart or diagram **wired to a backend or service** (live data, user input) is a
+tile. This is why the read-only `chart` and `mermaid` tiles stay: they are the
+seed of the interactive versions that arrive once backend connections are added.
 
 ### 5.1 Current Implementation Snapshot
 
@@ -484,6 +509,26 @@ The SSG content layer carries forward the useful Toucan model:
 - slug and permalink
 - last update
 - query fields
+
+### 7.4 Static capabilities
+
+Beyond prose and tiles, a page carries **static capability blocks**: rich static
+content authored in Markdown notation and rendered into the page without a tile.
+Three are planned, matching the sibling MarkdownPDF project's notation so a
+document can move between the two engines:
+
+- **Math**: inline `$...$` and display `$$...$$`, rendered to SVG with hidden
+  MathML for accessibility.
+- **Charts**: fenced `chart` blocks (a `key: value` DSL), rendered to SVG.
+- **Graphs and diagrams**: fenced `mermaid` blocks (flowchart/graph and pie),
+  rendered by a client runtime or to SVG.
+
+These are Markdown capabilities, not tiles, because their output is static; a
+client-side runtime drawing a diagram does not make it a tile. Only interactive
+or stateful components are tiles. The existing `chart`, `mermaid`, and `embed`
+tiles are left in place: they become the interactive counterparts of these static
+blocks once backend and service connections are added, where the same content
+gains live data or user input.
 
 ---
 
