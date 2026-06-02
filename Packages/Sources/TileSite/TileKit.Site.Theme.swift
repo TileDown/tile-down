@@ -131,7 +131,7 @@ public extension TileKit.Site {
         .td-article-dek { max-width: 40rem; color: var(--td-muted); font-size: clamp(1.15rem, 2.8vw, 1.65rem); line-height: 1.28; }
         .td-article-actions, .td-article-share { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1.6rem 0; }
         .td-article-share { margin-block-start: 0.8rem; }
-        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.9rem; border: 1px solid var(--td-border); border-radius: 999px; background: var(--td-surface); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.95rem; border: 1px solid var(--td-border); border-radius: 0.7rem; background: var(--td-surface); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; box-shadow: inset 0 -2px 0 0 rgba(0,0,0,0.04); }
         .td-article-actions a:hover, .td-article-share a:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-article-tags { margin-block: 1.1rem 0; }
         .td-article-media { margin-block: 0 clamp(2rem, 6vw, 4rem); }
@@ -160,6 +160,7 @@ public extension TileKit.Site {
         @media (max-width: 36rem) { .td-post-card { grid-template-columns: 1fr; } .td-post-thumb img { width: 100%; height: auto; } .td-posts .td-post-thumb .td-theme-image { width: 100%; height: auto; } .td-posts .td-post-thumb .td-theme-image img { height: auto; } }
         .td-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-block: 1.75rem 0; padding: 0; list-style: none; }
         .td-tag { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; background: var(--td-surface); border: 1px solid var(--td-border); color: var(--td-muted); font-size: 0.8rem; line-height: 1.5; text-decoration: none; }
+        .td-tags .td-tag::before { content: "#"; color: var(--td-accent); opacity: 0.65; margin-inline-end: 0.08rem; }
         .td-tag:hover { color: var(--td-ink); border-color: var(--td-accent); }
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }
@@ -268,7 +269,7 @@ public extension TileKit.Site {
         .td-article-dek { max-width: 40rem; color: var(--td-muted); font-size: clamp(1.15rem, 2.8vw, 1.65rem); line-height: 1.28; }
         .td-article-actions, .td-article-share { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1.6rem 0; }
         .td-article-share { margin-block-start: 0.8rem; }
-        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.95rem; border: 1px solid var(--td-border); border-radius: 999px; background: var(--td-elevated); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; box-shadow: none; }
+        .td-article-actions a, .td-article-share a { display: inline-flex; align-items: center; min-height: 2.35rem; padding: 0.4rem 0.95rem; border: 1px solid var(--td-border); border-radius: 0.7rem; background: var(--td-elevated); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; text-decoration: none; box-shadow: none; }
         .td-article-actions a:hover, .td-article-share a:hover { border-color: var(--td-accent); color: var(--td-accent); }
         .td-article-tags { margin-block: 1.1rem 0; }
         .td-article-media { margin-block: 0 clamp(2rem, 6vw, 4rem); }
@@ -297,6 +298,7 @@ public extension TileKit.Site {
         @media (max-width: 36rem) { .td-post-card { grid-template-columns: 1fr; } .td-post-thumb img { width: 100%; height: auto; } .td-posts .td-post-thumb .td-theme-image { width: 100%; height: auto; } .td-posts .td-post-thumb .td-theme-image img { height: auto; } }
         .td-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-block: 1.75rem 0; padding: 0; list-style: none; }
         .td-tag { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; background: var(--td-surface); border: 1px solid var(--td-border); color: var(--td-muted); font-size: 0.8rem; line-height: 1.5; text-decoration: none; }
+        .td-tags .td-tag::before { content: "#"; color: var(--td-accent); opacity: 0.65; margin-inline-end: 0.08rem; }
         .td-tag:hover { color: var(--td-ink); border-color: var(--td-accent); }
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }

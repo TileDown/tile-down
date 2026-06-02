@@ -254,6 +254,35 @@ struct ChartFenceRenderingTests {
         #expect(!svg.contains("<script"))
     }
 
+    @Test("legend labels are packed by width without overlapping")
+    func legendPacksWithoutOverlap() {
+        let renderer = ChartSVGRenderer()
+        let labels = ["Configuring the new generator", "Arguing about it online", "Actually writing posts"]
+        let placements = renderer.legendPlacements(labels)
+
+        #expect(placements.count == 3)
+        // Entries sharing a row advance strictly left to right (no overlap) and
+        // start within the plot, unlike the old fixed-width columns.
+        for row in 0 ... (placements.map(\.row).max() ?? 0) {
+            let inRow = placements.filter { $0.row == row }
+            #expect(zip(inRow, inRow.dropFirst()).allSatisfy { $0.xPosition < $1.xPosition })
+            #expect(inRow.allSatisfy { $0.xPosition >= renderer.left })
+        }
+    }
+
+    @Test("an overfull legend wraps to multiple rows")
+    func legendWrapsWhenOverfull() {
+        let labels = (1 ... 8).map { "Quite a long legend label number \($0)" }
+        let placements = ChartSVGRenderer().legendPlacements(labels)
+        #expect((placements.map(\.row).max() ?? 0) >= 1)
+    }
+
+    @Test("short legend labels stay on one row")
+    func legendKeepsShortLabelsOnOneRow() {
+        let placements = ChartSVGRenderer().legendPlacements(["A", "B", "C"])
+        #expect(placements.allSatisfy { $0.row == 0 })
+    }
+
     @Test("bar fence renders axis captions when provided")
     func barRendersAxisCaptions() throws {
         let chart = try ChartFence.parse(
