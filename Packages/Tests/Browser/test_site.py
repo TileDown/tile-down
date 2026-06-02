@@ -17,6 +17,7 @@ from playwright.sync_api import sync_playwright
 NORMAL = os.environ.get("NORMAL_URL", "http://localhost:8090")
 DRAFTS = os.environ.get("DRAFTS_URL", "http://localhost:8091")
 SYSTEM = os.environ.get("SYSTEM_URL", "http://localhost:8092")
+NORMAL_ROOT = os.environ.get("NORMAL_ROOT", "")
 
 results = []
 
@@ -105,6 +106,22 @@ def check_hero_rhythm(page, name):
     )
 
 
+def install_404_routes(page):
+    if not NORMAL_ROOT:
+        return
+    not_found = os.path.join(NORMAL_ROOT, "404.html")
+
+    def fallback(route):
+        route.fulfill(
+            status=404,
+            path=not_found,
+            headers={"content-type": "text/html; charset=utf-8"},
+        )
+
+    page.route(NORMAL + "/legacy-post**", fallback)
+    page.route(NORMAL + "/old-tags/**", fallback)
+
+
 def check_article_page(page):
     page.set_viewport_size({"width": 1024, "height": 900})
     page.emulate_media(color_scheme="light")
@@ -179,6 +196,8 @@ def check_article_page(page):
 
 
 def run(page):
+    install_404_routes(page)
+
     # --- Home: image, table, counter tile ---
     page.set_viewport_size({"width": 896, "height": 512})
     page.emulate_media(color_scheme="light")
@@ -335,6 +354,16 @@ def run(page):
     check("custom 404 relative images load", broken_404_images == 0, f"{broken_404_images} broken")
     not_found_folder = page.evaluate("async () => (await fetch('/404/', {method:'HEAD'})).status")
     check("custom 404 source does not create /404/", not_found_folder == 404, f"status={not_found_folder}")
+
+    page.goto(NORMAL + "/legacy-post?from=old#section", wait_until="domcontentloaded")
+    page.wait_for_url(NORMAL + "/posts/live/?from=old#section")
+    check("404 exact redirect preserves query and fragment", page.url.endswith("/posts/live/?from=old#section"), page.url)
+    page.goto(NORMAL + "/old-tags/swift?from=old#section", wait_until="domcontentloaded")
+    page.wait_for_url(NORMAL + "/tags/?from=old#section")
+    check("404 prefix redirect preserves query and fragment", page.url.endswith("/tags/?from=old#section"), page.url)
+    page.goto(NORMAL + "/old-tags/special/swift?from=old#section", wait_until="domcontentloaded")
+    page.wait_for_url(NORMAL + "/posts/live/?from=old#section")
+    check("404 most specific prefix wins", page.url.endswith("/posts/live/?from=old#section"), page.url)
 
     # --- Feed: live present, draft absent ---
     feed = page.evaluate("async () => (await fetch('/feed.xml')).text()")

@@ -127,4 +127,43 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("shareLinks: sometimes")
         }
     }
+
+    @Test("parses 404 fallback redirect rules")
+    func parsesNotFoundRedirects() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            notFoundRedirect.exact./cvbuilder: /blog/c-v-builder/
+            notFoundRedirect.exact./external: https://codeweaver.info/
+            notFoundRedirect.prefix./tag/: /
+            """,
+        )
+
+        #expect(
+            try file.configuration.notFoundRedirects.exact == [
+                .init(source: "/cvbuilder", target: "/blog/c-v-builder/"),
+                .init(source: "/external", target: "https://codeweaver.info/"),
+            ],
+        )
+        #expect(
+            try file.configuration.notFoundRedirects.prefixes == [
+                .init(source: "/tag/", target: "/"),
+            ],
+        )
+    }
+
+    @Test("rejects unsafe 404 fallback redirect rules")
+    func rejectsUnsafeNotFoundRedirects() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectPath("tag")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.prefix.tag: /")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectTarget("http://example.com")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: http://example.com")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectPath("//example.com")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: //example.com")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectTarget("https://example.com/\\old")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: https://example.com/\\old")
+        }
+    }
 }
