@@ -82,19 +82,17 @@ flowchart TD
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
 ```
 
-### Open work by epic
+### Roadmap by epic
 
 ```mermaid
 flowchart LR
-  Engine["0.1.0 engine slice"]:::done --> Site["Usable static site generator"]:::todo
-  Site --> Assets["#17 Assets and theming"]:::epic
+  Engine["0.1.0 engine slice"]:::done --> Site["Usable static site generator"]:::done
+  Site --> Assets["#17 Assets and theming"]:::done
   Site --> Output["#82 Static output"]:::done
   Site --> Tiles["#83 Tile catalog"]:::done
-  Site --> Workflow["#84 Local workflow"]:::epic
-  Site --> Renderer["#85 Renderer cleanup"]:::epic
-  Site --> Docs["#86 Docs and hygiene"]:::epic
-
-  Review["PR in review"]:::review
+  Site --> Workflow["#84 Local workflow"]:::done
+  Site --> Renderer["#85 Renderer cleanup"]:::done
+  Site --> Docs["#86 Docs and hygiene"]:::done
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
@@ -159,9 +157,10 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#84 Local author workflow and verification"]:::epic
-  Epic --> Serve["#33 tiledown serve"]:::review
-  Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
+  Epic --> Serve["#33 tiledown serve"]:::done
+  Epic --> BrowserGate["#60 Browser-test gate docs"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
@@ -189,10 +188,11 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#86 Documentation and contribution hygiene"]:::epic
-  Epic --> Contributing["#58 CONTRIBUTING refresh"]:::todo
-  Epic --> Imports["#59 TileSite import contract"]:::todo
-  Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
+  Epic --> Contributing["#58 CONTRIBUTING refresh"]:::done
+  Epic --> Imports["#59 TileSite import contract"]:::done
+  Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
