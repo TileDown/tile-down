@@ -44,6 +44,33 @@ extension ChartSVGRenderer {
 
     static let legendLineHeight = 22.0
 
+    /// The y-positions and total SVG height for the stack below a cartesian or
+    /// scatter plot: an axis-labels row, then the legend rows, then an optional
+    /// x-axis caption, each a full line apart so they never collide. The canvas
+    /// grows to contain the lowest band instead of cramming them into the margin.
+    struct BottomStack {
+        var axisY: Double
+        var legendBaseY: Double
+        var captionY: Double
+        var height: Int
+    }
+
+    func bottomStack(
+        _ data: ChartData,
+        legendLabels: [String],
+    ) -> BottomStack {
+        let line = Self.legendLineHeight
+        let plotBottom = Double(data.height) - bottom
+        let axisY = plotBottom + line
+        let legendRows = data.showsLegend && !legendLabels.isEmpty ? legendRowCount(legendLabels) : 0
+        let legendBaseY = legendRows > 0 ? axisY + line + Double(legendRows - 1) * line : axisY
+        let belowLegend = legendRows > 0 ? legendBaseY : axisY
+        let hasCaption = data.xLabel?.isEmpty == false
+        let captionY = belowLegend + line
+        let lowest = hasCaption ? captionY : belowLegend
+        return BottomStack(axisY: axisY, legendBaseY: legendBaseY, captionY: captionY, height: Int(lowest + 14))
+    }
+
     /// Packs legend entries left to right by measured label width, wrapping to a
     /// new row when the next entry would overflow the plot width. Fixes the
     /// overlap that fixed-width columns caused for long series or slice names.

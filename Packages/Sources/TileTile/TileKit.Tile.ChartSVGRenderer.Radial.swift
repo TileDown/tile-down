@@ -31,10 +31,12 @@ extension ChartSVGRenderer {
                 title: title,
             )
         }.joined(separator: "\n")
-        let legend = data.showsLegend ? legend(labels: data.labels, height: data.height) : ""
+        let legendRows = data.showsLegend ? legendRowCount(data.labels) : 0
+        let svgHeight = data.height + max(0, legendRows - 1) * Int(Self.legendLineHeight)
+        let legend = data.showsLegend ? legend(labels: data.labels, height: svgHeight) : ""
 
         return """
-        \(svgStart(height: data.height, ariaLabel: ariaLabel(data)))
+        \(svgStart(height: svgHeight, ariaLabel: ariaLabel(data)))
         <desc>\(escapeHTML(description(data)))</desc>
         \(slices)
         \(legend)
