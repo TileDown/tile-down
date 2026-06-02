@@ -142,7 +142,6 @@ struct PosixHTTPServerTests {
             throw TileKit.Serve.ServerError.socketFailed
         }
         defer { testCloseSocket(descriptor) }
-        try configureReceiveTimeout(for: descriptor)
 
         var address = sockaddr_in()
         address.sin_family = sa_family_t(AF_INET)
@@ -170,30 +169,34 @@ struct PosixHTTPServerTests {
         var received = Data()
         var buffer = [UInt8](repeating: 0, count: 4096)
         while true {
+            try waitForReadable(descriptor)
             let count = recv(descriptor, &buffer, buffer.count, 0)
             guard count > 0 else {
                 break
             }
             received.append(contentsOf: buffer.prefix(Int(count)))
+            if String(data: received, encoding: .utf8)?.hasSuffix("Home") == true {
+                break
+            }
         }
 
         return String(data: received, encoding: .utf8) ?? ""
     }
 
-    private func configureReceiveTimeout(
-        for descriptor: Int32,
+    private func waitForReadable(
+        _ descriptor: Int32,
     ) throws {
-        var timeout = timeval(tv_sec: 2, tv_usec: 0)
-        let result = withUnsafePointer(to: &timeout) {
-            setsockopt(
-                descriptor,
-                SOL_SOCKET,
-                SO_RCVTIMEO,
-                $0,
-                socklen_t(MemoryLayout<timeval>.size),
-            )
-        }
-        guard result == 0 else {
+        var pollDescriptor = pollfd(
+            fd: descriptor,
+            events: Int16(POLLIN),
+            revents: 0,
+        )
+        let result = testPoll(
+            &pollDescriptor,
+            nfds_t(1),
+            2000,
+        )
+        guard result > 0 else {
             throw TileKit.Serve.ServerError.socketFailed
         }
     }
@@ -250,5 +253,17 @@ private func testCloseSocket(
         _ = Darwin.close(descriptor)
     #elseif canImport(Glibc)
         _ = Glibc.close(descriptor)
+    #endif
+}
+
+private func testPoll(
+    _ fds: UnsafeMutablePointer<pollfd>,
+    _ count: nfds_t,
+    _ timeout: Int32,
+) -> Int32 {
+    #if canImport(Darwin)
+        Darwin.poll(fds, count, timeout)
+    #elseif canImport(Glibc)
+        Glibc.poll(fds, count, timeout)
     #endif
 }
