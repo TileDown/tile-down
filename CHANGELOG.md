@@ -99,6 +99,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pages cannot fail a build because of stale body content. (#45)
 - Outbound link shims now fail the build instead of overwriting an already
   generated page or redirect at the same output path. (#45)
+- RSS `content:encoded` now rewrites generated post links and image sources to
+  absolute public URLs when `baseURL` is configured. (#78)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.

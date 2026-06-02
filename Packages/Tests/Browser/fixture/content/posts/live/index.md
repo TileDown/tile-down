@@ -14,3 +14,7 @@ This post is published, so it shows in the listing and the RSS feed.
 ## Browser checked article
 
 The default post layout renders this body below the generated article header.
+
+The RSS body keeps [a root link](/about/) and an inline image.
+
+![RSS logo](/assets/logo.svg)
