@@ -60,6 +60,37 @@ HTTPS `.mp4`, `.webm`, and `.ogg` URLs render as responsive `<video controls>`
 embeds. Other schemes, providers, file types, and malformed ratios fail the
 build.
 
+## Mermaid diagrams
+
+Mermaid diagrams can use the exact shorthand fence:
+
+```markdown
+:::mermaid
+graph TD
+  A[Start] --> B{OK?}
+  B -->|yes| C[Ship]
+  B -->|no| A
+:::
+```
+
+The canonical serialized form is a normal tile directive with a multiline
+`definition` property:
+
+```markdown
+:::tile mermaid
+definition: |
+  graph TD
+    A[Start] --> B{OK?}
+    B -->|yes| C[Ship]
+    B -->|no| A
+:::
+```
+
+The definition is HTML-escaped into a `<pre class="mermaid">` container. The page
+emits one pinned client-side Mermaid runtime only when a Mermaid tile is present,
+and initializes it with the page's current light or dark appearance. This is
+visitor-side tile JavaScript, not build tooling.
+
 ## Canonical form
 
 `TileKit.Site.DocumentSerializer` is the source of truth for "one official

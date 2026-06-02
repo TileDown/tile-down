@@ -279,6 +279,41 @@ private struct PromoRenderer: TileKit.Tile.Rendering {
 }
 
 extension SiteGeneratorTests {
+    @Test("left sidebar layout includes page JavaScript assets")
+    func leftSidebarIncludesPageJavaScriptAssets() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": """
+                ---
+                title: Home
+                ---
+                :::tile promo
+                id: launch
+                :::
+                """,
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(
+                renderers: [
+                    "promo": PromoRenderer(),
+                ],
+            ),
+        )
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.leftSidebar),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/index.html"]?.contains(#"<script>console.log("promo");</script>"#) == true)
+    }
+
     @Test("excludes draft pages from the build by default")
     func excludesDrafts() throws {
         let fileSystem = MemoryFileSystem(

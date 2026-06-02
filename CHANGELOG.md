@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Mermaid diagrams through the built-in `mermaid` tile, with exact
+  `:::mermaid` shorthand parsing, canonical `:::tile mermaid` serialization,
+  escaped diagram source, a pinned client-side Mermaid runtime, and Playwright
+  coverage for browser rendering. (#56)
 - Safe responsive embeds through `:::tile embed`, with required `url`, optional
   `title`, optional `aspectRatio`, YouTube and Vimeo iframe normalization, direct
   HTTPS video-file output, and typed failures for unsafe schemes, unsupported

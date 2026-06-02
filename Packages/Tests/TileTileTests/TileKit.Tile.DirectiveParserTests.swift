@@ -65,6 +65,71 @@ struct TileDirectiveParserTests {
         #expect(tile.properties.map(\.key) == ["id", "mode", "videoId", "privacyEnhanced"])
     }
 
+    @Test("parses multiline string properties")
+    func parsesMultilineStringProperties() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            :::tile mermaid
+            title: Release flow
+            definition: |
+              graph TD
+                A[Start] --> B{OK?}
+                B -->|yes| C[Ship]
+            :::
+            """,
+        )
+
+        guard case let .tile(tile) = blocks.first else {
+            Issue.record("Expected a tile block")
+            return
+        }
+
+        #expect(tile.typeID == "mermaid")
+        #expect(tile.property(named: "title") == .string("Release flow"))
+        #expect(
+            tile.property(named: "definition") == .string(
+                """
+                graph TD
+                  A[Start] --> B{OK?}
+                  B -->|yes| C[Ship]
+                """,
+            ),
+        )
+    }
+
+    @Test("parses exact mermaid shorthand as a definition property")
+    func parsesMermaidShorthand() throws {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        let blocks = try parser.parseBlocks(
+            """
+            :::mermaid
+            graph TD
+              A[Start] --> B{OK?}
+              B -->|no| A
+            :::
+            """,
+        )
+
+        guard case let .tile(tile) = blocks.first else {
+            Issue.record("Expected a tile block")
+            return
+        }
+
+        #expect(tile.typeID == "mermaid")
+        #expect(
+            tile.property(named: "definition") == .string(
+                """
+                graph TD
+                  A[Start] --> B{OK?}
+                  B -->|no| A
+                """,
+            ),
+        )
+    }
+
     @Test("throws on missing closing fence")
     func throwsOnMissingClosingFence() {
         let parser = TileKit.Tile.DirectiveParser()
@@ -156,5 +221,20 @@ struct TileDirectiveParserTests {
         )
 
         #expect(blocks.contains { if case .tile = $0 { true } else { false } })
+    }
+
+    @Test("plain unindented body lines remain invalid in canonical tile directives")
+    func plainBodyLinesRemainInvalid() {
+        let parser = TileKit.Tile.DirectiveParser()
+
+        #expect(throws: TileKit.Tile.DirectiveParserError.invalidPropertyLine(line: 2, text: "graph TD")) {
+            try parser.parseBlocks(
+                """
+                :::tile mermaid
+                graph TD
+                :::
+                """,
+            )
+        }
     }
 }

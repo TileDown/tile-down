@@ -283,6 +283,10 @@ private struct Command {
                 TileKit.Tile.EmbedRenderer(),
                 for: TileKit.Tile.EmbedRenderer.typeID,
             )
+            .registering(
+                TileKit.Tile.MermaidRenderer(),
+                for: TileKit.Tile.MermaidRenderer.typeID,
+            )
     }
 }
 
