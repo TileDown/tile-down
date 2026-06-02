@@ -190,6 +190,79 @@ extension ChartFence {
         return value
     }
 
+    /// Whether a ` ```mermaid ` source is a pie chart (`pie` or `pie title ...`),
+    /// which MarkdownPDF renders as a static chart rather than a diagram.
+    static func isMermaidPie(
+        _ source: String,
+    ) -> Bool {
+        guard let header = mermaidLines(source).first else {
+            return false
+        }
+        let lower = header.lowercased()
+        return lower == "pie" || lower.hasPrefix("pie ")
+    }
+
+    /// Parses a mermaid `pie`/`pie title ...` block (`"Label" : value` lines) into
+    /// a pie ``ChartData``, matching MarkdownPDF's mermaid-pie handling.
+    static func parseMermaidPie(
+        _ source: String,
+    ) throws -> ChartData {
+        let lines = mermaidLines(source)
+        guard let header = lines.first else {
+            throw fenceError("empty mermaid pie chart")
+        }
+        let title: String?
+        let lower = header.lowercased()
+        if lower == "pie" {
+            title = nil
+        } else if lower.hasPrefix("pie title ") {
+            title = sanitizedLabel(String(header.dropFirst("pie title ".count)))
+        } else {
+            throw fenceError("expected `pie` or `pie title ...`")
+        }
+
+        var labels: [String] = []
+        var values: [Double] = []
+        for line in lines.dropFirst() {
+            let text = stripTrailingSemicolon(line)
+            guard let split = splitKeyValue(text), let value = parseNumber(split.value), value >= 0 else {
+                throw fenceError("expected `\"label\" : value`")
+            }
+            labels.append(sanitizedLabel(split.key))
+            values.append(value)
+        }
+        guard !labels.isEmpty, values.reduce(0, +) > 0 else {
+            throw fenceError("pie chart needs slices with a total greater than zero")
+        }
+        return ChartData(
+            kind: .pie,
+            title: title,
+            labels: labels,
+            series: [ChartSeries(name: "Slices", values: values)],
+        )
+    }
+
+    private static func mermaidLines(
+        _ source: String,
+    ) -> [String] {
+        source
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty && !$0.hasPrefix("%%") }
+    }
+
+    private static func stripTrailingSemicolon(
+        _ text: String,
+    ) -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasSuffix(";") else {
+            return trimmed
+        }
+        return String(trimmed.dropLast()).trimmingCharacters(in: .whitespaces)
+    }
+
     static func sanitizedLabel(
         _ text: String,
     ) -> String {

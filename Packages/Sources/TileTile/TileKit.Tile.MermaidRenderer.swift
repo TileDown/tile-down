@@ -34,7 +34,9 @@ public extension TileKit.Tile {
             )
         }
 
-        private static func html(
+        /// Shared with the Markdown ` ```mermaid ` fence renderer so both emit the
+        /// same client-runtime container and assets.
+        static func html(
             definition: String,
             title: String?,
         ) -> String {
@@ -51,7 +53,7 @@ public extension TileKit.Tile {
             """
         }
 
-        private static let css = """
+        static let css = """
         .td-mermaid {
           margin-block: 1.75rem;
         }
@@ -78,7 +80,7 @@ public extension TileKit.Tile {
         }
         """
 
-        private static let javascript = """
+        static let javascript = """
         (function () {
           var selector = '.td-mermaid-source:not([data-td-mermaid-bound])';
           var nodes = Array.prototype.slice.call(document.querySelectorAll(selector));

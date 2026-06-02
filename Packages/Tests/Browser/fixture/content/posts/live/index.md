@@ -61,3 +61,19 @@ x-label: effort
 y-label: impact
 series: Trials = (1, 2), (3, 5), (6, 9)
 ```
+
+A diagram authored as a Markdown fence, using MarkdownPDF's notation:
+
+```mermaid
+graph LR
+  Author[Author] --> Render[Render]
+  Render --> Ship[Ship]
+```
+
+A mermaid pie renders as a static chart, like MarkdownPDF:
+
+```mermaid
+pie title Engine split
+  "Charts" : 3
+  "Diagrams" : 2
+```
