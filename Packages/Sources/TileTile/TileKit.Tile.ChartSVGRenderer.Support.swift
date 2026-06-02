@@ -14,13 +14,15 @@ extension ChartSVGRenderer {
         labels: [String],
         height: Int,
     ) -> String {
+        let placements = legendPlacements(labels)
+        let rows = (placements.map(\.row).max() ?? 0) + 1
         let baseY = Double(height) - 12
-        return labels.enumerated().map { index, label in
-            let xPosition = left + Double(index % 4) * 150
-            let yPosition = baseY - Double(index / 4) * 22
+        return placements.enumerated().map { index, placement in
+            // Rows stack upward from the baseline so the last row sits at baseY.
+            let yPosition = baseY - Double(rows - 1 - placement.row) * Self.legendLineHeight
             let labelNode = text(
-                label,
-                xPosition: xPosition + 18,
+                placement.label,
+                xPosition: placement.xPosition + 18,
                 yPosition: yPosition,
                 anchor: "start",
                 className: "td-chart-legend-text",
@@ -28,7 +30,7 @@ extension ChartSVGRenderer {
             return """
             <rect
               class="td-chart-series-\(index % 6)"
-              x="\(format(xPosition))"
+              x="\(format(placement.xPosition))"
               y="\(format(yPosition - 10))"
               width="12"
               height="12"
@@ -38,6 +40,68 @@ extension ChartSVGRenderer {
             \(labelNode)
             """
         }.joined(separator: "\n")
+    }
+
+    static let legendLineHeight = 22.0
+
+    /// Packs legend entries left to right by measured label width, wrapping to a
+    /// new row when the next entry would overflow the plot width. Fixes the
+    /// overlap that fixed-width columns caused for long series or slice names.
+    struct LegendPlacement {
+        var label: String
+        var xPosition: Double
+        var row: Int
+    }
+
+    func legendPlacements(
+        _ labels: [String],
+    ) -> [LegendPlacement] {
+        let maxX = width - right
+        var placements: [LegendPlacement] = []
+        var xCursor = left
+        var row = 0
+        for label in labels {
+            // 18: swatch width plus gap before the label. 18: trailing gap.
+            let itemWidth = 18 + estimatedTextWidth(label, fontSize: 13) + 18
+            if xCursor > left, xCursor + itemWidth > maxX {
+                row += 1
+                xCursor = left
+            }
+            placements.append(LegendPlacement(label: label, xPosition: xCursor, row: row))
+            xCursor += itemWidth
+        }
+        return placements
+    }
+
+    /// The number of rows the wrapped legend occupies, so the renderer can grow
+    /// the canvas to fit instead of clipping or overlapping the plot.
+    func legendRowCount(
+        _ labels: [String],
+    ) -> Int {
+        (legendPlacements(labels).map(\.row).max() ?? 0) + 1
+    }
+
+    /// Estimates the rendered width of a text run without a font metrics table,
+    /// using per-character advance classes generous enough to prevent overlap.
+    /// Good enough for legend packing and axis-room decisions in static SVG.
+    func estimatedTextWidth(
+        _ text: String,
+        fontSize: Double,
+    ) -> Double {
+        var advance = 0.0
+        for character in text {
+            switch character {
+            case "i", "j", "l", "I", "t", "f", "r", ".", ",", ":", ";", "'", "|", "!", "(", ")", "[", "]", " ":
+                advance += 0.32
+            case "m", "M", "W", "w", "@", "%":
+                advance += 0.92
+            case "A" ... "Z":
+                advance += 0.68
+            default:
+                advance += 0.55
+            }
+        }
+        return advance * fontSize
     }
 
     func svgStart(
