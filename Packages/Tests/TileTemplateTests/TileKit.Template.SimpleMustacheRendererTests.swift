@@ -98,6 +98,79 @@ struct SimpleMustacheRendererTests {
         #expect(html == "enabled||||")
     }
 
+    @Test("renders inverted sections when absent or falsey")
+    func rendersInvertedSectionsWhenAbsentOrFalsey() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: [
+                "{{^missing}}missing{{/missing}}",
+                "{{^disabled}}disabled{{/disabled}}",
+                "{{^disabledZero}}zero{{/disabledZero}}",
+                "{{^disabledNo}}no{{/disabledNo}}",
+                "{{^emptyText}}empty text{{/emptyText}}",
+                "{{^emptyItems}}empty items{{/emptyItems}}",
+            ].joined(separator: "|"),
+            context: [
+                "disabled": " false ",
+                "disabledZero": "0",
+                "disabledNo": "NO",
+                "emptyText": "",
+                "emptyItems": .list([]),
+            ],
+        )
+
+        #expect(html == "missing|disabled|zero|no|empty text|empty items")
+    }
+
+    @Test("skips inverted sections when truthy")
+    func skipsInvertedSectionsWhenTruthy() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: [
+                "{{^enabled}}enabled{{/enabled}}",
+                "{{^items}}items{{/items}}",
+                "{{^metadata}}metadata{{/metadata}}",
+            ].joined(separator: "|"),
+            context: [
+                "enabled": "true",
+                "items": .list([["title": "Post"]]),
+                "metadata": .object(["title": "Home"]),
+            ],
+        )
+
+        #expect(html == "||")
+    }
+
+    @Test("renders nested and mixed sections")
+    func rendersNestedAndMixedSections() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: """
+            {{#groups}}{{^items}}empty:{{name}};{{/items}}{{#items}}{{name}}={{label}};{{/items}}{{/groups}}
+            {{^missing}}outer {{^missing}}inner{{/missing}} end{{/missing}}
+            """,
+            context: [
+                "groups": .list(
+                    [
+                        [
+                            "name": "A",
+                            "items": .list([]),
+                        ],
+                        [
+                            "name": "B",
+                            "items": .list([["label": "One"]]),
+                        ],
+                    ],
+                ),
+            ],
+        )
+
+        #expect(html == "empty:A;B=One;\nouter inner end")
+    }
+
     @Test(
         "string section truthiness folds case and trims whitespace",
         arguments: [
