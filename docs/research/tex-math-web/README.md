@@ -13,6 +13,14 @@ see [`references/PROVENANCE.md`](references/PROVENANCE.md) for licenses.
 
 ## Decisions (locked 2026-06-02)
 
+- **Integration: a Markdown rendering capability, not a tile.** Math is static,
+  so it lives in the prose / Markdown-to-HTML pipeline (inline `$...$`, display
+  `$$...$$`), rendered as ordinary Markdown. It is **not** a `:::tile`. Tiles are
+  reserved for **interactive** output; a tile wrapper can be added later only if
+  something interactive (e.g. an equation editor) is ever wanted. Existing tiles
+  (chart, mermaid, embed) are left exactly as they are. This work only **expands
+  Markdown capabilities**. The same principle applies going forward: static
+  charts/graphs belong in Markdown too; the tile system is for interactivity.
 - **Reuse: shared SPM package.** Extract the math core into a standalone,
   dependency-free Swift package that both `MarkdownPDF` and Tiledown depend on,
   rather than copying it. This is the "abstract at the second real consumer"
@@ -180,26 +188,27 @@ font dependency.
 
 The format requirement is delimiter parity, not engine parity:
 
+Both surfaces are **Markdown capabilities**, integrated into the prose pipeline.
+Neither is a tile (see Decisions).
+
 | Construct | Syntax | MarkdownPDF | Tiledown surface |
 |---|---|---|---|
 | Inline math | `$ ... $` | inline parser, woven into prose | **new inline extension** over swift-markdown prose |
-| Display math | `$$ ... $$` (one line or fenced across lines) | block parser | block-level, in source order |
+| Display math | `$$ ... $$` (one line or fenced across lines) | block parser | **new block extension**, recognized in source order before prose handoff |
 
-Two real wrinkles for Tiledown specifically:
+The integration points:
 
-1. **Inline `$...$` is a prose-level concern, not a `:::tile` directive.** It
-   appears *inside* paragraphs, so it cannot be a directive block. Tiledown parses
-   prose with swift-markdown, which has no `$...$` concept. This needs a custom
-   inline scan over text runs that extracts `$...$` (honoring code spans and
-   escaped `\$`) and replaces it with rendered math, the same role MarkdownPDF's
-   `InlineParser.parseInlineMath()` plays. This is the larger piece of work.
+1. **Inline `$...$`** appears *inside* paragraphs. swift-markdown has no `$...$`
+   concept, so this needs a custom inline scan over text runs that extracts
+   `$...$` (honoring code spans and escaped `\$`) and replaces it with rendered
+   math, the same role MarkdownPDF's `InlineParser.parseInlineMath()` plays. This
+   is the larger piece of work.
 
-2. **Display math has two candidate spellings.** Either keep `$$...$$` parity
-   (a block-level math extension recognized before prose), or also accept a
-   `:::tile formula` directive for an explicitly-typed, attribute-bearing block
-   (e.g. a numbered/labelled equation). These are not exclusive: `$$...$$` for
-   author ergonomics, `:::tile formula` when the tile model wants the equation as
-   a first-class addressable node. Decide during epic breakdown.
+2. **Display `$$...$$`** is recognized as a block before prose is handed to the
+   CommonMark renderer (the same extract-first approach the directive parser
+   already uses for `:::tile`), then rendered inline in source order. Spelling is
+   `$$...$$` for MarkdownPDF parity; there is no `:::tile formula` (a tile would
+   only be justified by interactivity, which static math does not have).
 
 Escape-by-default still applies: the TeX source is escaped into the output
 container; we render structure, never pass raw author HTML through.
@@ -221,13 +230,13 @@ linked; licenses in [`PROVENANCE.md`](references/PROVENANCE.md)):
 
 ## 8. Open decisions (for the epic)
 
-Resolved (see Decisions at top): reuse path (shared package), shared boundary
-(neutral `MathBox`), web output (SVG-outlines + hidden MathML). Still open:
+Resolved (see Decisions at top): integration (Markdown capability, not a tile),
+reuse path (shared package), shared boundary (neutral `MathBox`), web output
+(SVG-outlines + hidden MathML), display spelling (`$$...$$`, no tile). Still open:
 
 - Font story: ship Latin Modern Math / Computer Modern web subset for the
   `<text>` step; whether embedded outlines also come from that font's `glyf`/`CFF`
   or a separate subset.
-- Display spelling: `$$...$$` only, `:::tile formula` only, or both.
 - Scope of the TeX subset for v1 (match MarkdownPDF's, or trim/extend).
 - The new shared package's name, repo home, and ownership across the two
   products.
