@@ -11,6 +11,32 @@ This doc records what actually does the work under every web math renderer, why
 vendored as reference. The vendored source lives in [`references/`](references/);
 see [`references/PROVENANCE.md`](references/PROVENANCE.md) for licenses.
 
+## Decisions (locked 2026-06-02)
+
+- **Reuse: shared SPM package.** Extract the math core into a standalone,
+  dependency-free Swift package that both `MarkdownPDF` and Tiledown depend on,
+  rather than copying it. This is the "abstract at the second real consumer"
+  rule landing: Tiledown is the second consumer.
+- **Shared boundary: parse to a neutral box model.** The package owns
+  `parse -> layout -> MathBox`, where a `MathBox` is pure geometry: positioned
+  runs (`{ text, font, size, color, baselineOffset }`) and rules (rectangles).
+  **Emitters stay per-consumer**: MarkdownPDF keeps its PDF emitter, Tiledown
+  adds the web emitters. The only coupling to break in MarkdownPDF is the run
+  type inside `MarkdownMathLayoutElement` (today `PDFTextRun`); it becomes a
+  neutral run, with a thin `MathRun -> PDFTextRun` adapter on the PDF side. The
+  layout algorithm is unchanged.
+- **MarkdownPDF must not regress.** Its `math-formulas.md` witness corpus plus
+  `MarkdownMathParserTests`/`MarkdownMathLayoutTests` are the gate; held green at
+  every extraction step. Extract leaves first (AST, metrics: zero coupling),
+  then layout with the neutral run + adapter.
+- **Web output: SVG with embedded glyph outlines, plus hidden MathML for a11y.**
+  Reasoned from first principles in section 5. SVG-with-outlines is the only form
+  that simultaneously keeps the layout ours, renders identically on every
+  browser, and needs zero runtime dependency. MathML is emitted alongside as a
+  screen-reader layer, never as the visual render (it would hand layout back to
+  the browser). Build order: SVG `<text>` + one bundled OFL math font first
+  (fastest correct render), then swap to embedded outlines to drop the font.
+
 ## 1. The one algorithm everyone reimplements
 
 There is no canonical C "math layout library" to bind to. Math typesetting is an
@@ -141,10 +167,14 @@ radicals via glyph assemblies. Layers on top of A; not a separate path.
 large client-side dependency the brief explicitly refuses, and it puts layout in
 JS rather than Swift.
 
-**Recommendation:** A as the renderer, with B emitted alongside for
-accessibility and as a graceful path, C as a fidelity upgrade once the box model
-is in. This reuses MarkdownPDF's engine, matches the chart-tile precedent, ships
-no large dependency, and keeps the math layout in Swift, on the metal.
+**Decision (see top of doc):** A as the renderer, specifically **SVG with
+embedded glyph outlines** (the self-contained form: layout ours, identical
+everywhere, zero runtime dependency), with B's MathML emitted **hidden, for
+accessibility only** (never as the visual render, since that hands layout to the
+browser), and C as a fidelity upgrade once the box model is in. The engine is
+shared via an extracted package, not ported in place. Build order: SVG `<text>`
++ one bundled OFL math font first, then swap to embedded outlines to drop the
+font dependency.
 
 ## 6. Authoring format: parity with MarkdownPDF
 
@@ -191,14 +221,16 @@ linked; licenses in [`PROVENANCE.md`](references/PROVENANCE.md)):
 
 ## 8. Open decisions (for the epic)
 
-- Renderer: confirm A (SVG) primary + B (MathML) companion; defer C.
-- Font story: ship Latin Modern Math / Computer Modern web subset, generate our
-  own metric table (`extract_tfms.py` recipe), or read an OpenType MATH font at
-  build time.
+Resolved (see Decisions at top): reuse path (shared package), shared boundary
+(neutral `MathBox`), web output (SVG-outlines + hidden MathML). Still open:
+
+- Font story: ship Latin Modern Math / Computer Modern web subset for the
+  `<text>` step; whether embedded outlines also come from that font's `glyf`/`CFF`
+  or a separate subset.
 - Display spelling: `$$...$$` only, `:::tile formula` only, or both.
 - Scope of the TeX subset for v1 (match MarkdownPDF's, or trim/extend).
-- Reuse path: extract MarkdownPDF's math engine into a shared package vs.
-  re-port into TileKit (MarkdownPDF is a separate repo/product).
+- The new shared package's name, repo home, and ownership across the two
+  products.
 
 ## Sources
 
