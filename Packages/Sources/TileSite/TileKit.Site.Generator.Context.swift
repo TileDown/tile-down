@@ -258,7 +258,9 @@ extension TileKit.Site.Generator {
                 )
             },
         )
-        let listsPosts = !(page.document.frontMatter["postList"] ?? "").isEmpty
+        let listsPosts = TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(
+            page.document.frontMatter["postList"],
+        )
         let filtersByTags = !TileKit.Site.Tags.filterSlugs(of: page).isEmpty
         context["hasPosts"] = .string(posts.isEmpty ? "" : "true")
         context["emptyPosts"] = .string(posts.isEmpty && listsPosts && filtersByTags ? "true" : "")

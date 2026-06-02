@@ -56,6 +56,59 @@ struct SimpleMustacheRendererTests {
         #expect(html == "<a href=\"/\">Home</a><a href=\"/blog/\">Blog &lt;News&gt;</a>")
     }
 
+    @Test("renders string sections only when truthy")
+    func rendersStringSectionsOnlyWhenTruthy() throws {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        let html = try renderer.render(
+            template: [
+                "{{#enabled}}enabled{{/enabled}}",
+                "{{#disabledFalse}}false{{/disabledFalse}}",
+                "{{#disabledZero}}zero{{/disabledZero}}",
+                "{{#disabledNo}}no{{/disabledNo}}",
+                "{{#disabledEmpty}}empty{{/disabledEmpty}}",
+            ].joined(separator: "|"),
+            context: [
+                "enabled": "true",
+                "disabledFalse": "false",
+                "disabledZero": "0",
+                "disabledNo": "no",
+                "disabledEmpty": "",
+            ],
+        )
+
+        #expect(html == "enabled||||")
+    }
+
+    @Test(
+        "string section truthiness folds case and trims whitespace",
+        arguments: [
+            ("true", true),
+            ("yes", true),
+            ("1", true),
+            ("  hello  ", true),
+            ("FALSE", false),
+            ("False", false),
+            (" false ", false),
+            ("NO", false),
+            ("No", false),
+            ("0", false),
+            (" 0 ", false),
+            ("", false),
+            ("   ", false),
+        ] as [(value: String, expected: Bool)],
+    )
+    func stringSectionTruthinessEdgeCases(_ testCase: (value: String, expected: Bool)) {
+        #expect(
+            TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(testCase.value) == testCase.expected,
+        )
+    }
+
+    @Test("absent string section is falsey")
+    func absentStringSectionIsFalsey() {
+        #expect(!TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(nil))
+    }
+
     @Test("renders nested object values")
     func rendersNestedObjectValues() throws {
         let renderer = TileKit.Template.SimpleMustacheRenderer()
