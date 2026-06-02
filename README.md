@@ -48,14 +48,15 @@ The architecture and the planned road are real and written down:
 The public issue tracker is organized into epics. These diagrams include every
 open public issue as of June 1, 2026.
 
-Status key:
+Status key. The roadmap status colors move with the work: open issue, active
+branch, review PR, then merged.
 
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
   Review["PR in review"]:::review
   Epic["Epic grouping"]:::epic
-  Todo["Open issue"]:::todo
+  Todo["Open issue, no PR"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
@@ -97,8 +98,6 @@ flowchart LR
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -112,8 +111,6 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -149,8 +146,6 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -163,8 +158,6 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -180,8 +173,6 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -195,8 +186,6 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -303,6 +292,12 @@ omitted, the generated page keeps the plain single-image markup.
 When `baseURL` is set, root-relative generated `src` and `href` values such as
 `/assets/demo-light.png` are prefixed with that base URL. Authored relative URLs
 such as `assets/demo-light.png` remain relative.
+
+Built-in layouts also use page front matter and site configuration for head
+metadata. Set `description` for the description, Open Graph, and Twitter
+description tags. Set `baseURL` for canonical URLs, Open Graph URLs, and
+absolute social preview images. Dated posts under the posts directory emit
+article metadata.
 
 Or pass a custom template explicitly:
 
