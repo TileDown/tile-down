@@ -27,11 +27,12 @@ Markdown is real CommonMark via
 [swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
-write an RSS feed from the shared post collection.
+write an RSS feed from the shared post collection. The CLI also has a local
+preview server through `tiledown serve`.
 
 Still missing before it is a usable static site generator: project scaffolding
-(`tiledown init`), a dev server and watch mode, named tile types (`youtube-video`,
-`poll`, and the rest), and a full asset pipeline
+(`tiledown init`), watch mode, named tile types (`youtube-video`, `poll`, and the
+rest), and a full asset pipeline
 (transforms, minification). The internals for typed tiles and a service-backed
 form exist and are tested, but only the service-form tile is wired in; the rest
 are not yet a usable authoring workflow.
@@ -46,7 +47,7 @@ The architecture and the planned road are real and written down:
 ## Roadmap
 
 The public issue tracker is organized into epics. These diagrams include every
-open public issue as of June 1, 2026.
+open public issue as of June 2, 2026.
 
 Status key. The roadmap status colors move with the work: open issue, active
 branch, review PR, then merged.
@@ -158,10 +159,11 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#84 Local author workflow and verification"]:::epic
-  Epic --> Serve["#33 tiledown serve"]:::todo
+  Epic --> Serve["#33 tiledown serve"]:::review
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
@@ -229,6 +231,15 @@ written once for the whole site):
 ```sh
 swift run tiledown build-site content/ dist/
 ```
+
+Build and preview a content directory on localhost:
+
+```sh
+swift run tiledown serve --port 8765 content/
+```
+
+`serve` writes to a sibling `.tiledown/serve/` directory by default. Pass
+`--output dist/` when you want a stable preview output path.
 
 Add `content/tiledown.yml` to select site settings:
 

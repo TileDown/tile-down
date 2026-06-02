@@ -1,8 +1,14 @@
 import Foundation
 import Testing
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 @Suite("tiledown CLI")
-struct TiledownCLITests {
+struct TiledownCLITests {}
+
+extension TiledownCLITests {
     @Test("build-site without a template writes a styled top-nav site")
     func buildSiteWithBuiltInLayoutAndTheme() throws {
         let fixture = try makeContentFixture()
@@ -75,6 +81,42 @@ struct TiledownCLITests {
         #expect(home.contains(#"<a href="https://example.com/feed.xml">RSS</a>"#))
         #expect(css.contains("--td-bg: #f5f5f7;"))
         #expect(feed.contains("<title>Configured Feed</title>"))
+    }
+
+    @Test("serve builds a site and serves it over localhost")
+    func serveBuildsAndServesSite() async throws {
+        let fixture = try makeContentFixture()
+        defer {
+            try? FileManager.default.removeItem(at: fixture.root)
+        }
+
+        let port = Int.random(in: 20000 ... 50000)
+        let process = try runTiledownProcess(
+            arguments: [
+                "serve",
+                "--port",
+                "\(port)",
+                "--output",
+                fixture.output.path,
+                fixture.content.path,
+            ],
+        )
+        defer {
+            terminateServeProcess(process)
+        }
+
+        let result = try await fetchWithRetry(
+            #require(URL(string: "http://127.0.0.1:\(port)/")),
+            process: process,
+        )
+
+        #expect(result.status == 200)
+        #expect(result.body.contains("<h1>Home</h1>"))
+        #expect(
+            FileManager.default.fileExists(
+                atPath: fixture.output.appendingPathComponent("index.html").path,
+            ),
+        )
     }
 
     private func makeContentFixture() throws -> ContentFixture {
@@ -194,19 +236,12 @@ struct TiledownCLITests {
         arguments: [String],
         currentDirectory: URL? = nil,
     ) throws -> ProcessResult {
-        let process = Process()
-        process.executableURL = try tiledownExecutable()
-        process.arguments = arguments
-        if let currentDirectory {
-            process.currentDirectoryURL = currentDirectory
-        }
-
-        let stdout = Pipe()
-        let stderr = Pipe()
-        process.standardOutput = stdout
-        process.standardError = stderr
-
-        try process.run()
+        let process = try runTiledownProcess(
+            arguments: arguments,
+            currentDirectory: currentDirectory,
+        )
+        let stdout = try #require(process.standardOutput as? Pipe)
+        let stderr = try #require(process.standardError as? Pipe)
         process.waitUntilExit()
 
         return .init(
@@ -220,6 +255,59 @@ struct TiledownCLITests {
                 encoding: .utf8,
             ) ?? "",
         )
+    }
+
+    private func runTiledownProcess(
+        arguments: [String],
+        currentDirectory: URL? = nil,
+    ) throws -> Process {
+        let process = Process()
+        process.executableURL = try tiledownExecutable()
+        process.arguments = arguments
+        if let currentDirectory {
+            process.currentDirectoryURL = currentDirectory
+        }
+
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+
+        try process.run()
+        return process
+    }
+
+    private func fetchWithRetry(
+        _ url: URL,
+        process: Process,
+    ) async throws -> HTTPFetchResult {
+        var lastError: Error?
+        for _ in 0 ..< 50 {
+            do {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                let httpResponse = try #require(response as? HTTPURLResponse)
+                return .init(
+                    status: httpResponse.statusCode,
+                    body: String(data: data, encoding: .utf8) ?? "",
+                )
+            } catch {
+                lastError = error
+                if !process.isRunning {
+                    let stderr = (process.standardError as? Pipe)?
+                        .fileHandleForReading
+                        .readDataToEndOfFile()
+                    let message = stderr
+                        .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+                    Issue.record("serve exited early: \(message)")
+                    break
+                }
+                try await Task.sleep(nanoseconds: 100_000_000)
+            }
+        }
+        throw try #require(lastError)
+    }
+
+    private struct HTTPFetchResult: Equatable {
+        var status: Int
+        var body: String
     }
 
     private func tiledownExecutable() throws -> URL {

@@ -12,11 +12,13 @@ and facade targets are the exceptions.
 | `TileService` | `Foundation`, `TileCore` | matches |
 | `TileServiceForm` | `Foundation`, `TileCore`, `TileService`, `TileTile` | matches |
 | `TileServiceImpl` | `Foundation`, `TileCore`, `TileService` | matches |
+| `TileServe` | `Foundation`, `TileCore` | matches |
+| `TileServeImpl` | `Darwin` or `Glibc`, `Foundation`, `TileCore`, `TileServe` | matches |
 | `TileSource` | `Foundation`, `TileCore` | matches |
 | `TileTemplate` | `Foundation`, `TileCore` | matches |
 | `TileTile` | `Foundation`, `TileCore` | matches |
 | `TileOutput` | `Foundation`, `TileCore`, `TileMarkdown`, `TileTile` | matches |
 | `TileSite` | `Foundation`, `TileCore`, `TileMarkdown`, `TileOutput`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TileSiteImpl` | `Foundation`, `TileCore`, `TileSite` | matches |
-| `TileKit` | re-exports `TileCore`, `TileContent`, `TileMarkdown`, `TileOutput`, `TileService`, `TileServiceForm`, `TileServiceImpl`, `TileSite`, `TileSiteImpl`, `TileSource`, `TileTemplate`, `TileTile` | matches |
+| `TileKit` | re-exports `TileCore`, `TileContent`, `TileMarkdown`, `TileOutput`, `TileService`, `TileServiceForm`, `TileServiceImpl`, `TileServe`, `TileServeImpl`, `TileSite`, `TileSiteImpl`, `TileSource`, `TileTemplate`, `TileTile` | matches |
 | `TiledownCLI` | `Foundation`, `TileKit` | matches |

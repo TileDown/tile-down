@@ -220,7 +220,7 @@ Not implemented yet:
 | Service loading | remote service contract resolver, health checks, availability policy execution, and manifest caching |
 | Built-in tile wiring | default registration for `youtube-video`, `poll`, comments, email response, and charts (`service-form` is registered; the rest are not) |
 | Assets | asset declarations, deduplication, copying, transforms, and site-level asset behavior registry |
-| CLI workflow | `init`, `serve`, `watch`, and proxy support |
+| CLI workflow | `init`, `watch`, and proxy support; static localhost `serve` exists |
 
 Registries are values passed into the generator:
 
@@ -1107,7 +1107,7 @@ Start small:
 
 Defer:
 
-- Hummingbird until `serve` or proxy support is implemented.
+- Hummingbird until proxy support or a richer server slice needs a framework.
 - file watching until `watch`.
 - Sass and CSS parser until asset behavior tests require them.
 - AsyncHTTPClient until service manifests or build-mode functions need HTTP.

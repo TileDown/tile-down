@@ -26,9 +26,10 @@ Swift-only; this is test tooling that never ships in the product.
 Packages/Tests/Browser/run.sh
 ```
 
-`run.sh` builds the fixture site twice (normal and `--drafts`), serves both,
-runs `test_site.py`, and tears everything down. Exit code is 0 only if every
-check passes.
+`run.sh` builds the fixture variants, serves the normal, `--drafts`, and system
+theme variants through `tiledown serve`, serves the baseURL subpath fixture from
+its parent directory, runs `test_site.py`, and tears everything down. Exit code is
+0 only if every check passes.
 
 This browser gate is part of the full local stack:
 
@@ -43,7 +44,7 @@ narrow local iteration where browser coverage is intentionally deferred.
 
 ## Prerequisites
 
-- A Swift toolchain (the script builds `tiledown` via `swift run`).
+- A Swift toolchain (the script builds `tiledown` before serving fixtures).
 - Python Playwright and a Chromium:
   ```sh
   pip install playwright && playwright install chromium
