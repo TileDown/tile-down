@@ -141,6 +141,9 @@ extension SiteGeneratorTests {
         // A dark/light theme toggle and the no-flash script that wires it.
         #expect(home.contains(#"data-td-theme-toggle"#))
         #expect(home.contains("localStorage.getItem('td-theme')"))
+        #expect(home.contains("root.removeAttribute('data-theme')"))
+        #expect(home.contains("window.addEventListener('pageshow', applyStoredTheme)"))
+        #expect(home.contains("window.addEventListener('storage', function (event)"))
     }
 
     @Test("built-in layouts apply baseURL to home and section links")
@@ -201,6 +204,10 @@ extension SiteGeneratorTests {
         #expect(home.contains(#"<nav class="td-sidebar-nav"><a class="td-nav-link" href="/about/">About</a></nav>"#))
         #expect(home.contains(#"<div class="td-content">"#))
         #expect(home.contains(#"<main class="td-main"><h1>Welcome</h1>"#))
+        #expect(home.contains(#"data-td-theme-toggle"#))
+        #expect(home.contains("root.removeAttribute('data-theme')"))
+        #expect(home.contains("window.addEventListener('pageshow', applyStoredTheme)"))
+        #expect(home.contains("window.addEventListener('storage', function (event)"))
     }
 }
 

@@ -12,7 +12,7 @@ public extension TileKit.Site {
         private let markdownParser: any TileKit.Source.MarkdownParsing
         private let tileParser: any TileKit.Tile.Parsing
         private let htmlRenderer: any TileKit.Output.Rendering
-        private let templateRenderer: any TileKit.Template.Rendering
+        let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
         let imageChecker: any ImageChecking
 
@@ -37,10 +37,14 @@ public extension TileKit.Site {
         public func build(
             _ request: BuildRequest,
         ) throws -> BuildResult {
-            let page = try loadPage(
+            var page = try loadPage(
                 sourcePath: request.sourcePath,
                 outputPath: request.outputPath,
                 slug: "",
+            )
+            page.html = rewriteRootRelativeURLs(
+                in: page.html,
+                baseURL: request.configuration.baseURL,
             )
             let template = try fileSystem.readTextFile(at: request.templatePath)
             let output = try render(
@@ -62,10 +66,10 @@ public extension TileKit.Site {
         public func buildContent(
             _ request: ContentBuildRequest,
         ) throws -> ContentBuildResult {
-            let contentPages = try applyingPostsLabel(
-                to: loadPages(request),
-                configuration: request.configuration,
-            )
+            let source = try sourcePages(request)
+            let contentPages = source.contentPages
+            let redirectPages = source.redirectPages
+            let notFoundPage = source.notFoundPage
             let posts = TileKit.Site.PostCollection(
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
@@ -78,7 +82,7 @@ public extension TileKit.Site {
 
             var outputPaths: [String] = []
             let stylesheetPath = try writeSharedStylesheet(
-                pages: pages,
+                pages: pages + [notFoundPage],
                 outputRootPath: request.outputRootPath,
                 configuration: request.configuration,
                 outputPaths: &outputPaths,
@@ -89,41 +93,37 @@ public extension TileKit.Site {
                 configuration: request.configuration,
                 outputPaths: &outputPaths,
             )
+            try writeSitemap(
+                pages: pages,
+                request: request,
+                outputPaths: &outputPaths,
+            )
             let sitePaths = TileKit.Site.GeneratedSitePaths(
                 stylesheetPath: stylesheetPath,
                 feedPath: feedPath,
             )
 
-            for page in pages {
-                let output = try render(
-                    page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: request.configuration,
-                    sitePaths: sitePaths,
-                )
-                try fileSystem.writeTextFile(
-                    output,
-                    at: page.outputPath,
-                )
-                outputPaths.append(page.outputPath)
-            }
-
-            outputPaths += try outboundShims(request: request)
-            try copyAssets(
+            let finalOutputPaths = try writeFinalOutputs(.init(
+                pages: pages,
+                notFoundPage: notFoundPage,
+                redirectPages: redirectPages,
+                template: template,
                 request: request,
-                generated: Set(outputPaths),
-                outputPaths: &outputPaths,
-            )
-
-            return .init(outputPaths: outputPaths)
+                sitePaths: sitePaths,
+                initialOutputPaths: outputPaths,
+                notFoundAssetDirectory: source.notFoundAssetDirectory,
+            ))
+            return .init(outputPaths: finalOutputPaths)
         }
     }
 }
 
-private extension TileKit.Site.Generator {
-    static let sharedStylesheetFileName = "styles.css"
+extension TileKit.Site.Generator {
+    static let notFoundSlug = "404"
+    static let notFoundFileName = "404.html"
+}
 
+private extension TileKit.Site.Generator {
     func loadPages(
         _ request: TileKit.Site.ContentBuildRequest,
     ) throws -> [TileKit.Site.Page] {
@@ -154,6 +154,36 @@ private extension TileKit.Site.Generator {
         return pages
     }
 
+    private func sourcePages(
+        _ request: TileKit.Site.ContentBuildRequest,
+    ) throws -> SourcePages {
+        let loadedPages = try loadPages(request)
+        let sourceNotFoundPage = loadedPages.first(where: isNotFoundPage)
+        let notFoundPage = try notFoundPage(
+            from: sourceNotFoundPage,
+            outputRootPath: request.outputRootPath,
+        )
+        let notFoundAssetDirectory = sourceNotFoundPage.flatMap { page in
+            sourceRelativeDirectory(
+                sourcePath: page.sourcePath,
+                contentRootPath: request.contentRootPath,
+            )
+        }
+        let contentPages = applyingPostsLabel(
+            to: loadedPages.filter { page in
+                !isNotFoundPage(page) && !isRedirect(page)
+            },
+            configuration: request.configuration,
+        )
+        let redirectPages = loadedPages.filter(isRedirect)
+        return SourcePages(
+            contentPages: contentPages,
+            redirectPages: redirectPages,
+            notFoundPage: notFoundPage,
+            notFoundAssetDirectory: notFoundAssetDirectory,
+        )
+    }
+
     /// Applies the configured `postsLabel` to the posts landing page (the page
     /// whose slug is the posts directory), overriding its `title` so navigation
     /// and its heading read the chosen label. An empty label leaves pages as is.
@@ -166,25 +196,14 @@ private extension TileKit.Site.Generator {
             return pages
         }
         return pages.map { page in
-            guard page.slug == configuration.postsDirectory else {
+            guard page.slug == configuration.postsDirectory
+                || page.sourceSlug == configuration.postsDirectory
+            else {
                 return page
             }
             var page = page
             page.document.frontMatter["title"] = label
             return page
-        }
-    }
-
-    /// Whether a page is a draft, from a truthy `draft` front-matter value.
-    /// Unset or any non-truthy value publishes as normal.
-    func isDraft(
-        _ page: TileKit.Site.Page,
-    ) -> Bool {
-        switch page.document.frontMatter["draft"]?.lowercased() {
-        case "true", "yes":
-            true
-        default:
-            false
         }
     }
 
@@ -199,80 +218,56 @@ private extension TileKit.Site.Generator {
         }
     }
 
-    /// Merges every page's CSS into one site stylesheet, writes it to the output
-    /// root, records it in `outputPaths`, and returns the URL to link it from
-    /// each page. Returns "" and writes nothing when no page has any CSS, so a
-    /// site without styled tiles emits no stray stylesheet.
-    func writeSharedStylesheet(
-        pages: [TileKit.Site.Page],
+    private func notFoundPage(
+        from sourcePage: TileKit.Site.Page?,
         outputRootPath: String,
-        configuration: TileKit.Site.Configuration,
-        outputPaths: inout [String],
-    ) throws -> String {
-        let tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
-            result.merging(page.stylesheet)
-        }
-        let css = Self.composeStylesheet(
-            theme: configuration.theme,
-            tiles: tiles,
-            fontScale: configuration.fontScale,
-        )
-        guard !css.isEmpty else {
-            return ""
-        }
-
-        let outputPath = join(outputRootPath, Self.sharedStylesheetFileName)
-        try fileSystem.writeTextFile(
-            css,
-            at: outputPath,
-        )
-        outputPaths.append(outputPath)
-        return stylesheetURL(
-            baseURL: configuration.baseURL,
-            fileName: Self.sharedStylesheetFileName,
-        )
+    ) throws -> TileKit.Site.Page {
+        var page = try sourcePage ?? defaultNotFoundPage(outputRootPath: outputRootPath)
+        page.slug = Self.notFoundSlug
+        page.outputPath = join(outputRootPath, Self.notFoundFileName)
+        return page
     }
 
-    private func writeFeed(
-        pages: [TileKit.Site.Page],
+    private func defaultNotFoundPage(
         outputRootPath: String,
-        configuration: TileKit.Site.Configuration,
-        outputPaths: inout [String],
-    ) throws -> String {
-        guard let feed = configuration.feed else {
-            return ""
-        }
+    ) throws -> TileKit.Site.Page {
+        try makePage(
+            sourcePath: "",
+            outputPath: join(outputRootPath, Self.notFoundFileName),
+            sourceSlug: Self.notFoundSlug,
+            slug: Self.notFoundSlug,
+            document: .init(
+                frontMatter: [
+                    "title": "Page not found",
+                ],
+                body: """
+                # Page not found
 
-        let feedFilePath = try outputFilePath(feed.path)
-        let outputPath = join(outputRootPath, feedFilePath)
-        try fileSystem.writeTextFile(
-            TileKit.Site.FeedRenderer().render(
-                feed: feed,
-                siteTitle: siteTitle(
-                    configuration: configuration,
-                    pages: pages,
-                ),
-                baseURL: configuration.baseURL,
-                pages: pages,
-                postsDirectory: configuration.postsDirectory,
+                The page you requested could not be found.
+                """,
             ),
-            at: outputPath,
-        )
-        outputPaths.append(outputPath)
-        return stylesheetURL(
-            baseURL: configuration.baseURL,
-            fileName: feedFilePath,
         )
     }
 
-    private func stylesheetURL(
-        baseURL: String,
-        fileName: String,
-    ) -> String {
-        guard !baseURL.isEmpty else {
-            return "/" + fileName
+    private func isNotFoundPage(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        page.slug == Self.notFoundSlug
+    }
+
+    private func sourceRelativeDirectory(
+        sourcePath: String,
+        contentRootPath: String,
+    ) -> String? {
+        let prefix = contentRootPath.hasSuffix("/") ? contentRootPath : contentRootPath + "/"
+        guard sourcePath.hasPrefix(prefix) else {
+            return nil
         }
-        return baseURL.hasSuffix("/") ? baseURL + fileName : baseURL + "/" + fileName
+        let relativePath = String(sourcePath.dropFirst(prefix.count))
+        guard let lastSeparator = relativePath.lastIndex(of: "/") else {
+            return ""
+        }
+        return String(relativePath[..<lastSeparator])
     }
 
     /// Loads a single page at a fixed slug and output path, for the single-file
@@ -289,6 +284,7 @@ private extension TileKit.Site.Generator {
         return try makePage(
             sourcePath: sourcePath,
             outputPath: outputPath,
+            sourceSlug: slug,
             slug: slug,
             document: document,
         )
@@ -304,16 +300,28 @@ private extension TileKit.Site.Generator {
         let document = try markdownParser.parse(
             fileSystem.readTextFile(at: sourcePath),
         )
-        let slug = effectiveSlug(
+        let slug = try effectiveSlug(
             folderSlug: folderSlug,
             frontMatter: document.frontMatter,
         )
+        let resolvedOutputPath = outputPath(
+            outputRootPath: outputRootPath,
+            slug: slug,
+        )
+        guard !isRedirect(frontMatter: document.frontMatter) else {
+            return .init(
+                sourcePath: sourcePath,
+                outputPath: resolvedOutputPath,
+                sourceSlug: folderSlug,
+                slug: slug,
+                document: document,
+                html: "",
+            )
+        }
         return try makePage(
             sourcePath: sourcePath,
-            outputPath: outputPath(
-                outputRootPath: outputRootPath,
-                slug: slug,
-            ),
+            outputPath: resolvedOutputPath,
+            sourceSlug: folderSlug,
             slug: slug,
             document: document,
         )
@@ -324,6 +332,7 @@ private extension TileKit.Site.Generator {
     private func makePage(
         sourcePath: String,
         outputPath: String,
+        sourceSlug: String,
         slug: String,
         document: TileKit.Source.Document,
     ) throws -> TileKit.Site.Page {
@@ -338,29 +347,12 @@ private extension TileKit.Site.Generator {
         return .init(
             sourcePath: sourcePath,
             outputPath: outputPath,
+            sourceSlug: sourceSlug,
             slug: slug,
             document: document,
             html: artifact.contents,
             stylesheet: artifact.assets.stylesheet,
             javascript: artifact.assets.javascript,
-        )
-    }
-
-    private func render(
-        page: TileKit.Site.Page,
-        pages: [TileKit.Site.Page],
-        template: String,
-        configuration: TileKit.Site.Configuration,
-        sitePaths: TileKit.Site.GeneratedSitePaths,
-    ) throws -> String {
-        try templateRenderer.render(
-            template: template,
-            context: context(
-                page: page,
-                pages: pages,
-                configuration: configuration,
-                sitePaths: sitePaths,
-            ),
         )
     }
 
@@ -370,23 +362,5 @@ private extension TileKit.Site.Generator {
     ) -> String {
         let path = slug.isEmpty ? "index.html" : slug + "/index.html"
         return join(outputRootPath, path)
-    }
-
-    private func outputFilePath(
-        _ path: String,
-    ) throws -> String {
-        var result = path
-        while result.hasPrefix("/") {
-            result.removeFirst()
-        }
-        guard !result.isEmpty else {
-            return "feed.xml"
-        }
-
-        let components = result.split(separator: "/", omittingEmptySubsequences: false)
-        guard components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
-            throw TileKit.Site.ConfigurationFileError.invalidPath(path)
-        }
-        return result
     }
 }

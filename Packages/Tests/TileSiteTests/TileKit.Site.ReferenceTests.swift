@@ -41,6 +41,85 @@ struct ReferenceTests {
         #expect(!home.contains("tag:"))
     }
 
+    @Test("post references resolve through source slug to migrated canonical URL")
+    func migratedPostReferenceResolves() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\nRead [legacy](post:legacy).",
+                "content/writings/legacy/index.md": """
+                ---
+                title: Legacy Post
+                date: 2026-05-20
+                slug: blog/legacy
+                ---
+                # Legacy Post
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(
+                    baseURL: "https://example.com",
+                    theme: nil,
+                    postsDirectory: "writings",
+                ),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<a href="https://example.com/blog/legacy/">legacy</a>"#))
+    }
+
+    @Test("canonical page references win over migrated source slug aliases")
+    func canonicalPageReferenceWinsOverSourceAlias() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": [
+                    "---\ntitle: Home\n---\n",
+                    "Read [canonical](page:writings/legacy) and [post](post:legacy).",
+                ].joined(),
+                "content/pages/canonical/index.md": """
+                ---
+                title: Canonical Page
+                slug: writings/legacy
+                ---
+                # Canonical Page
+                """,
+                "content/writings/legacy/index.md": """
+                ---
+                title: Legacy Post
+                date: 2026-05-20
+                slug: blog/legacy
+                ---
+                # Legacy Post
+                """,
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(
+                    baseURL: "https://example.com",
+                    theme: nil,
+                    postsDirectory: "writings",
+                ),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<a href="https://example.com/writings/legacy/">canonical</a>"#))
+        #expect(home.contains(#"<a href="https://example.com/blog/legacy/">post</a>"#))
+    }
+
     @Test("a social reference resolves to the configured external URL")
     func socialReferenceResolves() throws {
         let fileSystem = MemoryFileSystem(

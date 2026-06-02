@@ -127,4 +127,89 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("shareLinks: sometimes")
         }
     }
+
+    @Test("parses 404 fallback redirect rules")
+    func parsesNotFoundRedirects() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            notFoundRedirect.exact./cvbuilder: /blog/c-v-builder/
+            notFoundRedirect.exact./external: https://codeweaver.info/
+            notFoundRedirect.prefix./tag/: /
+            """,
+        )
+
+        #expect(
+            try file.configuration.notFoundRedirects.exact == [
+                .init(source: "/cvbuilder", target: "/blog/c-v-builder/"),
+                .init(source: "/external", target: "https://codeweaver.info/"),
+            ],
+        )
+        #expect(
+            try file.configuration.notFoundRedirects.prefixes == [
+                .init(source: "/tag/", target: "/"),
+            ],
+        )
+    }
+
+    @Test("parses static passthrough paths")
+    func parsesStaticPassthroughs() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            static.CNAME: deployment/CNAME
+            static.robots.txt: deployment/robots.txt
+            static.images: public/images/
+            static..nojekyll: deployment/.nojekyll
+            static..well-known: public/.well-known
+            """,
+        )
+
+        #expect(
+            file.configuration.staticPassthroughs == [
+                .init(sourcePath: "deployment/CNAME", outputPath: "CNAME"),
+                .init(sourcePath: "deployment/robots.txt", outputPath: "robots.txt"),
+                .init(sourcePath: "public/images", outputPath: "images"),
+                .init(sourcePath: "deployment/.nojekyll", outputPath: ".nojekyll"),
+                .init(sourcePath: "public/.well-known", outputPath: ".well-known"),
+            ],
+        )
+    }
+
+    @Test("rejects unsafe 404 fallback redirect rules")
+    func rejectsUnsafeNotFoundRedirects() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectPath("tag")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.prefix.tag: /")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectTarget("http://example.com")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: http://example.com")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectPath("//example.com")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: //example.com")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidRedirectTarget("https://example.com/\\old")) {
+            try TileKit.Site.ConfigurationFile.parse("notFoundRedirect.exact./old: https://example.com/\\old")
+        }
+    }
+
+    @Test("rejects unsafe static passthrough paths")
+    func rejectsUnsafeStaticPassthroughPaths() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("../CNAME")) {
+            try TileKit.Site.ConfigurationFile.parse("static.../CNAME: deployment/CNAME")
+        }
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath("../secret")) {
+            try TileKit.Site.ConfigurationFile.parse("static.CNAME: ../secret")
+        }
+    }
+
+    @Test("rejects static passthrough output URL syntax characters", arguments: [
+        "images?preview",
+        "images#hero",
+        "images%2Fhero",
+        #"images\hero"#,
+        "images\u{0007}hero",
+    ])
+    func rejectsStaticPassthroughOutputURLSyntaxCharacters(outputPath: String) {
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidPath(outputPath)) {
+            try TileKit.Site.ConfigurationFile.parse("static.\(outputPath): public/images")
+        }
+    }
 }

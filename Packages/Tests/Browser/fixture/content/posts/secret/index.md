@@ -1,5 +1,6 @@
 ---
 title: Secret Draft
+type: blog-post
 date: 2026-05-21
 draft: true
 description: A draft that must never appear in a normal build.

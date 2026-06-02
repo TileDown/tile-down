@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Redirect content items: a page with `type: redirect` and `to: <url>` now
+  emits a static redirect page at its slug while staying out of navigation, post
+  listings, tag pages, and feeds. (#45)
+- 404 fallback redirects: `notFoundRedirect.exact.<path>` and
+  `notFoundRedirect.prefix.<path>` in `tiledown.yml` inject safe static-host
+  redirect rules into generated `404.html`, preserving query strings and
+  fragments for migrated legacy routes. (#97)
+- Generated 404 pages: content builds now emit root `404.html`, using a
+  built-in default page or a site-specific `content/404/index.md` override
+  rendered through the same layout and theme as the rest of the site. Local
+  assets beside the override publish beside `404.html`, so relative images load
+  without creating a browsable `/404/` page. (#47)
+- Sitemap output: content builds now emit `sitemap.xml` with deterministic
+  page URLs, baseURL-aware locations, and optional `lastmod` values from valid
+  page dates. Draft and redirect content is excluded. (#46)
+- Content-type page behavior: `type: blog-post` and `type: post` now select
+  built-in post/article behavior, while `type: page` and unknown explicit values
+  use the standard page path. (#49)
+- Static passthrough configuration: `static.<public-path>: <source-path>` in
+  `tiledown.yml` copies files or directories from the content tree to stable
+  public output paths, preserving root deployment files, migrated asset URLs,
+  and explicitly configured hidden deployment paths such as `.nojekyll` and
+  `.well-known`. (#79)
+- Built-in layouts now treat `hero` front matter as a migration-friendly fallback
+  for the canonical `image` field when rendering page hero media, post-card
+  thumbnails, and metadata images. `image` keeps precedence when both are present.
+  (#103)
+- Built-in layouts now emit SEO and social preview metadata from page front
+  matter and site configuration: descriptions, canonical links when `baseURL` is
+  set, Open Graph and Twitter card tags, absolute preview images, and
+  article-published metadata for dated posts. (#100)
 - Static SVG charts through the built-in `chart` tile, with exact `:::chart`
   shorthand parsing, typed inline data validation, themed bar/line/pie/doughnut
   and scatter SVG output, no browser JavaScript, docs, examples, and Playwright
@@ -83,6 +114,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Redirect pages now reject unsafe target URL schemes before emitting meta
+  refresh or fallback links. (#45)
+- Migrated posts with a custom `slug` outside `postsDir` now remain posts. Post
+  listings, tag pages, RSS items, and `post:` references use the canonical custom
+  URL while selection still follows the source folder. (#87)
+- Slug overrides now reject `.`, `..`, interior empty path segments, URL
+  delimiters, percent escapes, backslashes, and control characters before writing
+  output, so a content file cannot publish outside the output root or generate a
+  link that browsers resolve to a different path. (#87)
+- Redirect content now ignores unused body tile syntax, so legacy redirect-only
+  pages cannot fail a build because of stale body content. (#45)
+- Outbound link shims now fail the build instead of overwriting an already
+  generated page or redirect at the same output path. (#45)
+- RSS `content:encoded` now rewrites generated post links and image sources to
+  absolute public URLs when `baseURL` is configured. (#78)
+- Generated root-relative `href` and `src` URLs now honor `baseURL`, so
+  Markdown-authored images and asset links keep working when a site is deployed
+  under a subpath. Built-in hero and post thumbnail image URLs use the same
+  prefixing. (#37)
+- Theme toggles now reapply the saved appearance on page restore and cross-page
+  storage updates, so light/dark selections remain stable across navigation.
+  (#77)
+- Static passthrough output paths now reject URL syntax characters before
+  writing public files. (#79)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.

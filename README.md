@@ -27,7 +27,7 @@ Markdown is real CommonMark via
 [swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
-write an RSS feed from pages under `posts/`.
+write an RSS feed from the shared post collection.
 
 Still missing before it is a usable static site generator: project scaffolding
 (`tiledown init`), a dev server and watch mode, named tile types (`youtube-video`,
@@ -48,17 +48,20 @@ The architecture and the planned road are real and written down:
 The public issue tracker is organized into epics. These diagrams include every
 open public issue as of June 1, 2026.
 
-Status key:
+Status key. The roadmap status colors move with the work: open issue, active
+branch, review PR, then merged.
 
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
+  Review["PR in review"]:::review
   Epic["Epic grouping"]:::epic
-  Todo["Open issue"]:::todo
+  Todo["Open issue, no PR"]:::todo
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### Current shipped slice
@@ -90,9 +93,12 @@ flowchart LR
   Site --> Renderer["#85 Renderer cleanup"]:::epic
   Site --> Docs["#86 Docs and hygiene"]:::epic
 
+  Review["PR in review"]:::review
+
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #17 Assets and theming
@@ -100,11 +106,13 @@ flowchart LR
 ```mermaid
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::todo
-  Epic --> Persistence["#77 Theme choice persistence"]:::todo
+  Epic --> Theme["#20 Site theme and theme properties"]:::done
+  Epic --> Persistence["#77 Theme choice persistence"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #82 Static output
@@ -112,16 +120,22 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::todo
-  Epic --> Types["#49 Content types"]:::todo
-  Epic --> Redirects["#45 Redirect output"]:::todo
-  Epic --> NotFound["#47 404 page"]:::todo
-  Epic --> Sitemap["#46 sitemap.xml"]:::todo
-  Epic --> RSS["#78 RSS content:encoded"]:::todo
-  Epic --> BaseURL["#37 baseURL asset links"]:::todo
+  Epic --> Static["#79 Static passthrough"]:::done
+  Epic --> Types["#49 Content types"]:::done
+  Epic --> Redirects["#45 Redirect output"]:::done
+  Epic --> NotFound["#47 404 page"]:::done
+  Epic --> Sitemap["#46 sitemap.xml"]:::done
+  Epic --> RSS["#78 RSS content:encoded"]:::done
+  Epic --> BaseURL["#37 baseURL asset links"]:::done
+  Epic --> Slugs["#87 Migration slugs"]:::done
+  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::done
+  Epic --> SEO["#100 SEO metadata"]:::done
+  Epic --> HeroFM["#103 Hero front matter"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #83 Tile catalog
@@ -129,12 +143,14 @@ flowchart TD
 ```mermaid
 flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> Embed["#80 Safe embed tile"]:::review
-  Epic --> Mermaid["#56 Mermaid tile"]:::review
-  Epic --> Charts["#57 Chart tile"]:::review
+  Epic --> Embed["#80 Safe embed tile"]:::done
+  Epic --> Mermaid["#56 Mermaid tile"]:::done
+  Epic --> Charts["#57 Chart tile"]:::done
 
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #84 Local workflow
@@ -146,7 +162,7 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #85 Renderer cleanup
@@ -161,7 +177,7 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #86 Docs and hygiene
@@ -174,7 +190,7 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ## What actually runs today
@@ -224,6 +240,8 @@ theme: system
 rss: true
 rssPath: feed.xml
 shareLinks: true
+notFoundRedirect.exact./old-post: /posts/new-post/
+notFoundRedirect.prefix./tag/: /tags/
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
 ```
@@ -232,15 +250,27 @@ When `shareLinks: true` is set, built-in article pages include static share link
 for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a
 published site.
 
+Fallback 404 redirects help migrated static sites preserve old URLs on hosts
+without wildcard redirect files. `notFoundRedirect.exact.<path>` redirects one
+legacy path, while `notFoundRedirect.prefix.<path>` redirects any path beginning
+with that prefix. Sources must be root-relative paths. Targets can be
+root-relative paths or HTTPS URLs. Query strings and fragments are preserved, and
+the most specific matching prefix wins.
+
 Posts can declare tags in front matter:
 
 ```markdown
 ---
 title: Notes from the renderer
+type: blog-post
 date: 2026-05-31
 tags: swift, rendering
 ---
 ```
+
+`type: blog-post` and `type: post` select the built-in article behavior.
+`type: page` and unknown explicit values use the standard page behavior.
+Dated pages under `postsDir` still act as posts when `type:` is omitted.
 
 Tiledown generates static tag pages. Single-tag pages keep `/tags/swift/`.
 Two-tag AND filters are always generated, and larger filters use canonical nested
@@ -263,6 +293,15 @@ imageDark: /assets/demo-dark.png
 
 Built-in layouts use the same pair for post-card thumbnails. If `imageDark` is
 omitted, the generated page keeps the plain single-image markup.
+When `baseURL` is set, root-relative generated `src` and `href` values such as
+`/assets/demo-light.png` are prefixed with that base URL. Authored relative URLs
+such as `assets/demo-light.png` remain relative.
+
+Built-in layouts also use page front matter and site configuration for head
+metadata. Set `description` for the description, Open Graph, and Twitter
+description tags. Set `baseURL` for canonical URLs, Open Graph URLs, and
+absolute social preview images. Dated posts under the posts directory emit
+article metadata.
 
 Or pass a custom template explicitly:
 
