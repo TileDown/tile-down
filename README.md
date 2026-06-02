@@ -107,7 +107,7 @@ flowchart LR
 ```mermaid
 flowchart TD
   Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::review
+  Epic --> Theme["#20 Site theme and theme properties"]:::done
   Epic --> Persistence["#77 Theme choice persistence"]:::done
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
@@ -250,6 +250,8 @@ title: Minimal Site
 baseURL: https://example.com
 layout: top-nav
 theme: system
+theme.light.accent: #0057d8
+theme.dark.accent: #66aaff
 rss: true
 rssPath: feed.xml
 shareLinks: true
@@ -258,6 +260,11 @@ notFoundRedirect.prefix./tag/: /tags/
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
 ```
+
+Theme property overrides use the curated `--td-*` custom property surface. For
+example, `theme.light.accent` rewrites `--td-accent` in light mode and
+`theme.dark.accent` rewrites it in dark mode, so built-in layouts and themed
+tiles reskin together.
 
 When `shareLinks: true` is set, built-in article pages include static share links
 for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a

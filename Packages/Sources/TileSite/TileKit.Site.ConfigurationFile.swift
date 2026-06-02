@@ -54,6 +54,9 @@ public extension TileKit.Site {
                 if try applyStaticPassthrough(item, to: &result) {
                     continue
                 }
+                if try applyThemeProperty(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,

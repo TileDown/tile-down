@@ -40,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for the canonical `image` field when rendering page hero media, post-card
   thumbnails, and metadata images. `image` keeps precedence when both are present.
   (#103)
+- Site theme property overrides in `tiledown.yml`: `theme.light.<name>` and
+  `theme.dark.<name>` can tune the curated `--td-*` custom property surface for
+  built-in themes without replacing a layout or template. Values are validated
+  and emitted after the selected theme's defaults. (#20)
 - Built-in layouts now emit SEO and social preview metadata from page front
   matter and site configuration: descriptions, canonical links when `baseURL` is
   set, Open Graph and Twitter card tags, absolute preview images, and

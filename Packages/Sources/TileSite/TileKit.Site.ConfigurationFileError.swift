@@ -16,6 +16,8 @@ public extension TileKit.Site {
         case missingStaticPath(String)
         case invalidLatestPosts(String)
         case invalidFontScale(String)
+        case unknownThemeProperty(String)
+        case invalidThemePropertyValue(String)
 
         public var description: String {
             switch self {
@@ -47,6 +49,11 @@ public extension TileKit.Site {
                 "Invalid latestPosts value `\(value)`. Expected a non-negative integer."
             case let .invalidFontScale(value):
                 "Invalid fontScale value `\(value)`. Expected a positive number."
+            case let .unknownThemeProperty(name):
+                "Unknown theme property `\(name)`."
+            case let .invalidThemePropertyValue(value):
+                "Invalid theme property value `\(value)`. Expected a non-empty CSS value " +
+                    "without semicolons, braces, or comments."
             }
         }
     }

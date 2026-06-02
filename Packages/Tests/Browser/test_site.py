@@ -333,6 +333,16 @@ def run(page):
     )
     footer_credit = page.locator(".td-built").inner_text()
     check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
+    root_vars = page.evaluate(
+        """() => {
+            const style = getComputedStyle(document.documentElement);
+            return {
+                accent: style.getPropertyValue("--td-accent").trim(),
+                radius: style.getPropertyValue("--td-radius").trim()
+            };
+        }"""
+    )
+    check("theme property overrides apply in light mode", root_vars == {"accent": "#0057d8", "radius": "6px"}, str(root_vars))
 
     broken = page.eval_on_selector_all("img", "els => els.filter(e => e.naturalWidth === 0).length")
     check("all home images load", broken == 0, f"{broken} broken")
@@ -407,9 +417,19 @@ def run(page):
     page.click("[data-td-theme-toggle]")
     theme = page.evaluate("document.documentElement.getAttribute('data-theme')")
     bg_after = page.evaluate("getComputedStyle(document.body).backgroundColor")
+    dark_vars = page.evaluate(
+        """() => {
+            const style = getComputedStyle(document.documentElement);
+            return {
+                accent: style.getPropertyValue("--td-accent").trim(),
+                surface: style.getPropertyValue("--td-surface").trim()
+            };
+        }"""
+    )
     check("toggle sets data-theme", theme in ("dark", "light"), f"data-theme={theme}")
     check("toggle selects dark in light media", theme == "dark", f"data-theme={theme}")
     check("toggle changes background", bg_before != bg_after, f"{bg_before}->{bg_after}")
+    check("theme property overrides apply in dark mode", dark_vars == {"accent": "#66aaff", "surface": "#101820"}, str(dark_vars))
     check("dark hero image visible after toggle", theme == "dark" and dark_hero.is_visible() and not light_hero.is_visible())
     page.reload(wait_until="networkidle")
     check("toggle choice persists", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme)
