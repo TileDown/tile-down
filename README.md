@@ -87,8 +87,8 @@ flowchart TD
 flowchart LR
   Engine["0.1.0 engine slice"]:::done --> Site["Usable static site generator"]:::todo
   Site --> Assets["#17 Assets and theming"]:::epic
-  Site --> Output["#82 Static output"]:::epic
-  Site --> Tiles["#83 Tile catalog"]:::epic
+  Site --> Output["#82 Static output"]:::done
+  Site --> Tiles["#83 Tile catalog"]:::done
   Site --> Workflow["#84 Local workflow"]:::epic
   Site --> Renderer["#85 Renderer cleanup"]:::epic
   Site --> Docs["#86 Docs and hygiene"]:::epic
