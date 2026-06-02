@@ -13,6 +13,7 @@ public extension TileKit.Site {
         case invalidRedirectTarget(String)
         case duplicateSlug(String)
         case duplicateOutputPath(String)
+        case missingStaticPath(String)
         case invalidLatestPosts(String)
         case invalidFontScale(String)
 
@@ -40,6 +41,8 @@ public extension TileKit.Site {
                 "Duplicate page slug `\(slug)`. Two pages resolve to the same output path."
             case let .duplicateOutputPath(path):
                 "Duplicate output path `\(path)`. Two generated files would overwrite each other."
+            case let .missingStaticPath(path):
+                "Missing static passthrough source path `\(path)`."
             case let .invalidLatestPosts(value):
                 "Invalid latestPosts value `\(value)`. Expected a non-negative integer."
             case let .invalidFontScale(value):

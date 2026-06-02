@@ -51,6 +51,9 @@ public extension TileKit.Site {
                 if try applyNotFoundRedirect(item, to: &result) {
                     continue
                 }
+                if try applyStaticPassthrough(item, to: &result) {
+                    continue
+                }
                 if try applyFeedSetting(
                     item,
                     feed: &feed,

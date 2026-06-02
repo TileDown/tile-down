@@ -55,6 +55,9 @@ public extension TileKit.Site {
         /// Fallback redirects emitted into root `404.html` for static hosts that
         /// cannot express wildcard redirects natively.
         public var notFoundRedirects: NotFoundRedirects
+        /// Static files or directories to copy from the content tree to explicit
+        /// output paths, e.g. root deployment files or migrated public assets.
+        public var staticPassthroughs: [StaticPassthrough]
 
         public init(
             title: String = "",
@@ -72,6 +75,7 @@ public extension TileKit.Site {
             analyticsBodyEnd: String = "",
             shareLinks: Bool = false,
             notFoundRedirects: NotFoundRedirects = .init(),
+            staticPassthroughs: [StaticPassthrough] = [],
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -88,6 +92,7 @@ public extension TileKit.Site {
             self.analyticsBodyEnd = analyticsBodyEnd
             self.shareLinks = shareLinks
             self.notFoundRedirects = notFoundRedirects
+            self.staticPassthroughs = staticPassthroughs
         }
     }
 }

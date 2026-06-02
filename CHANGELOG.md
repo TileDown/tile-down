@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content-type page behavior: `type: blog-post` and `type: post` now select
   built-in post/article behavior, while `type: page` and unknown explicit values
   use the standard page path. (#49)
+- Static passthrough configuration: `static.<public-path>: <source-path>` in
+  `tiledown.yml` copies files or directories from the content tree to stable
+  public output paths, preserving root deployment files, migrated asset URLs,
+  and explicitly configured hidden deployment paths such as `.nojekyll` and
+  `.well-known`. (#79)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
@@ -111,6 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Theme toggles now reapply the saved appearance on page restore and cross-page
   storage updates, so light/dark selections remain stable across navigation.
   (#77)
+- Static passthrough output paths now reject URL syntax characters before
+  writing public files. (#79)
 - Built-in layouts now render the generated footer credit as `TileDown`.
 - Built-in hero images now render as block media with room below them, so
   theme-aware image wrappers do not run directly into the page heading.
