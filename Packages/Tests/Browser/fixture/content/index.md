@@ -10,6 +10,8 @@ counter tile.
 
 ![Logo](/assets/logo.svg)
 
+[Download logo](/assets/logo.svg)
+
 | Name  | Score | Grade  |
 |:------|------:|:------:|
 | Alice |    90 |   A    |
