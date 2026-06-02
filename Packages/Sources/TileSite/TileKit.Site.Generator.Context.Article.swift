@@ -43,9 +43,13 @@ extension TileKit.Site.Generator {
             "title": .string(page.document.frontMatter["title"] ?? page.slug),
             "description": .string(page.document.frontMatter["description"] ?? ""),
             "url": .string(url(for: page.slug, baseURL: baseURL)),
+            "shareLinks": .list([]),
+            "hasShareLinks": "",
         ]
         if let heroImage = heroImageContext(page) {
             context["heroImage"] = .object(heroImage)
+        } else {
+            context["heroImage"] = ""
         }
 
         let split = recentSplit(page.html)

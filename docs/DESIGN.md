@@ -199,7 +199,7 @@ Implemented as of the current design revision:
 | CLI | `tiledown` builds one page from a custom template, or a content directory from either a custom template or a built-in layout selected by `tiledown.yml` |
 | Source | front matter parsing and index-content discovery |
 | Markdown | CommonMark rendering via swift-markdown (`TileKit.Markdown.CommonMarkRenderer`), raw HTML escaped, not passed through |
-| Templates | Mustache-style rendering, nested values, raw values, list sections, and built-in layout template selection through `TileKit.Site.TemplateSource` |
+| Templates | Mustache-style rendering, nested values, raw values, list sections, and built-in layout template selection through `TileKit.Site.TemplateSource`. A reference to an undeclared section key fails the build like a missing interpolation value, so template typos surface instead of rendering nothing; an optional section must be declared (a present-but-falsey value renders nothing). |
 | Content | typed records, field values, filters, sorting, offset, limit, and query runner |
 | Tiles | source-ordered directive parser, typed tile values, `service-form` request validation, renderer protocol, render output, registry, and unknown fallback |
 | Site generation | renders Markdown and tile blocks in source order through injected parser and registry values; content builds derive `site.sections`, write a shared stylesheet, can use built-in layouts, and can write RSS from `posts/` pages |
