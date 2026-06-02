@@ -12,14 +12,14 @@ public extension TileKit.Tile {
         public func render(
             _ tile: Instance,
         ) -> Rendered {
-            let title = Self.string(tile.property(named: "title")) ?? "Note"
-            let body = Self.string(tile.property(named: "body")) ?? ""
+            let title = tile.property(named: "title")?.stringValue ?? "Note"
+            let body = tile.property(named: "body")?.stringValue ?? ""
 
             return .init(
                 html: """
                 <div class="td-callout">
-                <p class="td-callout-title">\(Self.escapeHTML(title))</p>
-                <p class="td-callout-body">\(Self.escapeHTML(body))</p>
+                <p class="td-callout-title">\(TileKit.HTML.escape(title))</p>
+                <p class="td-callout-body">\(TileKit.HTML.escape(body))</p>
                 </div>
                 """,
                 css: """
@@ -35,26 +35,6 @@ public extension TileKit.Tile {
                 .td-callout-body { margin: 0; color: var(--td-muted); }
                 """,
             )
-        }
-
-        private static func string(
-            _ value: Value?,
-        ) -> String? {
-            guard case let .string(string) = value else {
-                return nil
-            }
-            return string
-        }
-
-        private static func escapeHTML(
-            _ value: String,
-        ) -> String {
-            value
-                .replacingOccurrences(of: "&", with: "&amp;")
-                .replacingOccurrences(of: "<", with: "&lt;")
-                .replacingOccurrences(of: ">", with: "&gt;")
-                .replacingOccurrences(of: "\"", with: "&quot;")
-                .replacingOccurrences(of: "'", with: "&#39;")
         }
     }
 }

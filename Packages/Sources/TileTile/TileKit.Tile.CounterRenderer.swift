@@ -13,12 +13,12 @@ public extension TileKit.Tile {
         public func render(
             _ tile: Instance,
         ) -> Rendered {
-            let label = Self.string(tile.property(named: "label")) ?? "Clicks"
+            let label = tile.property(named: "label")?.stringValue ?? "Clicks"
 
             return .init(
                 html: """
                 <div class="td-counter" data-td-counter>
-                <button class="td-counter-button" type="button">\(Self.escapeHTML(label))</button>
+                <button class="td-counter-button" type="button">\(TileKit.HTML.escape(label))</button>
                 <span class="td-counter-value" data-td-counter-value>0</span>
                 </div>
                 """,
@@ -47,26 +47,6 @@ public extension TileKit.Tile {
                 });
                 """,
             )
-        }
-
-        private static func string(
-            _ value: Value?,
-        ) -> String? {
-            guard case let .string(string) = value else {
-                return nil
-            }
-            return string
-        }
-
-        private static func escapeHTML(
-            _ value: String,
-        ) -> String {
-            value
-                .replacingOccurrences(of: "&", with: "&amp;")
-                .replacingOccurrences(of: "<", with: "&lt;")
-                .replacingOccurrences(of: ">", with: "&gt;")
-                .replacingOccurrences(of: "\"", with: "&quot;")
-                .replacingOccurrences(of: "'", with: "&#39;")
         }
     }
 }
