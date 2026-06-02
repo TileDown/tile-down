@@ -148,4 +148,56 @@ struct DemoTileRenderersTests {
             )
         }
     }
+
+    @Test("mermaid renders escaped source and emits the browser runtime")
+    func mermaidRenders() throws {
+        let rendered = try TileKit.Tile.MermaidRenderer().render(
+            .init(
+                typeID: "mermaid",
+                properties: [
+                    .init(
+                        key: "definition",
+                        value: .string(
+                            """
+                            graph TD
+                              A[Start] --> B{OK?}
+                              B -->|yes| C[<script>]
+                            """,
+                        ),
+                    ),
+                    .init(key: "title", value: .string("Release flow")),
+                ],
+            ),
+        )
+
+        #expect(rendered.html.contains(#"<figure class="td-mermaid" data-td-mermaid>"#))
+        #expect(rendered.html.contains("A[Start] --&gt; B{OK?}"))
+        #expect(rendered.html.contains("C[&lt;script&gt;]"))
+        #expect(rendered.html.contains(#"<figcaption class="td-mermaid-caption">Release flow</figcaption>"#))
+        #expect(rendered.css.contains(".td-mermaid-source"))
+        #expect(rendered.javascript.contains("mermaid@10.9.3"))
+        #expect(rendered.javascript.contains("securityLevel: 'strict'"))
+        #expect(rendered.javascript.contains("MutationObserver"))
+        #expect(rendered.javascript.contains("data-td-mermaid-error"))
+    }
+
+    @Test("mermaid rejects missing definitions and wrong tile types")
+    func mermaidRejectsInvalidInputs() {
+        #expect(throws: TileKit.Tile.MermaidRendererError.missingProperty("definition")) {
+            try TileKit.Tile.MermaidRenderer().render(
+                .init(typeID: "mermaid", properties: []),
+            )
+        }
+
+        #expect(throws: TileKit.Tile.MermaidRendererError.invalidTileType(actual: "chart")) {
+            try TileKit.Tile.MermaidRenderer().render(
+                .init(
+                    typeID: "chart",
+                    properties: [
+                        .init(key: "definition", value: .string("graph TD\nA --> B")),
+                    ],
+                ),
+            )
+        }
+    }
 }

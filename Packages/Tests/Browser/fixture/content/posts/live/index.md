@@ -20,3 +20,9 @@ url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 title: TileDown demo video
 aspectRatio: 16/9
 :::
+
+:::mermaid
+graph TD
+  A[Write Markdown] --> B[Build TileDown]
+  B --> C[Ship static HTML]
+:::
