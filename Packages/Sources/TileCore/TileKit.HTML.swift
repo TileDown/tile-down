@@ -3,8 +3,13 @@ import Foundation
 public extension TileKit {
     /// Shared escaping helpers for generated HTML.
     enum HTML {
-        /// Escapes text with the conservative table historically used by Tiledown
-        /// renderers.
+        /// Escapes a value with the full table (`&`, `<`, `>`, `"`, `'`).
+        ///
+        /// This matches the escaping the per-renderer helpers applied before they
+        /// were hoisted here, so it stays safe in both text and double-quoted
+        /// attribute contexts. Prefer ``escapeText(_:)`` for text nodes and
+        /// ``escapeAttribute(_:)`` for attribute values where the distinction
+        /// matters.
         public static func escape(
             _ value: String,
         ) -> String {

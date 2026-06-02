@@ -72,6 +72,37 @@ extension SiteGeneratorTests {
         }
     }
 
+    @Test("redirect page escapes the target for attribute and text contexts")
+    func redirectPageEscapesTarget() throws {
+        let target = #"https://example.com/p?a=1&b=2"q<x>'z"#
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/old/index.md": "---\ntype: redirect\nto: \(target)\n---\n",
+                "templates/page.html": "{{{ page.contents.html }}}",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        let redirect = try #require(fileSystem.files["dist/old/index.html"])
+        // Attribute context escapes quotes and angle brackets, so a target
+        // cannot break out of the href, canonical, or refresh attributes.
+        let escapedAttribute = #"https://example.com/p?a=1&amp;b=2&quot;q&lt;x&gt;&#39;z"#
+        #expect(redirect.contains(#"href="\#(escapedAttribute)""#))
+        #expect(redirect.contains(#"content="0; url=\#(escapedAttribute)""#))
+        // Text context escapes markup but leaves quotes and apostrophes literal.
+        #expect(redirect.contains(#">https://example.com/p?a=1&amp;b=2"q&lt;x&gt;'z</a>"#))
+        // No markup-significant character survives unescaped anywhere.
+        #expect(redirect.contains("<x>") == false)
+    }
+
     @Test("redirect content rejects blank target values")
     func redirectContentRejectsBlankTargetValues() {
         let fileSystem = MemoryFileSystem(files: [:])
