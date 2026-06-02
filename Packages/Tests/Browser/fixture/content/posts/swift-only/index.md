@@ -1,5 +1,6 @@
 ---
 title: Swift Only
+type: post
 date: 2026-05-21
 description: A second published post used by tag filter checks.
 tags: swift

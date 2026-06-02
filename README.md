@@ -27,7 +27,7 @@ Markdown is real CommonMark via
 [swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
-write an RSS feed from pages under `posts/`.
+write an RSS feed from the shared post collection.
 
 Still missing before it is a usable static site generator: project scaffolding
 (`tiledown init`), a dev server and watch mode, named tile types (`youtube-video`,
@@ -97,7 +97,6 @@ flowchart LR
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
@@ -111,7 +110,9 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
+  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #82 Static output
@@ -146,7 +147,9 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
+  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #84 Local workflow
@@ -158,7 +161,9 @@ flowchart TD
   Epic --> BrowserGate["#60 Browser-test gate docs"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
+  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #85 Renderer cleanup
@@ -173,7 +178,9 @@ flowchart TD
   Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
+  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ### #86 Docs and hygiene
@@ -186,7 +193,9 @@ flowchart TD
   Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::todo
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
+  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
+  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
 ```
 
 ## What actually runs today
@@ -258,10 +267,15 @@ Posts can declare tags in front matter:
 ```markdown
 ---
 title: Notes from the renderer
+type: blog-post
 date: 2026-05-31
 tags: swift, rendering
 ---
 ```
+
+`type: blog-post` and `type: post` select the built-in article behavior.
+`type: page` and unknown explicit values use the standard page behavior.
+Dated pages under `postsDir` still act as posts when `type:` is omitted.
 
 Tiledown generates static tag pages. Single-tag pages keep `/tags/swift/`.
 Two-tag AND filters are always generated, and larger filters use canonical nested
