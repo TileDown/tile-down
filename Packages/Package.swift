@@ -30,6 +30,8 @@ let allProducts: [Product] = [
     .singleTargetLibrary("TileService"),
     .singleTargetLibrary("TileServiceForm"),
     .singleTargetLibrary("TileServiceImpl"),
+    .singleTargetLibrary("TileServe"),
+    .singleTargetLibrary("TileServeImpl"),
     .singleTargetLibrary("TileSource"),
     .singleTargetLibrary("TileTemplate"),
     .singleTargetLibrary("TileTile"),
@@ -268,6 +270,42 @@ let targets: [Target] = {
     )
     let tileSiteImplTargets = [tileSiteImplTarget, tileSiteImplTestsTarget]
 
+    let tileServeTarget = Target.target(
+        name: "TileServe",
+        dependencies: [
+            "TileCore",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServeTestsTarget = Target.testTarget(
+        name: "TileServeTests",
+        dependencies: [
+            "TileCore",
+            "TileServe",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServeTargets = [tileServeTarget, tileServeTestsTarget]
+
+    let tileServeImplTarget = Target.target(
+        name: "TileServeImpl",
+        dependencies: [
+            "TileCore",
+            "TileServe",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServeImplTestsTarget = Target.testTarget(
+        name: "TileServeImplTests",
+        dependencies: [
+            "TileCore",
+            "TileServe",
+            "TileServeImpl",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileServeImplTargets = [tileServeImplTarget, tileServeImplTestsTarget]
+
     // ---------- Facade Layer ----------
     let tileKitTarget = Target.target(
         name: "TileKit",
@@ -281,6 +319,8 @@ let targets: [Target] = {
             "TileService",
             "TileServiceForm",
             "TileServiceImpl",
+            "TileServe",
+            "TileServeImpl",
             "TileSource",
             "TileTemplate",
             "TileTile",
@@ -325,6 +365,8 @@ let targets: [Target] = {
         + tileServiceImplTargets
         + tileSiteTargets
         + tileSiteImplTargets
+        + tileServeTargets
+        + tileServeImplTargets
         + tileKitTargets
         + frontDoorTargets
 }()

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Local preview server: `tiledown serve [--drafts] [--port N] [--output DIR]
+  <content-dir>` builds a content directory and serves the generated static files
+  from `127.0.0.1`, with directory `index.html` resolution, common content types,
+  and 404 responses for misses. (#33)
 - Redirect content items: a page with `type: redirect` and `to: <url>` now
   emits a static redirect page at its slug while staying out of navigation, post
   listings, tag pages, and feeds. (#45)

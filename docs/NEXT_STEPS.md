@@ -244,12 +244,14 @@ Order:
 1. `tiledown init`
 2. `tiledown build` config loading
 3. `tiledown watch`
-4. `tiledown serve`
+4. `tiledown serve` (first static preview slice exists)
 5. Optional proxy support
 
-Keep `serve` and proxy support separate from the core generator. Runtime proxy
-support needs a server dependency and belongs behind its own protocol and target
-boundary.
+Keep proxy support separate from the core generator. Runtime proxy support needs
+a server dependency and belongs behind its own protocol and target boundary. The
+first `serve` slice stays Swift-only: it builds a content directory, serves static
+files on `127.0.0.1`, resolves directory `index.html` files, and maps common
+content types.
 
 ## Package Placement
 
