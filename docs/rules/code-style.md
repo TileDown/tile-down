@@ -6,6 +6,15 @@ Swift does not have true namespaces, so we simulate them with root types and ext
 
 For the narrower question "should the anchor be `enum`, `struct`, or `class`?", see [namespacing.md](namespacing.md) (the type-choice canonical rule). This file covers the broader operational discipline.
 
+## Embedded browser payloads
+
+Tile renderers may embed CSS and browser JavaScript string literals because the
+tile rendering contract returns HTML, CSS, and JavaScript fragments. Those
+payloads should remain readable as CSS and JavaScript. If a normal one-line CSS
+rule or JavaScript statement exceeds SwiftLint's `line_length` limit, disable
+`line_length` only around the embedded payload and re-enable it before Swift code
+resumes. Add a short comment explaining the scope of the exception.
+
 ## Namespacing discipline (mandatory)
 
 **Every public type lives under a struct or enum namespace that mirrors its folder on disk.** No public type stays at file scope. The qualified name carries module + folder + role; reading `Module.Sub.Leaf` should be enough to know where the type lives and what it does.

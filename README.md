@@ -176,7 +176,7 @@ flowchart TD
   Epic --> Mustache["#38 Mustache section typo detection"]:::done
   Epic --> Escaping["#40 Shared HTML escaping"]:::done
   Epic --> ContentWalk["#41 Single content tree walk"]:::todo
-  Epic --> CSSLint["#35 Embedded CSS lint posture"]:::todo
+  Epic --> CSSLint["#35 Embedded CSS lint posture"]:::done
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
