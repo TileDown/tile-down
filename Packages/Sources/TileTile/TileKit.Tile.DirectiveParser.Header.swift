@@ -7,6 +7,9 @@ extension TileKit.Tile.DirectiveParser {
         lineNumber: Int,
     ) throws -> (typeID: String, rawDefinitionKey: String?) {
         let line = trimmed(line)
+        if line == ":::chart" {
+            return ("chart", nil)
+        }
         if line == ":::mermaid" {
             return ("mermaid", "definition")
         }
@@ -29,7 +32,8 @@ extension TileKit.Tile.DirectiveParser {
         _ line: String,
     ) -> Bool {
         let line = trimmed(line)
-        return line == ":::mermaid"
+        return line == ":::chart"
+            || line == ":::mermaid"
             || line == ":::tile"
             || line.hasPrefix(":::tile ")
             || line.hasPrefix(":::tile\t")

@@ -60,6 +60,43 @@ HTTPS `.mp4`, `.webm`, and `.ogg` URLs render as responsive `<video controls>`
 embeds. Other schemes, providers, file types, and malformed ratios fail the
 build.
 
+## Charts
+
+Charts can use the exact shorthand fence:
+
+```markdown
+:::chart
+type: bar
+title: Releases per month
+labels: Jan, Feb, Mar, Apr
+series.Downloads: 12, 19, 7, 24
+series.Stars: 3, 8, 5, 11
+:::
+```
+
+The canonical serialized form is a normal tile directive:
+
+```markdown
+:::tile chart
+type: bar
+title: Releases per month
+labels: Jan, Feb, Mar, Apr
+series.Downloads: 12, 19, 7, 24
+series.Stars: 3, 8, 5, 11
+:::
+```
+
+`type`, `labels`, and at least one `series.<name>` property are required.
+Supported types are `bar`, `line`, `pie`, `doughnut`, and `scatter`. `labels`
+and series values may be comma-separated scalar properties or list properties.
+Every series must have the same number of values as `labels`. Pie and doughnut
+charts accept exactly one series with positive values. `height` is optional and
+must be an integer from `240` through `720`; `legend` is optional and accepts
+`true`, `false`, `yes`, `no`, `on`, `off`, `1`, or `0`.
+
+The default chart tile renders static SVG with themed CSS and no browser
+JavaScript. Labels, titles, and generated SVG text are escaped.
+
 ## Mermaid diagrams
 
 Mermaid diagrams can use the exact shorthand fence:

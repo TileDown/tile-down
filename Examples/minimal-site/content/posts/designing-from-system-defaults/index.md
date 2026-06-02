@@ -10,3 +10,11 @@ color, and CSS theme properties that switch automatically for light and dark mod
 
 That gives a plain content site a polished baseline without making every tile or
 page carry its own design decisions.
+
+:::chart
+type: line
+title: Theme polish over time
+labels: Week 1, Week 2, Week 3, Week 4
+series.Spacing: 2, 5, 8, 10
+series.Color: 3, 6, 7, 9
+:::

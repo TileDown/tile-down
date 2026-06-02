@@ -276,6 +276,10 @@ private struct Command {
                 for: TileKit.Tile.CalloutRenderer.typeID,
             )
             .registering(
+                TileKit.Tile.ChartRenderer(),
+                for: TileKit.Tile.ChartRenderer.typeID,
+            )
+            .registering(
                 TileKit.Tile.CounterRenderer(),
                 for: TileKit.Tile.CounterRenderer.typeID,
             )
