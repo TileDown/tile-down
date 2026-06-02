@@ -102,10 +102,7 @@ extension TiledownCLITests {
             ],
         )
         defer {
-            if process.isRunning {
-                process.terminate()
-            }
-            process.waitUntilExit()
+            terminateServeProcess(process)
         }
 
         let result = try await fetchWithRetry(
