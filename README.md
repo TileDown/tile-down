@@ -131,7 +131,7 @@ flowchart TD
   Epic["#83 Authoring tile catalog"]:::epic
   Epic --> Embed["#80 Safe embed tile"]:::review
   Epic --> Mermaid["#56 Mermaid tile"]:::review
-  Epic --> Charts["#57 Chart tile"]:::active
+  Epic --> Charts["#57 Chart tile"]:::review
 
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
