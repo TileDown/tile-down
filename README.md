@@ -53,7 +53,7 @@ Status key:
 ```mermaid
 flowchart LR
   Done["In main now"]:::done
-  Review["Open PR"]:::review
+  Review["PR in review"]:::review
   Epic["Epic grouping"]:::epic
   Todo["Open issue"]:::todo
 
