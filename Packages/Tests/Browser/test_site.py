@@ -221,9 +221,15 @@ def check_article_page(page):
     )
     page.wait_for_selector(".td-mermaid-source[data-td-mermaid-stub='rendered']")
     mermaid_source = page.locator(".td-mermaid-source").first
-    check("article mermaid tile renders", page.locator(".td-mermaid-rendered-test").count() == 1)
-    check("article mermaid source remains escaped", "<script" not in page.locator(".td-mermaid").inner_html())
+    # The mermaid tile and the ```mermaid graph fence both render via the runtime.
+    check("article mermaid tile and graph fence render", page.locator(".td-mermaid-rendered-test").count() == 2)
+    check("article mermaid sources remain escaped", "<script" not in page.locator(".td-mermaid").first.inner_html())
     check("article mermaid keeps source text", "Write Markdown" in mermaid_source.inner_text())
+    check(
+        "article markdown mermaid fence renders its diagram source",
+        page.locator(".td-mermaid-source").count() == 2
+        and "Author" in page.locator(".td-mermaid-source").nth(1).inner_text(),
+    )
     mermaid_config = page.evaluate("window.__tdMermaidConfig")
     page_theme = page.evaluate("document.documentElement.getAttribute('data-theme')")
     expected_mermaid_theme = "dark" if page_theme == "dark" else "default"
@@ -245,10 +251,13 @@ def check_article_page(page):
         "article mermaid rethemes after toggle",
         page.evaluate("window.__tdMermaidConfig && window.__tdMermaidConfig.theme") == toggled_mermaid_theme,
     )
-    check("article renders chart tile and two markdown chart fences as svg", page.locator(".td-chart .td-chart-svg").count() == 3)
+    # Chart tile, ```chart line fence, ```chart scatter fence, and the ```mermaid
+    # pie fence (which MarkdownPDF and Tiledown render as a static chart).
+    check("article renders the chart tile and three markdown-fence charts as svg", page.locator(".td-chart .td-chart-svg").count() == 4)
     tile_chart_text = page.locator(".td-chart").first.inner_text()
     line_fence_text = page.locator(".td-chart").nth(1).inner_text()
     scatter_fence_text = page.locator(".td-chart").nth(2).inner_text()
+    pie_fence_text = page.locator(".td-chart").nth(3).inner_text()
     check("article chart tile keeps labels and series", "Release metrics" in tile_chart_text and "Downloads" in tile_chart_text and "Jan" in tile_chart_text)
     check(
         "article markdown line fence renders labels, series, and axis captions",
@@ -263,8 +272,12 @@ def check_article_page(page):
         page.locator(".td-chart").nth(2).locator(".td-chart-point").count() == 3,
     )
     check(
+        "article mermaid pie fence renders as a static chart",
+        "Engine split" in pie_fence_text and page.locator(".td-chart").nth(3).locator(".td-chart-slice").count() == 2,
+    )
+    check(
         "article charts emit no script",
-        all("<script" not in page.locator(".td-chart").nth(index).inner_html() for index in range(3)),
+        all("<script" not in page.locator(".td-chart").nth(index).inner_html() for index in range(4)),
     )
 
     page.set_viewport_size({"width": 390, "height": 844})

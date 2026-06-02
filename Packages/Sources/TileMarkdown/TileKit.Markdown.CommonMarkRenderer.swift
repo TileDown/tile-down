@@ -41,7 +41,7 @@ public extension TileKit.Markdown {
         ) -> TileKit.Markdown.RenderedBody {
             var visitor = HTMLVisitor(extraSchemes: passthroughSchemes, fencedRenderer: fencedRenderer)
             let html = visitor.visitDocument(Document(parsing: markdown))
-            return .init(html: html, css: visitor.fencedCSS)
+            return .init(html: html, css: visitor.fencedCSS, javascript: visitor.fencedJS)
         }
     }
 }
@@ -63,6 +63,9 @@ private struct HTMLVisitor: MarkupVisitor {
 
     /// Page-local stylesheets collected from rendered fenced capability blocks.
     var fencedCSS: [String] = []
+
+    /// Page-local scripts collected from rendered fenced capability blocks.
+    var fencedJS: [String] = []
 
     mutating func defaultVisit(
         _ markup: any Markup,
@@ -121,6 +124,9 @@ private struct HTMLVisitor: MarkupVisitor {
         if let fenced = renderedFence(for: codeBlock) {
             if !fenced.css.isEmpty, !fencedCSS.contains(fenced.css) {
                 fencedCSS.append(fenced.css)
+            }
+            if !fenced.javascript.isEmpty, !fencedJS.contains(fenced.javascript) {
+                fencedJS.append(fenced.javascript)
             }
             return fenced.html
         }

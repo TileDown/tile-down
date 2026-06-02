@@ -51,6 +51,9 @@ public extension TileKit.Output {
                     for stylesheet in body.css {
                         Self.appendUnique(stylesheet, to: &themed)
                     }
+                    for script in body.javascript {
+                        Self.appendUnique(script, to: &javascript)
+                    }
                 case let .tile(tile):
                     let rendered = try tileRegistry.render(tile)
                     html.append(rendered.html)

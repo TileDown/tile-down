@@ -100,7 +100,10 @@ extension Command {
         .init(
             markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
                 passthroughSchemes: TileKit.Site.Reference.schemes,
-                fencedRenderer: TileKit.Tile.ChartFenceRenderer(),
+                fencedRenderer: TileKit.CompositeFencedBlockRenderer([
+                    TileKit.Tile.ChartFenceRenderer(),
+                    TileKit.Tile.MermaidFenceRenderer(),
+                ]),
             ),
             tileRegistry: makeTileRegistry(serviceBindings: serviceBindings),
         )
