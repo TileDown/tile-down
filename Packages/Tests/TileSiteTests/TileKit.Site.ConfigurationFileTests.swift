@@ -212,4 +212,43 @@ struct SiteConfigurationFileTests {
             try TileKit.Site.ConfigurationFile.parse("static.\(outputPath): public/images")
         }
     }
+
+    @Test("parses theme property overrides")
+    func parsesThemeProperties() throws {
+        let file = try TileKit.Site.ConfigurationFile.parse(
+            """
+            theme.light.accent: #0057d8
+            theme.light.surface: rgba(255, 255, 255, 0.92)
+            theme.dark.accent: #66aaff
+            theme.dark.font: ui-serif, Georgia, serif
+            """,
+        )
+
+        let expected = try TileKit.Site.ThemeProperties(
+            light: [
+                "accent": "#0057d8",
+                "surface": "rgba(255, 255, 255, 0.92)",
+            ],
+            dark: [
+                "accent": "#66aaff",
+                "font": "ui-serif, Georgia, serif",
+            ],
+        )
+        #expect(file.configuration.themeProperties == expected)
+    }
+
+    @Test("rejects unknown or unsafe theme property overrides")
+    func rejectsBadThemeProperties() {
+        #expect(throws: TileKit.Site.ConfigurationFileError.unknownThemeProperty("brand")) {
+            try TileKit.Site.ConfigurationFile.parse("theme.light.brand: #123456")
+        }
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidThemePropertyValue("red; body { color: blue }")) {
+            try TileKit.Site.ConfigurationFile.parse("theme.dark.accent: red; body { color: blue }")
+        }
+
+        #expect(throws: TileKit.Site.ConfigurationFileError.invalidThemePropertyValue("red /* broken")) {
+            try TileKit.Site.ConfigurationFile.parse("theme.dark.accent: red /* broken")
+        }
+    }
 }

@@ -91,6 +91,40 @@ struct SiteCustomizationTests {
         #expect(!css.contains("html { font-size:"))
     }
 
+    @Test("theme property overrides reskin the shared stylesheet")
+    func themePropertyOverrides() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home\n\n:::callout\nmessage: Hello\n:::",
+                "content/tiledown.yml": """
+                theme.light.accent: #0057d8
+                theme.light.radius: 6px
+                theme.dark.accent: #66aaff
+                theme.dark.surface: #101820
+                """,
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: TileKit.Site.ConfigurationFile.parse(
+                    fileSystem.files["content/tiledown.yml"] ?? "",
+                ).configuration,
+            ),
+        )
+
+        let css = try #require(fileSystem.files["dist/styles.css"])
+        #expect(css.contains(":root {\n--td-accent: #0057d8;\n--td-radius: 6px;\n}"))
+        #expect(css.contains(#".td-dark-tokens, [data-theme="dark"] {"#))
+        #expect(css.contains("--td-accent: #66aaff;\n--td-surface: #101820;"))
+        #expect(css.contains(#"[data-theme="dark"]"#))
+        #expect(css.contains("@layer reset, theme, tile-override;"))
+        #expect(css.contains("var(--td-accent)"))
+    }
+
     @Test("the current section is marked with aria-current in the nav")
     func navMarksCurrentSection() throws {
         let fileSystem = MemoryFileSystem(

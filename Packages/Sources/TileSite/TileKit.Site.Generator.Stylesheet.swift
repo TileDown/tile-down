@@ -21,6 +21,7 @@ extension TileKit.Site.Generator {
             theme: configuration.theme,
             tiles: tiles,
             fontScale: configuration.fontScale,
+            themeProperties: configuration.themeProperties,
         )
         guard !css.isEmpty else {
             return ""
@@ -56,6 +57,7 @@ extension TileKit.Site.Generator {
         theme: TileKit.Site.Theme?,
         tiles: TileKit.Output.Stylesheet,
         fontScale: Double,
+        themeProperties: TileKit.Site.ThemeProperties,
     ) -> String {
         // A non-default font scale sets the root font size, so every rem-based
         // size (the body and the whole type scale) grows or shrinks together.
@@ -63,13 +65,20 @@ extension TileKit.Site.Generator {
         let scalePrefix = fontScale == 1
             ? ""
             : "html { font-size: \(percent(fontScale)); }\n"
+        let propertyOverrides = themeProperties.css()
 
         guard let theme else {
             let base = tiles.text()
-            return base.isEmpty ? base : scalePrefix + base
+            let overrides = propertyOverrides.isEmpty ? "" : "\(propertyOverrides)\n"
+            return [scalePrefix, overrides, base]
+                .filter { !$0.isEmpty }
+                .joined()
         }
 
         var result = scalePrefix + theme.tokens
+        if !propertyOverrides.isEmpty {
+            result += "\n" + propertyOverrides
+        }
         result += "\n@layer reset, theme, tile-override;"
         if !theme.reset.isEmpty {
             result += "\n@layer reset {\n\(theme.reset)\n}"

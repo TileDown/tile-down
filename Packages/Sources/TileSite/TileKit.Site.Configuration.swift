@@ -36,6 +36,11 @@ public extension TileKit.Site {
         /// whole type scale grows or shrinks together. `1` is the theme default;
         /// `1.1` is 10% larger. Values <= 0 are rejected at parse time.
         public var fontScale: Double
+        /// Site-level overrides for built-in theme custom properties. Empty by
+        /// default; when set, these values are emitted after the selected theme's
+        /// built-in properties so the site can tune the theme without replacing a
+        /// layout or template.
+        public var themeProperties: ThemeProperties
         /// Named outbound external links, keyed by name. `[text](link:key)` resolves
         /// to a generated `/out/<key>/` redirect page that forwards here, so an
         /// external URL lives in one place and the public link stays stable.
@@ -70,6 +75,7 @@ public extension TileKit.Site {
             latestPostCount: Int = 3,
             postsLabel: String = "",
             fontScale: Double = 1,
+            themeProperties: ThemeProperties = .init(),
             outboundLinks: [String: String] = [:],
             analyticsHead: String = "",
             analyticsBodyEnd: String = "",
@@ -87,6 +93,7 @@ public extension TileKit.Site {
             self.latestPostCount = latestPostCount
             self.postsLabel = postsLabel
             self.fontScale = fontScale
+            self.themeProperties = themeProperties
             self.outboundLinks = outboundLinks
             self.analyticsHead = analyticsHead
             self.analyticsBodyEnd = analyticsBodyEnd

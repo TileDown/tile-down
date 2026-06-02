@@ -3,6 +3,10 @@
 title: Browser Fixture
 baseURL: https://example.com/browser-fixture
 theme: standard
+theme.light.accent: #0057d8
+theme.light.radius: 6px
+theme.dark.accent: #66aaff
+theme.dark.surface: #101820
 appearance: toggle
 rss: true
 rssTitle: Browser Fixture
