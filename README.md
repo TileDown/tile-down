@@ -13,18 +13,22 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 > The repository is named `tile-down`; the product and CLI are `tiledown`.
 
-## Status: early, not production-ready yet
+## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.1.0` and is **not yet a production-ready static site
-generator.** Do not adopt it for a site that needs a stable toolchain.
+Tiledown is at version `0.2.0`, and it already builds and deploys its own project
+website, [tiledown.com](https://tiledown.com/), from this engine on every change.
+It is usable today for static content sites like that one. It is pre-1.0, so the
+toolchain and some APIs can still change; pin a commit if you need a stable
+toolchain.
 
-What works today is a real but partial slice. The engine builds, and the CLI can
+What works today is a real, growing slice. The engine builds, and the CLI can
 build a single Markdown file through a Mustache-style template, or build a folder
 of `index.md` files into a styled site using a built-in layout and theme selected
 from `tiledown.yml`. It can also emit derived JSON of the parsed tile tree
 (`tiledown json`) and rewrite a document to its canonical form (`tiledown fmt`).
 Markdown is real CommonMark via
-[swift-markdown](https://github.com/apple/swift-markdown). Tile CSS is wrapped in
+[swift-markdown](https://github.com/apple/swift-markdown). The compatibility
+target is CommonMark plus GitHub Flavored Markdown tables and images. Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
 write an RSS feed from the shared post collection. The CLI also has a local
@@ -209,7 +213,7 @@ From `Packages/`:
 
 ```sh
 swift run tiledown version
-# Tiledown 0.1.0
+# Tiledown 0.2.0
 ```
 
 Build one page from Markdown and a template:

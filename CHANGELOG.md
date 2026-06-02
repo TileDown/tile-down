@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-03
+
+### Added
+
+- Charts in Markdown: a `chart` fenced code block renders a static SVG chart
+  from the same authoring DSL the sibling MarkdownPDF project uses (`type`,
+  `title`, `categories`, numeric `x`, `x-label`/`y-label`, repeatable
+  `series`/`points`, and pie `slice` entries), with the same portable-profile
+  limits. Not a tile; it renders through the prose pipeline. (#125)
+- Diagrams in Markdown: a `mermaid` fenced code block renders `graph`/`flowchart`
+  diagrams through the client mermaid runtime, while a `pie`/`pie title` block
+  renders as a static SVG chart, matching MarkdownPDF. (#126)
+- Chart hovers, in two modes: the static chart fence gains native `<title>`
+  tooltips and a CSS hover highlight with no script; the interactive `chart`
+  tile adds a styled cursor-following tooltip with keyboard-focus support.
+  (#133)
+
+### Changed
+
+- Chart legends measure label width and wrap to new rows, fixing the overlap
+  that fixed-width columns caused for long series or slice names.
+- Article share and action links render as buttons (rounded rectangles) instead
+  of pills, and tag chips gain a leading accent `#`, so share links and tags are
+  no longer visually identical.
+
 ### Added
 
 - Service-form contract bindings in `tiledown.yml`: `service.<id>.contract`,
