@@ -15,6 +15,7 @@ public extension TileKit.Tile {
         case zeroTotal(type: String)
         case invalidHeight(String)
         case invalidBoolean(property: String, value: String)
+        case fenceSyntax(line: Int?, message: String)
 
         public var description: String {
             switch self {
@@ -42,6 +43,8 @@ public extension TileKit.Tile {
                 "Chart height must be an integer from 240 through 720, not \(value)."
             case let .invalidBoolean(property, value):
                 "Chart property \(property) must be true or false, not \(value)."
+            case let .fenceSyntax(line, message):
+                line.map { "Chart fence line \($0): \(message)." } ?? "Chart fence: \(message)."
             }
         }
     }

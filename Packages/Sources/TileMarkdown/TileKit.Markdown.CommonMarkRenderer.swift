@@ -17,17 +17,31 @@ public extension TileKit.Markdown {
         /// be resolved to real URLs afterward.
         private let passthroughSchemes: Set<String>
 
+        /// Renders fenced capability blocks (charts, diagrams) when supplied;
+        /// the composition root injects the concrete renderer. `nil` means every
+        /// fenced block falls back to escaped `<pre><code>`.
+        private let fencedRenderer: (any TileKit.FencedBlockRendering)?
+
         public init(
             passthroughSchemes: Set<String> = [],
+            fencedRenderer: (any TileKit.FencedBlockRendering)? = nil,
         ) {
             self.passthroughSchemes = passthroughSchemes
+            self.fencedRenderer = fencedRenderer
         }
 
         public func renderHTML(
             _ markdown: String,
         ) -> String {
-            var visitor = HTMLVisitor(extraSchemes: passthroughSchemes)
-            return visitor.visitDocument(Document(parsing: markdown))
+            renderBody(markdown).html
+        }
+
+        public func renderBody(
+            _ markdown: String,
+        ) -> TileKit.Markdown.RenderedBody {
+            var visitor = HTMLVisitor(extraSchemes: passthroughSchemes, fencedRenderer: fencedRenderer)
+            let html = visitor.visitDocument(Document(parsing: markdown))
+            return .init(html: html, css: visitor.fencedCSS)
         }
     }
 }
@@ -43,6 +57,12 @@ private struct HTMLVisitor: MarkupVisitor {
     /// Extra schemes the composition root allows through unchanged, beyond the
     /// built-in safe set (e.g. the site's `page:`/`post:`/`tag:` references).
     let extraSchemes: Set<String>
+
+    /// Renders recognized fenced capability blocks; `nil` falls back to code.
+    let fencedRenderer: (any TileKit.FencedBlockRendering)?
+
+    /// Page-local stylesheets collected from rendered fenced capability blocks.
+    var fencedCSS: [String] = []
 
     mutating func defaultVisit(
         _ markup: any Markup,
@@ -98,6 +118,13 @@ private struct HTMLVisitor: MarkupVisitor {
     mutating func visitCodeBlock(
         _ codeBlock: CodeBlock,
     ) -> String {
+        if let fenced = renderedFence(for: codeBlock) {
+            if !fenced.css.isEmpty, !fencedCSS.contains(fenced.css) {
+                fencedCSS.append(fenced.css)
+            }
+            return fenced.html
+        }
+
         let languageClass = codeBlock.language
             .map { " class=\"language-\(escapeAttribute($0))\"" } ?? ""
         var code = codeBlock.code
@@ -105,6 +132,17 @@ private struct HTMLVisitor: MarkupVisitor {
             code.removeLast()
         }
         return "<pre><code\(languageClass)>\(escape(code))</code></pre>"
+    }
+
+    /// The capability render of a fenced block, or `nil` if no renderer claims
+    /// its info-string language (so it falls back to the default code block).
+    private func renderedFence(
+        for codeBlock: CodeBlock,
+    ) -> TileKit.FencedBlock? {
+        guard let language = codeBlock.language?.split(whereSeparator: \.isWhitespace).first.map(String.init) else {
+            return nil
+        }
+        return fencedRenderer?.rendered(language: language, source: codeBlock.code)
     }
 
     mutating func visitLink(

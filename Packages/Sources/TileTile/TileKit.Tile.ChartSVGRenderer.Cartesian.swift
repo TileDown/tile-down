@@ -41,9 +41,42 @@ extension ChartSVGRenderer {
         \(verticalAxis)
         \(marks)
         \(labelNodes)
+        \(axisCaptions(data))
         \(legend(data))
         </svg>
         """
+    }
+
+    /// The optional x-axis and y-axis captions, when supplied (the Markdown
+    /// ` ```chart ` fence sets them; the property-authored chart tile does not).
+    /// The y caption is rotated up the left margin; the x caption sits centered
+    /// below the plot.
+    func axisCaptions(
+        _ data: ChartData,
+    ) -> String {
+        var nodes: [String] = []
+        let plotWidth = width - left - right
+        if let xLabel = data.xLabel, !xLabel.isEmpty {
+            nodes.append(text(
+                xLabel,
+                xPosition: left + plotWidth / 2,
+                yPosition: Double(data.height) - 2,
+                anchor: "middle",
+            ))
+        }
+        if let yLabel = data.yLabel, !yLabel.isEmpty {
+            let midY = top + (Double(data.height) - top - bottom) / 2
+            nodes.append("""
+            <text
+              class="td-chart-label"
+              x="16"
+              y="\(format(midY))"
+              text-anchor="middle"
+              transform="rotate(-90 16 \(format(midY)))"
+            >\(escapeHTML(yLabel))</text>
+            """)
+        }
+        return nodes.joined(separator: "\n")
     }
 
     func bars(
@@ -170,7 +203,7 @@ extension ChartSVGRenderer {
         """
     }
 
-    private func pointCircle(
+    func pointCircle(
         seriesIndex: Int,
         point: ChartPoint,
     ) -> String {

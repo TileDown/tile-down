@@ -16,7 +16,7 @@ struct ChartSVGRenderer {
         case .line:
             cartesian(data, marks: lines(data, range: valueRange(data), pointsOnly: false))
         case .scatter:
-            cartesian(data, marks: lines(data, range: valueRange(data), pointsOnly: true))
+            scatter(data)
         case .pie:
             radial(data, holeRatio: 0)
         case .doughnut:

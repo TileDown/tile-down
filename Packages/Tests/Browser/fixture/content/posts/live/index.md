@@ -39,3 +39,25 @@ labels: Jan, Feb, Mar
 series.Downloads: 12, 19, 7
 series.Stars: 3, 8, 5
 :::
+
+A static chart authored as a Markdown fence, using the same notation as
+MarkdownPDF:
+
+```chart
+type: line
+title: Fenced adoption
+categories: Q1, Q2, Q3
+x-label: quarter
+y-label: signups
+series: Signups = 4, 9, 14
+```
+
+A scatter chart with true `(x, y)` points:
+
+```chart
+type: scatter
+title: Effort versus impact
+x-label: effort
+y-label: impact
+series: Trials = (1, 2), (3, 5), (6, 9)
+```

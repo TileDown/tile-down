@@ -24,7 +24,9 @@ public extension TileKit.Tile {
             )
         }
 
-        private static let css = """
+        /// Shared by the property-authored chart tile and the Markdown ` ```chart `
+        /// fence renderer so both emit one identical stylesheet.
+        static let css = """
         .td-chart {
           margin-block: 1.75rem;
         }
