@@ -258,9 +258,7 @@ extension TileKit.Site.Generator {
                 )
             },
         )
-        let listsPosts = TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(
-            page.document.frontMatter["postList"],
-        )
+        let listsPosts = sectionIsTruthy(page.document.frontMatter["postList"])
         let filtersByTags = !TileKit.Site.Tags.filterSlugs(of: page).isEmpty
         context["hasPosts"] = .string(posts.isEmpty ? "" : "true")
         context["emptyPosts"] = .string(posts.isEmpty && listsPosts && filtersByTags ? "true" : "")
@@ -298,6 +296,10 @@ extension TileKit.Site.Generator {
         }
     }
 
+    func sectionIsTruthy(_ value: String?) -> Bool {
+        TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(value)
+    }
+
     func pageContext(
         _ page: TileKit.Site.Page,
         baseURL: String = "",
@@ -314,8 +316,8 @@ extension TileKit.Site.Generator {
             TileKit.Site.PostSelection.displayDate(page.document.frontMatter["date"]),
         )
         context["description"] = .string(page.document.frontMatter["description"] ?? "")
-        context["latest"] = .string(frontMatterSectionIsTruthy(page.document.frontMatter["latest"]) ? "true" : "")
-        context["postList"] = .string(frontMatterSectionIsTruthy(page.document.frontMatter["postList"]) ? "true" : "")
+        context["latest"] = .string(sectionIsTruthy(page.document.frontMatter["latest"]) ? "true" : "")
+        context["postList"] = .string(sectionIsTruthy(page.document.frontMatter["postList"]) ? "true" : "")
         // Non-empty on the tags landing page and any per-tag page, gating the
         // sticky tag bar that lets a reader jump between tags.
         let onTagPage = page.slug == "tags" || page.slug.hasPrefix("tags/")
