@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   public output paths, preserving root deployment files, migrated asset URLs,
   and explicitly configured hidden deployment paths such as `.nojekyll` and
   `.well-known`. (#79)
+- Built-in layouts now emit SEO and social preview metadata from page front
+  matter and site configuration: descriptions, canonical links when `baseURL` is
+  set, Open Graph and Twitter card tags, absolute preview images, and
+  article-published metadata for dated posts. (#100)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
