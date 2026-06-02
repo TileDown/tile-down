@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `theme.dark.<name>` can tune the curated `--td-*` custom property surface for
   built-in themes without replacing a layout or template. Values are validated
   and emitted after the selected theme's defaults. (#20)
+- Mustache inverted sections: `{{^key}}...{{/key}}` now render fallback blocks
+  when a value is absent or falsey, including empty strings, `false`, `0`, `no`,
+  and empty lists. (#114)
 - Built-in layouts now emit SEO and social preview metadata from page front
   matter and site configuration: descriptions, canonical links when `baseURL` is
   set, Open Graph and Twitter card tags, absolute preview images, and

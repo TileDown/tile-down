@@ -90,7 +90,7 @@ public extension TileKit.Template {
                 in: template[openRange.upperBound ..< closeRange.lowerBound],
             )
 
-            if key.hasPrefix("#") {
+            if key.hasPrefix("#") || key.hasPrefix("^") {
                 return try renderSectionTag(
                     key,
                     template: template,
@@ -119,6 +119,7 @@ public extension TileKit.Template {
             cursor: String.Index
         ) {
             let sectionName = Self.sectionName(key)
+            let isInverted = key.hasPrefix("^")
             let sectionEnd = try sectionEnd(
                 sectionName,
                 template: template,
@@ -129,6 +130,7 @@ public extension TileKit.Template {
             )
             let output = try renderSection(
                 sectionName,
+                isInverted: isInverted,
                 body: sectionBody,
                 scopes: scopes,
             )
@@ -137,13 +139,40 @@ public extension TileKit.Template {
 
         private func renderSection(
             _ key: String,
+            isInverted: Bool,
             body: String,
             scopes: [Context],
         ) throws -> String {
             guard let value = Self.lookup(key, scopes: scopes) else {
+                if isInverted {
+                    return try render(
+                        template: body,
+                        scopes: scopes,
+                    )
+                }
                 throw SimpleMustacheRendererError.missingValue(key)
             }
 
+            if isInverted {
+                return try renderInvertedSection(
+                    value,
+                    body: body,
+                    scopes: scopes,
+                )
+            }
+
+            return try renderPositiveSection(
+                value,
+                body: body,
+                scopes: scopes,
+            )
+        }
+
+        private func renderPositiveSection(
+            _ value: Value,
+            body: String,
+            scopes: [Context],
+        ) throws -> String {
             switch value {
             case let .list(items):
                 return try items
@@ -168,6 +197,30 @@ public extension TileKit.Template {
                     scopes: scopes,
                 )
             }
+        }
+
+        private func renderInvertedSection(
+            _ value: Value,
+            body: String,
+            scopes: [Context],
+        ) throws -> String {
+            let shouldRender: Bool = switch value {
+            case let .list(items):
+                items.isEmpty
+            case .object:
+                false
+            case let .string(value):
+                !Self.stringSectionIsTruthy(value)
+            }
+
+            guard shouldRender else {
+                return ""
+            }
+
+            return try render(
+                template: body,
+                scopes: scopes,
+            )
         }
 
         private func sectionEnd(
@@ -200,7 +253,8 @@ public extension TileKit.Template {
                     in: template[openRange.upperBound ..< closeRange.lowerBound],
                 )
 
-                if tag.hasPrefix("#"), Self.sectionName(tag) == key {
+                let isSectionOpen = tag.hasPrefix("#") || tag.hasPrefix("^")
+                if isSectionOpen, Self.sectionName(tag) == key {
                     depth += 1
                 }
 
