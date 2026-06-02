@@ -12,7 +12,8 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 packages="$(cd "$here/../.." && pwd)"
 fixture_source="$here/fixture/content"
 work="$(mktemp -d)"
-fixture="$work/content"
+normal_fixture="$work/normal-fixture"
+drafts_fixture="$work/drafts-fixture"
 normal="$work/normal"
 drafts="$work/drafts"
 system_fixture="$work/system-fixture"
@@ -52,12 +53,27 @@ PY
   fi
 }
 
+set_base_url() {
+  local fixture_dir="$1"
+  local url="$2"
+  local config="$fixture_dir/tiledown.yml"
+
+  if grep -q "^baseURL:" "$config"; then
+    perl -0pi -e "s#^baseURL:.*\$#baseURL: $url#m" "$config"
+  else
+    printf "\nbaseURL: %s\n" "$url" >> "$config"
+  fi
+}
+
 echo "Building fixture (normal + --drafts + system theme)..."
-cp -R "$fixture_source" "$fixture"
-perl -0pi -e "s|^baseURL: .*$|baseURL: http://localhost:$normal_port|m" "$fixture/tiledown.yml"
-( cd "$packages" && swift run tiledown build-site "$fixture" "$normal" )
-( cd "$packages" && swift run tiledown build-site --drafts "$fixture" "$drafts" )
-cp -R "$fixture" "$system_fixture"
+cp -R "$fixture_source" "$normal_fixture"
+cp -R "$fixture_source" "$drafts_fixture"
+cp -R "$fixture_source" "$system_fixture"
+set_base_url "$normal_fixture" "http://localhost:$normal_port"
+set_base_url "$drafts_fixture" "http://localhost:$drafts_port"
+set_base_url "$system_fixture" "http://localhost:$system_port"
+( cd "$packages" && swift run tiledown build-site "$normal_fixture" "$normal" )
+( cd "$packages" && swift run tiledown build-site --drafts "$drafts_fixture" "$drafts" )
 perl -0pi -e 's/^theme: standard$/theme: system/m' "$system_fixture/tiledown.yml"
 grep -qx "theme: system" "$system_fixture/tiledown.yml"
 ( cd "$packages" && swift run tiledown build-site "$system_fixture" "$system" )

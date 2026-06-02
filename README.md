@@ -92,9 +92,12 @@ flowchart LR
   Site --> Renderer["#85 Renderer cleanup"]:::epic
   Site --> Docs["#86 Docs and hygiene"]:::epic
 
+  Review["PR in review"]:::review
+
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff8d6,stroke:#ffcc00,color:#111827
   classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
