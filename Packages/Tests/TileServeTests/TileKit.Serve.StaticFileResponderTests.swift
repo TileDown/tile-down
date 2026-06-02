@@ -104,6 +104,20 @@ struct StaticFileResponderTests {
         #expect(response.body.isEmpty)
     }
 
+    @Test("head misses keep content length and omit the body")
+    func headMissesKeepContentLengthAndOmitBody() throws {
+        let fixture = try makeFixture()
+        defer { try? FileManager.default.removeItem(at: fixture) }
+
+        let response = try responder(root: fixture).response(
+            for: .init(method: "HEAD", target: "/missing/"),
+        )
+
+        #expect(response.statusCode == 404)
+        #expect(header("Content-Length", in: response) == "10")
+        #expect(response.body.isEmpty)
+    }
+
     private func responder(
         root: URL,
     ) -> TileKit.Serve.StaticFileResponder {

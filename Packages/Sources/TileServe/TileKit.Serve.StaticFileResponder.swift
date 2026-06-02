@@ -48,12 +48,14 @@ public extension TileKit.Serve {
                 )
             }
 
+            let sendsBody = request.method != "HEAD"
+
             guard let fileURL = try fileURL(for: request.target) else {
-                return notFound()
+                return notFound(sendsBody: sendsBody)
             }
 
             let body = try Data(contentsOf: fileURL)
-            let responseBody = request.method == "HEAD" ? Data() : body
+            let responseBody = sendsBody ? body : Data()
             return .init(
                 statusCode: 200,
                 reasonPhrase: "OK",
@@ -129,14 +131,18 @@ public extension TileKit.Serve {
             return path == root || path.hasPrefix(root + "/")
         }
 
-        private func notFound() -> Response {
-            .init(
+        private func notFound(
+            sendsBody: Bool,
+        ) -> Response {
+            let body = Data("Not Found\n".utf8)
+            return .init(
                 statusCode: 404,
                 reasonPhrase: "Not Found",
                 headers: [
                     .init(name: "Content-Type", value: "text/plain; charset=utf-8"),
+                    .init(name: "Content-Length", value: "\(body.count)"),
                 ],
-                body: Data("Not Found\n".utf8),
+                body: sendsBody ? body : Data(),
             )
         }
 

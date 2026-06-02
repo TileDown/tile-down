@@ -209,12 +209,7 @@ private final class Running: TileKit.Serve.RunningServer, @unchecked Sendable {
     private func readRequest(
         from client: Int32,
     ) throws -> TileKit.Serve.Request {
-        var buffer = [UInt8](repeating: 0, count: 16384)
-        let count = recv(client, &buffer, buffer.count, 0)
-        guard count > 0 else {
-            throw TileKit.Serve.ServerError.invalidRequestTarget("")
-        }
-        let data = Data(buffer.prefix(Int(count)))
+        let data = try readRequestHead(from: client)
         guard
             let text = String(data: data, encoding: .utf8),
             let requestLine = text.split(separator: "\r\n").first
@@ -229,6 +224,29 @@ private final class Running: TileKit.Serve.RunningServer, @unchecked Sendable {
             method: String(parts[0]),
             target: String(parts[1]),
         )
+    }
+
+    private func readRequestHead(
+        from client: Int32,
+    ) throws -> Data {
+        let maximumRequestHeadBytes = 16384
+        let lineEnd = Data("\r\n".utf8)
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 1024)
+
+        while data.count < maximumRequestHeadBytes {
+            let remaining = maximumRequestHeadBytes - data.count
+            let count = recv(client, &buffer, min(buffer.count, remaining), 0)
+            guard count > 0 else {
+                throw TileKit.Serve.ServerError.invalidRequestTarget("")
+            }
+            data.append(contentsOf: buffer.prefix(Int(count)))
+            if let range = data.range(of: lineEnd) {
+                return Data(data[..<range.upperBound])
+            }
+        }
+
+        throw TileKit.Serve.ServerError.invalidRequestTarget("")
     }
 
     private func write(
