@@ -300,6 +300,24 @@ def check_article_page(page):
         ":" in page.locator(".td-chart-tip").inner_text(),
     )
 
+    # Measure that no chart text (titles, axis labels, legends) escapes its SVG
+    # bounds, across both static-SVG fences and the interactive JS chart tile.
+    overflow = page.evaluate(
+        """() => {
+            const escaped = [];
+            document.querySelectorAll('.td-chart-svg').forEach((svg) => {
+                const s = svg.getBoundingClientRect();
+                svg.querySelectorAll('text').forEach((t) => {
+                    const b = t.getBoundingClientRect();
+                    const worst = Math.max(s.left - b.left, b.right - s.right, s.top - b.top, b.bottom - s.bottom);
+                    if (worst > 1.5) { escaped.push(t.textContent.trim().slice(0, 40) + ' (+' + Math.round(worst) + 'px)'); }
+                });
+            });
+            return escaped;
+        }""",
+    )
+    check("no chart text overflows its svg bounds (static and interactive charts)", overflow == [], str(overflow))
+
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
     title_box = box(page, ".td-article-title")
