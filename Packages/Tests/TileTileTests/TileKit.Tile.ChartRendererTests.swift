@@ -4,16 +4,20 @@ import TileCore
 
 @Suite("Chart tile renderer")
 struct ChartRendererTests {
-    @Test("chart renders escaped static SVG with no JavaScript")
-    func chartRendersStaticSVG() throws {
+    @Test("chart tile renders escaped SVG with an interactive hover runtime")
+    func chartRendersInteractiveSVG() throws {
         let rendered = try TileKit.Tile.ChartRenderer().render(chartTile(type: "bar"))
 
-        #expect(rendered.html.contains(#"<figure class="td-chart td-chart-bar">"#))
+        // The chart tile is the interactive form (the static, zero-JavaScript
+        // form is the ` ```chart ` Markdown fence, covered separately).
+        #expect(rendered.html.contains(#"<figure class="td-chart td-chart-bar" data-td-chart-interactive>"#))
         #expect(rendered.html.contains(#"class="td-chart-svg""#))
         #expect(rendered.html.contains("Releases &lt;monthly&gt;"))
         #expect(rendered.html.contains("Downloads"))
+        #expect(rendered.html.contains("<title>"))
         #expect(rendered.css.contains(".td-chart-frame"))
-        #expect(rendered.javascript.isEmpty)
+        #expect(rendered.css.contains(".td-chart-tip"))
+        #expect(rendered.javascript.contains("data-td-chart-interactive"))
     }
 
     @Test("chart renders line pie doughnut and scatter variants")
@@ -27,7 +31,7 @@ struct ChartRendererTests {
             )
             #expect(rendered.html.contains("td-chart-\(type)"))
             #expect(rendered.html.contains("td-chart-svg"))
-            #expect(rendered.javascript.isEmpty)
+            #expect(!rendered.javascript.isEmpty)
         }
     }
 
@@ -45,7 +49,6 @@ struct ChartRendererTests {
 
         #expect(!rendered.html.contains("td-chart-legend-text"))
         #expect(!rendered.html.contains(">Jan<"))
-        #expect(rendered.javascript.isEmpty)
     }
 
     @Test("chart rejects wrong type and missing labels")

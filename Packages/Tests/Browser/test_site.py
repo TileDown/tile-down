@@ -280,6 +280,26 @@ def check_article_page(page):
         all("<script" not in page.locator(".td-chart").nth(index).inner_html() for index in range(4)),
     )
 
+    # Static fence charts carry native <title> tooltips and no interactive hook.
+    fence_chart = page.locator(".td-chart:not([data-td-chart-interactive])").first
+    check(
+        "fence chart is static with a native title tooltip",
+        fence_chart.count() == 1 and fence_chart.locator("svg title").count() >= 1,
+    )
+
+    # The interactive chart tile shows a styled tooltip on hover (the JS mode).
+    tile_chart = page.locator(".td-chart[data-td-chart-interactive]").first
+    check("article chart tile is interactive", tile_chart.count() == 1)
+    tile_chart.locator(".td-chart-bar").first.hover()
+    page.wait_for_function(
+        "() => { const t = document.querySelector('.td-chart-tip');"
+        " return t && getComputedStyle(t).opacity === '1' && t.textContent.length > 0; }",
+    )
+    check(
+        "hovering an interactive chart bar shows a styled tooltip with a value",
+        ":" in page.locator(".td-chart-tip").inner_text(),
+    )
+
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
     title_box = box(page, ".td-article-title")

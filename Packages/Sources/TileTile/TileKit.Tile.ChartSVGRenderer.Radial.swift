@@ -17,12 +17,18 @@ extension ChartSVGRenderer {
         let slices = values.enumerated().map { index, value in
             let nextAngle = angle + (value / total) * Double.pi * 2
             defer { angle = nextAngle }
+            let label = data.labels.indices.contains(index) ? data.labels[index] : ""
+            let percent = formatValue(value / total * 100)
+            let title = label.isEmpty
+                ? "\(formatValue(value)) (\(percent)%)"
+                : "\(label): \(formatValue(value)) (\(percent)%)"
             return slice(
                 index: index,
                 geometry: geometry,
                 start: angle,
                 end: nextAngle,
                 isFullCircle: values.count == 1,
+                title: title,
             )
         }.joined(separator: "\n")
         let legend = data.showsLegend ? legend(labels: data.labels, height: data.height) : ""
@@ -42,6 +48,7 @@ extension ChartSVGRenderer {
         start: Double,
         end: Double,
         isFullCircle: Bool,
+        title: String = "",
     ) -> String {
         if isFullCircle, geometry.innerRadius == 0 {
             return """
@@ -50,11 +57,11 @@ extension ChartSVGRenderer {
               cx="\(format(geometry.centerX))"
               cy="\(format(geometry.centerY))"
               r="\(format(geometry.radius))"
-            ></circle>
+            >\(markTitle(title))</circle>
             """
         }
         if isFullCircle {
-            return doughnutCircle(index: index, geometry: geometry)
+            return doughnutCircle(index: index, geometry: geometry, title: title)
         }
 
         let outerStart = polar(geometry.centerX, geometry.centerY, geometry.radius, start)
@@ -68,7 +75,7 @@ extension ChartSVGRenderer {
                 "\(format(outerEnd.xPosition)) \(format(outerEnd.yPosition))",
                 "Z",
             ].joined(separator: " ")
-            return path(index: index, data: pathData)
+            return path(index: index, data: pathData, title: title)
         }
 
         let innerStart = polar(geometry.centerX, geometry.centerY, geometry.innerRadius, start)
@@ -100,18 +107,20 @@ extension ChartSVGRenderer {
     private func path(
         index: Int,
         data: String,
+        title: String = "",
     ) -> String {
         """
         <path
           class="td-chart-slice td-chart-series-\(index % 6)"
           d="\(data)"
-        ></path>
+        >\(markTitle(title))</path>
         """
     }
 
     private func doughnutCircle(
         index: Int,
         geometry: ChartArcGeometry,
+        title: String = "",
     ) -> String {
         """
         <circle
@@ -119,7 +128,7 @@ extension ChartSVGRenderer {
           cx="\(format(geometry.centerX))"
           cy="\(format(geometry.centerY))"
           r="\(format(geometry.radius))"
-        ></circle>
+        >\(markTitle(title))</circle>
         <circle
           cx="\(format(geometry.centerX))"
           cy="\(format(geometry.centerY))"

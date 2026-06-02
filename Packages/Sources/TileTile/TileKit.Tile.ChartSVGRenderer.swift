@@ -9,6 +9,7 @@ struct ChartSVGRenderer {
 
     func render(
         _ data: ChartData,
+        interactive: Bool = false,
     ) -> String {
         let svg = switch data.kind {
         case .bar:
@@ -26,8 +27,9 @@ struct ChartSVGRenderer {
         let caption = data.title.map {
             "\n<figcaption class=\"td-chart-caption\">\(escapeHTML($0))</figcaption>"
         } ?? ""
+        let interactiveAttr = interactive ? " data-td-chart-interactive" : ""
         return """
-        <figure class="td-chart td-chart-\(data.kind.rawValue)">\(caption)
+        <figure class="td-chart td-chart-\(data.kind.rawValue)"\(interactiveAttr)>\(caption)
         <div class="td-chart-frame">
         \(svg)
         </div>

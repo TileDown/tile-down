@@ -45,7 +45,8 @@ extension ChartSVGRenderer {
                     xPosition: left + normalized(point.xPosition, in: xRange) * plotWidth,
                     yPosition: yPosition(point.yPosition, range: yRange, plotHeight: plotHeight),
                 )
-                return pointCircle(seriesIndex: seriesIndex, point: placed)
+                let title = "\(series.name): (\(format(point.xPosition)), \(format(point.yPosition)))"
+                return pointCircle(seriesIndex: seriesIndex, point: placed, title: title)
             }.joined(separator: "\n")
         }.joined(separator: "\n")
     }
