@@ -40,6 +40,94 @@ block or inline, is **escaped rather than passed through**: authored or remote
 HTML never executes in generated output. This is Tiledown's escape-by-default
 security posture, not a CommonMark default.
 
+## Embeds
+
+Safe iframe and video embeds use the built-in `embed` tile. Raw iframe HTML is
+not passed through.
+
+```markdown
+:::tile embed
+url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+title: Demo video
+aspectRatio: 16/9
+:::
+```
+
+`url` is required. `title` is optional and escaped into the generated HTML.
+`aspectRatio` is optional, defaults to `16/9`, and must be two positive integers
+separated by `/`. YouTube and Vimeo URLs render as lazy responsive iframes. Direct
+HTTPS `.mp4`, `.webm`, and `.ogg` URLs render as responsive `<video controls>`
+embeds. Other schemes, providers, file types, and malformed ratios fail the
+build.
+
+## Charts
+
+Charts can use the exact shorthand fence:
+
+```markdown
+:::chart
+type: bar
+title: Releases per month
+labels: Jan, Feb, Mar, Apr
+series.Downloads: 12, 19, 7, 24
+series.Stars: 3, 8, 5, 11
+:::
+```
+
+The canonical serialized form is a normal tile directive:
+
+```markdown
+:::tile chart
+type: bar
+title: Releases per month
+labels: Jan, Feb, Mar, Apr
+series.Downloads: 12, 19, 7, 24
+series.Stars: 3, 8, 5, 11
+:::
+```
+
+`type`, `labels`, and at least one `series.<name>` property are required.
+Supported types are `bar`, `line`, `pie`, `doughnut`, and `scatter`. `labels`
+and series values may be comma-separated scalar properties or list properties.
+Every series must have the same number of values as `labels`. Pie and doughnut
+charts accept exactly one series with positive values. `height` is optional and
+must be an integer from `240` through `720`; `legend` is optional and accepts
+`true`, `false`, `yes`, `no`, `on`, `off`, `1`, or `0`.
+
+The default chart tile renders static SVG with themed CSS and no browser
+JavaScript. Labels, titles, and generated SVG text are escaped.
+
+## Mermaid diagrams
+
+Mermaid diagrams can use the exact shorthand fence:
+
+```markdown
+:::mermaid
+graph TD
+  A[Start] --> B{OK?}
+  B -->|yes| C[Ship]
+  B -->|no| A
+:::
+```
+
+The canonical serialized form is a normal tile directive with a multiline
+`definition` property:
+
+```markdown
+:::tile mermaid
+definition: |
+  graph TD
+    A[Start] --> B{OK?}
+    B -->|yes| C[Ship]
+    B -->|no| A
+:::
+```
+
+The definition is HTML-escaped into a `<pre class="mermaid">` container. The page
+emits one pinned client-side Mermaid runtime only when a Mermaid tile is present,
+and initializes it with the page's current light or dark appearance. This is
+visitor-side tile JavaScript, not build tooling.
+
 ## Canonical form
 
 `TileKit.Site.DocumentSerializer` is the source of truth for "one official

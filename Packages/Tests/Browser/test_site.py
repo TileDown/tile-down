@@ -22,6 +22,23 @@ BASE = os.environ.get("BASE_URL", "http://localhost:8093")
 
 results = []
 
+MERMAID_STUB = """
+export default {
+  initialize(config) {
+    window.__tdMermaidConfig = config;
+  },
+  run(options) {
+    Array.from(options.nodes || []).forEach((node) => {
+      node.setAttribute("data-td-mermaid-stub", "rendered");
+      const marker = document.createElement("span");
+      marker.className = "td-mermaid-rendered-test";
+      marker.textContent = "diagram rendered";
+      node.after(marker);
+    });
+  }
+};
+"""
+
 
 def check(name, ok, detail=""):
     results.append((name, bool(ok), detail))
@@ -190,6 +207,48 @@ def check_article_page(page):
         "" if media_box is None or body_box is None else f"gap={body_box['y'] - (media_box['y'] + media_box['height']):.0f}",
     )
     check("article related posts render", "More updates" in article_text and "Swift Only" in article_text)
+    embed = page.locator(".td-embed iframe").first
+    embed_box = box(page, ".td-embed-frame")
+    check("article embed iframe renders", embed.count() == 1)
+    check(
+        "article embed uses safe provider URL",
+        embed.get_attribute("src") == "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    )
+    check(
+        "article embed keeps responsive ratio",
+        embed_box is not None and abs((embed_box["width"] / embed_box["height"]) - (16 / 9)) < 0.05,
+        "" if embed_box is None else f"{embed_box['width']:.0f}x{embed_box['height']:.0f}",
+    )
+    page.wait_for_selector(".td-mermaid-source[data-td-mermaid-stub='rendered']")
+    mermaid_source = page.locator(".td-mermaid-source").first
+    check("article mermaid tile renders", page.locator(".td-mermaid-rendered-test").count() == 1)
+    check("article mermaid source remains escaped", "<script" not in page.locator(".td-mermaid").inner_html())
+    check("article mermaid keeps source text", "Write Markdown" in mermaid_source.inner_text())
+    mermaid_config = page.evaluate("window.__tdMermaidConfig")
+    page_theme = page.evaluate("document.documentElement.getAttribute('data-theme')")
+    expected_mermaid_theme = "dark" if page_theme == "dark" else "default"
+    check(
+        "article mermaid runtime uses strict themed config",
+        mermaid_config
+        and mermaid_config["securityLevel"] == "strict"
+        and mermaid_config["theme"] == expected_mermaid_theme,
+        str(mermaid_config),
+    )
+    click_center(page, page.locator("[data-td-theme-toggle]").first)
+    toggled_theme = page.evaluate("document.documentElement.getAttribute('data-theme')")
+    toggled_mermaid_theme = "dark" if toggled_theme == "dark" else "default"
+    page.wait_for_function(
+        """(expected) => window.__tdMermaidConfig && window.__tdMermaidConfig.theme === expected""",
+        arg=toggled_mermaid_theme,
+    )
+    check(
+        "article mermaid rethemes after toggle",
+        page.evaluate("window.__tdMermaidConfig && window.__tdMermaidConfig.theme") == toggled_mermaid_theme,
+    )
+    check("article chart renders static svg", page.locator(".td-chart .td-chart-svg").count() == 1)
+    chart_text = page.locator(".td-chart").inner_text()
+    check("article chart keeps labels and series", "Release metrics" in chart_text and "Downloads" in chart_text and "Jan" in chart_text)
+    check("article chart emits no script", "<script" not in page.locator(".td-chart").inner_html())
 
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
@@ -337,6 +396,7 @@ def run(page):
     page.click(".td-counter-button")
     after = page.eval_on_selector("[data-td-counter-value]", "e => e.textContent")
     check("counter tile increments per click", before == "0" and after == "2", f"{before}->{after}")
+    check("home has no mermaid runtime", page.evaluate("'__tdMermaidRuntime' in window") is False)
 
     # --- baseURL subpath: root-relative generated URLs still load ---
     check_baseurl_subpath(page)
@@ -567,6 +627,12 @@ def main():
         browser = p.chromium.launch()
         context = browser.new_context()
         page = context.new_page()
+        page.route("https://www.youtube-nocookie.com/**", lambda route: route.fulfill(status=204, body=""))
+        page.route("https://player.vimeo.com/**", lambda route: route.fulfill(status=204, body=""))
+        page.route(
+            "https://cdn.jsdelivr.net/npm/mermaid@10.9.3/**",
+            lambda route: route.fulfill(status=200, content_type="text/javascript", body=MERMAID_STUB),
+        )
         try:
             run(page)
         finally:

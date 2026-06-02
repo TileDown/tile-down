@@ -40,6 +40,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   matter and site configuration: descriptions, canonical links when `baseURL` is
   set, Open Graph and Twitter card tags, absolute preview images, and
   article-published metadata for dated posts. (#100)
+- Static SVG charts through the built-in `chart` tile, with exact `:::chart`
+  shorthand parsing, typed inline data validation, themed bar/line/pie/doughnut
+  and scatter SVG output, no browser JavaScript, docs, examples, and Playwright
+  coverage. (#57)
+- Mermaid diagrams through the built-in `mermaid` tile, with exact
+  `:::mermaid` shorthand parsing, canonical `:::tile mermaid` serialization,
+  escaped diagram source, a pinned client-side Mermaid runtime, and Playwright
+  coverage for browser rendering. (#56)
+- Safe responsive embeds through `:::tile embed`, with required `url`, optional
+  `title`, optional `aspectRatio`, YouTube and Vimeo iframe normalization, direct
+  HTTPS video-file output, and typed failures for unsafe schemes, unsupported
+  providers, and malformed ratios. (#80)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)
