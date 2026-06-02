@@ -223,6 +223,26 @@ public extension TileKit.Template {
     }
 }
 
+public extension TileKit.Template.SimpleMustacheRenderer {
+    /// Whether a string-valued Mustache section renders its body.
+    ///
+    /// A section is falsey when its value is `nil`, empty, whitespace-only, or,
+    /// after trimming and case-folding, one of `false`, `0`, or `no`. Every
+    /// other value is truthy. This is the single source of truth for string
+    /// section truthiness; the site generator reuses it so front-matter gates
+    /// such as `postList: false` behave the same way the renderer does.
+    static func stringSectionIsTruthy(
+        _ value: String?,
+    ) -> Bool {
+        switch value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case nil, .some(""), .some("false"), .some("0"), .some("no"):
+            false
+        default:
+            true
+        }
+    }
+}
+
 private extension TileKit.Template.SimpleMustacheRenderer {
     static func key(
         in value: Substring,
@@ -235,17 +255,6 @@ private extension TileKit.Template.SimpleMustacheRenderer {
     ) -> String {
         String(key.dropFirst())
             .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    static func stringSectionIsTruthy(
-        _ value: String,
-    ) -> Bool {
-        switch value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-        case "", "false", "0", "no":
-            false
-        default:
-            true
-        }
     }
 
     static func lookup(

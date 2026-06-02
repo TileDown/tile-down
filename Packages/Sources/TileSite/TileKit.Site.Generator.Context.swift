@@ -258,7 +258,9 @@ extension TileKit.Site.Generator {
                 )
             },
         )
-        let listsPosts = frontMatterSectionIsTruthy(page.document.frontMatter["postList"])
+        let listsPosts = TileKit.Template.SimpleMustacheRenderer.stringSectionIsTruthy(
+            page.document.frontMatter["postList"],
+        )
         let filtersByTags = !TileKit.Site.Tags.filterSlugs(of: page).isEmpty
         context["hasPosts"] = .string(posts.isEmpty ? "" : "true")
         context["emptyPosts"] = .string(posts.isEmpty && listsPosts && filtersByTags ? "true" : "")
@@ -275,17 +277,6 @@ extension TileKit.Site.Generator {
             )
         }
         return .object(context)
-    }
-
-    func frontMatterSectionIsTruthy(
-        _ value: String?,
-    ) -> Bool {
-        switch value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-        case nil, .some(""), .some("false"), .some("0"), .some("no"):
-            false
-        default:
-            true
-        }
     }
 
     /// The posts a page lists. A tag page (carrying tag filter markers) lists
