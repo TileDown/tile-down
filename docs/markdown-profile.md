@@ -25,13 +25,18 @@ CommonMark's 0-3 space indentation rule is not enforced. A code fence or tile
 fence indented four or more spaces is still recognized rather than treated as an
 indented code block. Full indentation-aware parsing is future work.
 
-## Prose: supported CommonMark
+## Prose: supported CommonMark and GFM tables
+
+The compatibility target is CommonMark plus GitHub Flavored Markdown tables and
+images. Markdown beyond that target is not a goal; rich content uses the tile and
+fenced-capability surfaces instead.
 
 Rendered today: headings, paragraphs, emphasis, strong, inline code, fenced code
-blocks (with a language class), links, images, unordered and ordered lists,
-block quotes, thematic breaks, and line/soft breaks. swift-markdown parses the
-full CommonMark grammar; this list is what the HTML renderer emits. Anything not
-listed falls through to its child content.
+blocks (with a language class), links, images, GitHub Flavored Markdown tables
+with column alignment, unordered and ordered lists, block quotes, thematic
+breaks, and line/soft breaks. swift-markdown parses the full CommonMark grammar
+plus the GFM table extension; this list is what the HTML renderer emits. Anything
+not listed falls through to its child content.
 
 ## Escaping and raw HTML
 
