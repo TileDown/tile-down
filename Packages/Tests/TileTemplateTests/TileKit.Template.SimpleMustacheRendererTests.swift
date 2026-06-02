@@ -31,6 +31,24 @@ struct SimpleMustacheRendererTests {
         }
     }
 
+    @Test("throws on missing section values")
+    func throwsOnMissingSectionValues() {
+        let renderer = TileKit.Template.SimpleMustacheRenderer()
+
+        #expect(throws: TileKit.Template.SimpleMustacheRendererError.missingValue("site.postss")) {
+            try renderer.render(
+                template: "{{#site.postss}}Post{{/site.postss}}",
+                context: [
+                    "site": .object(
+                        [
+                            "posts": .list([]),
+                        ],
+                    ),
+                ],
+            )
+        }
+    }
+
     @Test("renders list sections with local item scope")
     func rendersListSections() throws {
         let renderer = TileKit.Template.SimpleMustacheRenderer()
