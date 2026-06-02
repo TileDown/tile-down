@@ -22,7 +22,7 @@ extension SiteGeneratorTests {
         #expect(result.outputPaths.contains("dist/sitemap.xml"))
         let sitemap = try #require(fileSystem.files["dist/sitemap.xml"])
         #expect(sitemap == expectedSitemap)
-        #expect(!sitemap.contains("/old-target-only/"))
+        #expect(sitemap.contains("/legacy-note/"))
     }
 
     @Test("preview content builds keep drafts out of the sitemap")
@@ -74,13 +74,13 @@ extension SiteGeneratorTests {
                 ---
                 # Old Post
                 """,
-                "content/old-target-only/index.md": """
+                "content/legacy-note/index.md": """
                 ---
-                title: Old Target Only
+                title: Legacy Note
                 to: /posts/live/
                 date: 2026-05-18
                 ---
-                # Old Target Only
+                # Legacy Note
                 """,
                 "templates/page.html": "{{{ page.contents.html }}}",
             ],
@@ -110,6 +110,10 @@ extension SiteGeneratorTests {
         <url>
         <loc>https://example.com/site/about/</loc>
         <lastmod>2026-05-01</lastmod>
+        </url>
+        <url>
+        <loc>https://example.com/site/legacy-note/</loc>
+        <lastmod>2026-05-18</lastmod>
         </url>
         <url>
         <loc>https://example.com/site/posts/live/</loc>

@@ -267,8 +267,11 @@ def run(page):
     check("home title", page.title() == "Home", page.title())
     check("home metadata description", meta_content(page, 'meta[name="description"]') == "A fixture home page for generated site behavior.")
     check("home metadata open graph", meta_content(page, 'meta[property="og:type"]') == "website")
-    check("home metadata twitter card", meta_content(page, 'meta[name="twitter:card"]') == "summary")
-    check("home has no relative canonical", page.locator('link[rel="canonical"]').count() == 0)
+    check("home metadata twitter card", meta_content(page, 'meta[name="twitter:card"]') == "summary_large_image")
+    check(
+        "home canonical is absolute",
+        page.locator('link[rel="canonical"]').get_attribute("href") == NORMAL + "/",
+    )
     footer_credit = page.locator(".td-built").inner_text()
     check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
 
@@ -285,8 +288,8 @@ def run(page):
     check("hero front matter image renders", fallback_hero.is_visible())
     check("hero front matter image center is unobstructed", can_receive_center_click(fallback_hero))
     check(
-        "hero front matter omits relative metadata image without base URL",
-        page.locator('meta[property="og:image"]').count() == 0,
+        "hero front matter emits absolute metadata image",
+        page.locator('meta[property="og:image"]').get_attribute("content") == NORMAL + "/assets/hero.svg",
     )
     fallback_box = box(page, ".td-hero")
     fallback_heading = box(page, "h1")
@@ -456,7 +459,7 @@ def run(page):
     ).first
     check(
         "migrated article permalink uses canonical URL",
-        migrated_permalink.get_attribute("href") == "/blog/migrated/",
+        migrated_permalink.get_attribute("href") == NORMAL + "/blog/migrated/",
     )
     check(
         "migrated article share link is tappable",
@@ -480,7 +483,7 @@ def run(page):
     migrated_listing = page.inner_text("body")
     check("migrated post appears in listing", "Migrated Post" in migrated_listing)
     migrated_card = page.locator(".td-post-card").get_by_role("link", name="Migrated Post").first
-    check("migrated listing uses canonical URL", migrated_card.get_attribute("href") == "/blog/migrated/")
+    check("migrated listing uses canonical URL", migrated_card.get_attribute("href") == NORMAL + "/blog/migrated/")
     page.goto(NORMAL + "/tags/migration/", wait_until="networkidle")
     check("migrated post appears on tag page", "Migrated Post" in page.inner_text("body"))
 
