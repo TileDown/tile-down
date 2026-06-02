@@ -129,6 +129,7 @@ flowchart TD
   Epic --> Slugs["#87 Migration slugs"]:::review
   Epic --> LegacyRedirects["#97 404 legacy redirects"]:::review
   Epic --> SEO["#100 SEO metadata"]:::review
+  Epic --> HeroFM["#103 Hero front matter"]:::review
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
