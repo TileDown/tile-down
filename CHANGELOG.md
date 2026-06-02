@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Redirect content items: a page with `type: redirect` and `to: <url>` now
   emits a static redirect page at its slug while staying out of navigation, post
   listings, tag pages, and feeds. (#45)
+- Generated 404 pages: content builds now emit root `404.html`, using a
+  built-in default page or a site-specific `content/404/index.md` override
+  rendered through the same layout and theme as the rest of the site. Local
+  assets beside the override publish beside `404.html`, so relative images load
+  without creating a browsable `/404/` page. (#47)
 - Default article pages for dated posts in the built-in layouts, with a
   newsroom-style header, dek, hero media, body, related posts, and optional
   static share links controlled by `shareLinks: true` in `tiledown.yml`. (#74)

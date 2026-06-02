@@ -8,16 +8,32 @@ extension TileKit.Site.Generator {
         sitePaths: TileKit.Site.GeneratedSitePaths,
     ) throws -> [String] {
         try pages.map { page in
-            let output = try render(
+            try writeRenderedPage(
                 page: page,
                 pages: pages,
                 template: template,
                 configuration: configuration,
                 sitePaths: sitePaths,
             )
-            try fileSystem.writeTextFile(output, at: page.outputPath)
-            return page.outputPath
         }
+    }
+
+    func writeRenderedPage(
+        page: TileKit.Site.Page,
+        pages: [TileKit.Site.Page],
+        template: String,
+        configuration: TileKit.Site.Configuration,
+        sitePaths: TileKit.Site.GeneratedSitePaths,
+    ) throws -> String {
+        let output = try render(
+            page: page,
+            pages: pages,
+            template: template,
+            configuration: configuration,
+            sitePaths: sitePaths,
+        )
+        try fileSystem.writeTextFile(output, at: page.outputPath)
+        return page.outputPath
     }
 
     func render(
