@@ -9,6 +9,31 @@ struct ChartData: Equatable {
     var height: Int
     var showsLegend: Bool
 
+    /// Optional axis captions, supported by the Markdown `chart` fence. The
+    /// property-authored chart tile leaves these `nil`.
+    var xLabel: String?
+    var yLabel: String?
+
+    init(
+        kind: ChartKind,
+        title: String?,
+        labels: [String],
+        series: [ChartSeries],
+        height: Int = 360,
+        showsLegend: Bool = true,
+        xLabel: String? = nil,
+        yLabel: String? = nil,
+    ) {
+        self.kind = kind
+        self.title = title
+        self.labels = labels
+        self.series = series
+        self.height = height
+        self.showsLegend = showsLegend
+        self.xLabel = xLabel
+        self.yLabel = yLabel
+    }
+
     init(
         _ tile: TileKit.Tile.Instance,
     ) throws {

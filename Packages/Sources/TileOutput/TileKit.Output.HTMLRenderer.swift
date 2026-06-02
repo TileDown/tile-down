@@ -46,7 +46,11 @@ public extension TileKit.Output {
             for block in document.blocks {
                 switch block {
                 case let .markdown(markdown):
-                    html.append(markdownRenderer.renderHTML(markdown))
+                    let body = markdownRenderer.renderBody(markdown)
+                    html.append(body.html)
+                    for stylesheet in body.css {
+                        Self.appendUnique(stylesheet, to: &themed)
+                    }
                 case let .tile(tile):
                     let rendered = try tileRegistry.render(tile)
                     html.append(rendered.html)

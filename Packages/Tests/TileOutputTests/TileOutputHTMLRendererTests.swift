@@ -64,6 +64,64 @@ struct TileOutputHTMLRendererTests {
         )
     }
 
+    @Test("renders a chart fence to SVG and collects its stylesheet")
+    func chartFenceRendersToSVG() throws {
+        let html = TileKit.Output.HTMLRenderer(
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
+                fencedRenderer: TileKit.Tile.ChartFenceRenderer(),
+            ),
+            tileRegistry: .init(),
+        )
+        let document = TileKit.Output.Document(blocks: [
+            .markdown(
+                """
+                Before the chart.
+
+                ```chart
+                type: bar
+                title: Release metrics
+                categories: Jan, Feb
+                series: Downloads = 3, 5
+                ```
+
+                After the chart.
+                """,
+            ),
+        ])
+
+        let artifact = try html.render(document)
+        #expect(artifact.contents.contains("td-chart-svg"))
+        #expect(artifact.contents.contains("Release metrics"))
+        #expect(artifact.contents.contains("<p>Before the chart.</p>"))
+        // Dispatched away from a raw code block.
+        #expect(!artifact.contents.contains("language-chart"))
+        // The chart stylesheet is collected into the page assets, in the theme layer.
+        #expect(artifact.assets.css.contains(".td-chart-frame"))
+    }
+
+    @Test("an unparseable chart fence falls back to an escaped code block")
+    func chartFenceFallsBack() throws {
+        let html = TileKit.Output.HTMLRenderer(
+            markdownRenderer: TileKit.Markdown.CommonMarkRenderer(
+                fencedRenderer: TileKit.Tile.ChartFenceRenderer(),
+            ),
+            tileRegistry: .init(),
+        )
+        let document = TileKit.Output.Document(blocks: [
+            .markdown(
+                """
+                ```chart
+                type: bar
+                ```
+                """,
+            ),
+        ])
+
+        let artifact = try html.render(document)
+        #expect(artifact.contents.contains("language-chart"))
+        #expect(!artifact.contents.contains("td-chart-svg"))
+    }
+
     @Test("the format id and file extension are html")
     func format() throws {
         #expect(renderer().formatID == "html")

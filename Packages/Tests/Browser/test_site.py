@@ -245,10 +245,27 @@ def check_article_page(page):
         "article mermaid rethemes after toggle",
         page.evaluate("window.__tdMermaidConfig && window.__tdMermaidConfig.theme") == toggled_mermaid_theme,
     )
-    check("article chart renders static svg", page.locator(".td-chart .td-chart-svg").count() == 1)
-    chart_text = page.locator(".td-chart").inner_text()
-    check("article chart keeps labels and series", "Release metrics" in chart_text and "Downloads" in chart_text and "Jan" in chart_text)
-    check("article chart emits no script", "<script" not in page.locator(".td-chart").inner_html())
+    check("article renders chart tile and two markdown chart fences as svg", page.locator(".td-chart .td-chart-svg").count() == 3)
+    tile_chart_text = page.locator(".td-chart").first.inner_text()
+    line_fence_text = page.locator(".td-chart").nth(1).inner_text()
+    scatter_fence_text = page.locator(".td-chart").nth(2).inner_text()
+    check("article chart tile keeps labels and series", "Release metrics" in tile_chart_text and "Downloads" in tile_chart_text and "Jan" in tile_chart_text)
+    check(
+        "article markdown line fence renders labels, series, and axis captions",
+        "Fenced adoption" in line_fence_text and "Signups" in line_fence_text and "quarter" in line_fence_text,
+    )
+    check(
+        "article markdown scatter fence renders points and axis captions",
+        "Effort versus impact" in scatter_fence_text and "effort" in scatter_fence_text and "impact" in scatter_fence_text,
+    )
+    check(
+        "article scatter fence draws point marks",
+        page.locator(".td-chart").nth(2).locator(".td-chart-point").count() == 3,
+    )
+    check(
+        "article charts emit no script",
+        all("<script" not in page.locator(".td-chart").nth(index).inner_html() for index in range(3)),
+    )
 
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
