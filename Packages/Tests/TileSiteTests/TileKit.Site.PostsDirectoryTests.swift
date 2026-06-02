@@ -62,6 +62,40 @@ struct SitePostsDirectoryTests {
         #expect(!feed.contains("Blog Post"))
     }
 
+    @Test("postList false suppresses built-in listing sections")
+    func postListFalseSuppressesListing() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\npostList: false\n---\n# Home",
+                "content/empty/index.md": "---\ntitle: Empty\npostList: false\ntag: missing\n---\n# Empty",
+                "content/posts/entry/index.md": "---\ntitle: Listed Post\ndate: 2026-05-29\n---\n# Entry",
+                "templates/page.html": [
+                    "{{{ page.contents.html }}}",
+                    "{{#page.postList}}{{#site.posts}}<li>{{ title }}</li>{{/site.posts}}{{/page.postList}}",
+                    "{{#page.emptyPosts}}EMPTY{{/page.emptyPosts}}",
+                ].joined(),
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(
+                    baseURL: "https://example.com",
+                    theme: nil,
+                ),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(!home.contains("Listed Post"))
+
+        let empty = try #require(fileSystem.files["dist/empty/index.html"])
+        #expect(!empty.contains("EMPTY"))
+    }
+
     @Test("postsDir in the configuration file is parsed and slash-normalized")
     func postsDirParsing() throws {
         let file = try TileKit.Site.ConfigurationFile.parse("postsDir: /blog/")
