@@ -17,17 +17,21 @@ extension ChartSVGRenderer {
         let xRange = pointRange(data.series.flatMap { $0.points ?? [] }.map(\.xPosition))
         let yRange = valueRange(data)
         let zeroY = yPosition(0, range: yRange, plotHeight: plotHeight)
+        let stack = bottomStack(data, legendLabels: data.series.map(\.name))
+        let legendNodes = data.showsLegend
+            ? legend(labels: data.series.map(\.name), height: Int(stack.legendBaseY + 12))
+            : ""
 
         return """
-        \(svgStart(height: data.height, ariaLabel: ariaLabel(data)))
+        \(svgStart(height: stack.height, ariaLabel: ariaLabel(data)))
         <desc>\(escapeHTML(description(data)))</desc>
         \(gridLines(range: yRange, plotHeight: plotHeight))
         \(line(className: "td-chart-axis", startX: left, startY: zeroY, endX: width - right, endY: zeroY))
         \(line(className: "td-chart-axis", startX: left, startY: top, endX: left, endY: Double(data.height) - bottom))
-        \(scatterXAxis(xRange: xRange, plotWidth: plotWidth, height: data.height))
+        \(scatterXAxis(xRange: xRange, plotWidth: plotWidth, axisY: stack.axisY))
         \(scatterMarks(data, xRange: xRange, yRange: yRange, plotWidth: plotWidth, plotHeight: plotHeight))
-        \(axisCaptions(data))
-        \(legend(data))
+        \(axisCaptions(data, captionY: stack.captionY))
+        \(legendNodes)
         </svg>
         """
     }
@@ -54,12 +58,12 @@ extension ChartSVGRenderer {
     private func scatterXAxis(
         xRange: ClosedRange<Double>,
         plotWidth: Double,
-        height: Int,
+        axisY: Double,
     ) -> String {
         let ticks = [xRange.lowerBound, (xRange.lowerBound + xRange.upperBound) / 2, xRange.upperBound]
         return ticks.map { value in
             let xPosition = left + normalized(value, in: xRange) * plotWidth
-            return text(formatValue(value), xPosition: xPosition, yPosition: Double(height) - 22, anchor: "middle")
+            return text(formatValue(value), xPosition: xPosition, yPosition: axisY, anchor: "middle")
         }.joined(separator: "\n")
     }
 

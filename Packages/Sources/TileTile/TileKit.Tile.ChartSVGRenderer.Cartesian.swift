@@ -13,9 +13,10 @@ extension ChartSVGRenderer {
             range: range,
         )
         let zeroY = yPosition(0, range: range, plotHeight: plot.plotHeight)
+        let stack = bottomStack(data, legendLabels: data.series.map(\.name))
         let labelNodes = data.labels.enumerated().map { index, label in
             let labelX = left + (Double(index) + 0.5) * plot.plotWidth / Double(data.labels.count)
-            return text(label, xPosition: labelX, yPosition: Double(data.height) - 22, anchor: "middle")
+            return text(label, xPosition: labelX, yPosition: stack.axisY, anchor: "middle")
         }.joined(separator: "\n")
 
         let horizontalAxis = line(
@@ -33,16 +34,19 @@ extension ChartSVGRenderer {
             endY: Double(data.height) - bottom,
         )
 
+        let legendNodes = data.showsLegend
+            ? legend(labels: data.series.map(\.name), height: Int(stack.legendBaseY + 12))
+            : ""
         return """
-        \(svgStart(height: data.height, ariaLabel: ariaLabel(data)))
+        \(svgStart(height: stack.height, ariaLabel: ariaLabel(data)))
         <desc>\(escapeHTML(description(data)))</desc>
         \(gridLines(range: range, plotHeight: plot.plotHeight))
         \(horizontalAxis)
         \(verticalAxis)
         \(marks)
         \(labelNodes)
-        \(axisCaptions(data))
-        \(legend(data))
+        \(axisCaptions(data, captionY: stack.captionY))
+        \(legendNodes)
         </svg>
         """
     }
@@ -53,6 +57,7 @@ extension ChartSVGRenderer {
     /// below the plot.
     func axisCaptions(
         _ data: ChartData,
+        captionY: Double,
     ) -> String {
         var nodes: [String] = []
         let plotWidth = width - left - right
@@ -60,7 +65,7 @@ extension ChartSVGRenderer {
             nodes.append(text(
                 xLabel,
                 xPosition: left + plotWidth / 2,
-                yPosition: Double(data.height) - 2,
+                yPosition: captionY,
                 anchor: "middle",
             ))
         }

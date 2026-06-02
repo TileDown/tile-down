@@ -300,23 +300,38 @@ def check_article_page(page):
         ":" in page.locator(".td-chart-tip").inner_text(),
     )
 
-    # Measure that no chart text (titles, axis labels, legends) escapes its SVG
-    # bounds, across both static-SVG fences and the interactive JS chart tile.
-    overflow = page.evaluate(
+    # Measure chart text geometry across static fences and the interactive tile:
+    # nothing escapes the SVG bounds, and no two labels (categories, axis caption,
+    # legend) overlap each other.
+    problems = page.evaluate(
         """() => {
-            const escaped = [];
-            document.querySelectorAll('.td-chart-svg').forEach((svg) => {
+            const issues = [];
+            document.querySelectorAll('.td-chart-svg').forEach((svg, ci) => {
                 const s = svg.getBoundingClientRect();
+                const boxes = [];
                 svg.querySelectorAll('text').forEach((t) => {
+                    const label = t.textContent.trim();
+                    if (!label) { return; }
                     const b = t.getBoundingClientRect();
-                    const worst = Math.max(s.left - b.left, b.right - s.right, s.top - b.top, b.bottom - s.bottom);
-                    if (worst > 1.5) { escaped.push(t.textContent.trim().slice(0, 40) + ' (+' + Math.round(worst) + 'px)'); }
+                    const out = Math.max(s.left - b.left, b.right - s.right, s.top - b.top, b.bottom - s.bottom);
+                    if (out > 1.5) { issues.push('overflow#' + ci + ' ' + label.slice(0, 20)); }
+                    boxes.push({ label, b });
                 });
+                for (let i = 0; i < boxes.length; i++) {
+                    for (let j = i + 1; j < boxes.length; j++) {
+                        const a = boxes[i].b, c = boxes[j].b;
+                        const ox = Math.min(a.right, c.right) - Math.max(a.left, c.left);
+                        const oy = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
+                        if (ox > 2 && oy > 2) {
+                            issues.push('overlap#' + ci + ' ' + boxes[i].label.slice(0, 14) + ' / ' + boxes[j].label.slice(0, 14));
+                        }
+                    }
+                }
             });
-            return escaped;
+            return issues;
         }""",
     )
-    check("no chart text overflows its svg bounds (static and interactive charts)", overflow == [], str(overflow))
+    check("no chart text overflows or overlaps (static and interactive charts)", problems == [], str(problems))
 
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
