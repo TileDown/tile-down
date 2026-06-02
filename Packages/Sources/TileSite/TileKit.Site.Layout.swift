@@ -46,9 +46,26 @@ public extension TileKit.Site {
         {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
+          function storedTheme() {
+            try {
+              var saved = localStorage.getItem('td-theme');
+              return saved === 'dark' || saved === 'light' ? saved : '';
+            } catch (e) {
+              return '';
+            }
+          }
+          function applyStoredTheme() {
+            var saved = storedTheme();
+            if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
+          }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
-          try { var saved = localStorage.getItem('td-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+          applyStoredTheme();
+          window.addEventListener('pageshow', applyStoredTheme);
+          window.addEventListener('storage', function (event) {
+            if (event.key === 'td-theme') applyStoredTheme();
+          });
           document.addEventListener('DOMContentLoaded', function () {
             var button = document.querySelector('[data-td-theme-toggle]');
             if (!button) return;
@@ -90,9 +107,26 @@ public extension TileKit.Site {
         {{#site.appearanceToggle}}<script>
         (function () {
           var root = document.documentElement;
+          function storedTheme() {
+            try {
+              var saved = localStorage.getItem('td-theme');
+              return saved === 'dark' || saved === 'light' ? saved : '';
+            } catch (e) {
+              return '';
+            }
+          }
+          function applyStoredTheme() {
+            var saved = storedTheme();
+            if (saved) root.setAttribute('data-theme', saved);
+            else root.removeAttribute('data-theme');
+          }
           // Apply a saved choice before paint so there is no flash. With no saved
           // choice the CSS follows the OS via prefers-color-scheme.
-          try { var saved = localStorage.getItem('td-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+          applyStoredTheme();
+          window.addEventListener('pageshow', applyStoredTheme);
+          window.addEventListener('storage', function (event) {
+            if (event.key === 'td-theme') applyStoredTheme();
+          });
           document.addEventListener('DOMContentLoaded', function () {
             var button = document.querySelector('[data-td-theme-toggle]');
             if (!button) return;

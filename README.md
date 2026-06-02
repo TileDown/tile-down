@@ -110,9 +110,7 @@ flowchart TD
 
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
   classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff8cc,stroke:#ffcc00,color:#111827
-  classDef active fill:#ffe8cc,stroke:#ff9500,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+  classDef todo fill:#fff1d6,stroke:#ff9500,color:#111827
 ```
 
 ### #82 Static output
