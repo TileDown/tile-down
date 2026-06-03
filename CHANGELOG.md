@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   vendored and a pure-Swift OpenType reader parses its `cmap`/`hmtx`/`head` for
   glyph advances (the engine's `measureText` contract) and its `MATH` table for
   layout metrics. Verified against the font's own metrics. (#127)
+- A pure-Swift CFF Type2 charstring interpreter that turns glyph ids into outline
+  paths (cubic curves and lines, following local and global subroutines and the
+  flex operators). This lets the SVG renderer draw self-contained glyph outlines
+  with no shipped font or runtime. Verified against fontTools: exact outlines for
+  reference glyphs and matching control bounds across letters, digits, delimiters,
+  and large math symbols (sum, integral, radical, pi, partial). (#127)
 
 ### Fixed
 
