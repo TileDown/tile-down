@@ -206,6 +206,8 @@ let targets: [Target] = {
     let markdownPDFPlaygroundTarget = Target.executableTarget(
         name: "MarkdownPDFPlaygroundCLI",
         dependencies: [
+            "TileCore",
+            "TilePDF",
             .product(name: "MarkdownPDF", package: "MarkdownPDF"),
         ],
         swiftSettings: swiftSettings,
