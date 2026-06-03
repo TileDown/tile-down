@@ -55,7 +55,7 @@ public extension TileKit.Site {
                 if applyAnalytics(item, to: &result) {
                     continue
                 }
-                if try applyShareLinks(item, to: &result) {
+                if try applyBooleanFlag(item, to: &result) {
                     continue
                 }
                 if try applyNotFoundRedirect(item, to: &result) {
@@ -319,16 +319,21 @@ private extension TileKit.Site.ConfigurationFile {
         return true
     }
 
-    /// Parses the opt-in article share-link switch separately from the scalar
-    /// dispatch so the scalar switch stays small enough to read.
-    static func applyShareLinks(
+    /// Parses the opt-in boolean switches (article share links and the Markdown
+    /// source disclosure) separately from the scalar dispatch so that switch stays
+    /// small enough to read.
+    static func applyBooleanFlag(
         _ item: (key: String, value: String),
         to result: inout Self,
     ) throws -> Bool {
-        guard item.key == "shareLinks" else {
+        switch item.key {
+        case "shareLinks":
+            result.configuration.shareLinks = try boolean(item.value)
+        case "showSource":
+            result.configuration.showSource = try boolean(item.value)
+        default:
             return false
         }
-        result.configuration.shareLinks = try boolean(item.value)
         return true
     }
 }

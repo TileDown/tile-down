@@ -57,6 +57,10 @@ public extension TileKit.Site {
         /// Disabled by default so a site only emits third-party share URLs when it
         /// opts in.
         public var shareLinks: Bool
+        /// Whether every built-in page offers a "Show Markdown source" disclosure
+        /// carrying its verbatim source file. Disabled by default; a teaching site
+        /// opts in so readers can see the Tiledown Markdown behind each page.
+        public var showSource: Bool
         /// Fallback redirects emitted into root `404.html` for static hosts that
         /// cannot express wildcard redirects natively.
         public var notFoundRedirects: NotFoundRedirects
@@ -80,6 +84,7 @@ public extension TileKit.Site {
             analyticsHead: String = "",
             analyticsBodyEnd: String = "",
             shareLinks: Bool = false,
+            showSource: Bool = false,
             notFoundRedirects: NotFoundRedirects = .init(),
             staticPassthroughs: [StaticPassthrough] = [],
         ) {
@@ -98,6 +103,7 @@ public extension TileKit.Site {
             self.analyticsHead = analyticsHead
             self.analyticsBodyEnd = analyticsBodyEnd
             self.shareLinks = shareLinks
+            self.showSource = showSource
             self.notFoundRedirects = notFoundRedirects
             self.staticPassthroughs = staticPassthroughs
         }

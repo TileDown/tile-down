@@ -17,6 +17,10 @@ public extension TileKit.Site {
         public var sourceSlug: String
         public var slug: String
         public var document: TileKit.Source.Document
+        /// The verbatim source file (front matter and Markdown body), kept so the
+        /// built-in layout can offer a "Show Markdown source" disclosure. Empty when
+        /// the page has no backing source file.
+        public var rawSource: String
         public var html: String
         /// The page's CSS by cascade layer, mergeable into a shared site stylesheet.
         public var stylesheet: TileKit.Output.Stylesheet
@@ -28,6 +32,7 @@ public extension TileKit.Site {
             sourceSlug: String? = nil,
             slug: String,
             document: TileKit.Source.Document,
+            rawSource: String = "",
             html: String,
             stylesheet: TileKit.Output.Stylesheet = .init(),
             javascript: String = "",
@@ -37,6 +42,7 @@ public extension TileKit.Site {
             self.sourceSlug = sourceSlug ?? slug
             self.slug = slug
             self.document = document
+            self.rawSource = rawSource
             self.html = html
             self.stylesheet = stylesheet
             self.javascript = javascript

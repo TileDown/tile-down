@@ -426,6 +426,61 @@ def check_baseurl_subpath(page):
     )
 
 
+def check_source_disclosure(page):
+    page.set_viewport_size({"width": 1024, "height": 900})
+    page.emulate_media(color_scheme="light")
+    page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
+
+    # The opt-in "View Markdown source" disclosure: a native <details> window.
+    check("source disclosure present on article", page.locator(".td-source").count() == 1)
+    check("source window has a titlebar", page.locator(".td-source-window .td-source-titlebar").count() == 1)
+    name = page.locator(".td-source-name").text_content()
+    check("source window names the .md file", name.endswith(".md"), name)
+
+    # Build-time syntax highlighting: real tokens, not a single color.
+    check(
+        "source is syntax highlighted",
+        page.locator(".td-source .tok-fm-key").count() >= 1 and page.locator(".td-source .tok-heading").count() >= 1,
+    )
+    colors = page.evaluate(
+        """() => {
+            const c = s => { const e = document.querySelector(s); return e ? getComputedStyle(e).color : null; };
+            return { key: c('.tok-fm-key'), val: c('.tok-fm-value'), muted: c('.tok-fm-delim') };
+        }"""
+    )
+    check(
+        "syntax tokens use distinct colors",
+        colors["key"] != colors["val"] and colors["val"] != colors["muted"],
+        str(colors),
+    )
+
+    # The source must be escaped: no markup from the file leaks into the page.
+    code_html = page.locator(".td-source-code").inner_html()
+    check("source code carries no raw script tag", "<script" not in code_html.lower())
+
+    # The Copy button is added by JS (progressive enhancement), so it is absent
+    # without scripting and present here.
+    check("copy button is injected by JS", page.locator(".td-source-copy").count() == 1)
+
+    # The open state persists in localStorage, so it follows the reader. The
+    # toggle event is async, so wait for the write to land before reloading.
+    page.locator(".td-source-summary").click()
+    check("disclosure opens on click", page.locator(".td-source").get_attribute("open") is not None)
+    page.wait_for_function("() => localStorage.getItem('td-source-open') === 'true'")
+    page.reload(wait_until="networkidle")
+    check("source open state persists across navigation", page.locator(".td-source").get_attribute("open") is not None)
+
+    # The window follows the appearance toggle: a token color changes light->dark.
+    light = page.evaluate("() => getComputedStyle(document.querySelector('.tok-fm-key')).color")
+    page.locator("[data-td-theme-toggle]").click()
+    dark = page.evaluate("() => getComputedStyle(document.querySelector('.tok-fm-key')).color")
+    check("source colors follow the light/dark setting", light != dark, f"{light} vs {dark}")
+
+    # A page with no source file (the synthesized 404) shows no disclosure.
+    page.goto(NORMAL + "/this-page-does-not-exist/", wait_until="networkidle")
+    check("404 page has no source disclosure", page.locator(".td-source").count() == 0)
+
+
 def run(page):
     install_404_routes(page)
 
@@ -609,6 +664,7 @@ def run(page):
 
     # --- Article page: newsroom-style post layout ---
     check_article_page(page)
+    check_source_disclosure(page)
     page.goto(NORMAL + "/writing/typed/", wait_until="networkidle")
     typed_article = page.inner_text("body")
     check("typed post outside postsDir renders article shell", page.locator(".td-article").count() == 1)
