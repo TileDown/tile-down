@@ -15,9 +15,21 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 ## What it renders
 
-Math, charts, and diagrams are written in Markdown and rendered by the build. Math
-and charts come out as static SVG with no client-side JavaScript and no web font.
-Mermaid diagrams use the mermaid runtime.
+Ordinary Markdown becomes a themed page: headings, lists, GitHub-flavored tables,
+code, and blockquotes laid out by a built-in theme, with math typeset to SVG right
+alongside the prose. The same page in light and dark (the image follows your
+GitHub theme):
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/page-dark.png">
+    <img alt="A TileDown page: prose, a list, a table, a blockquote, code, and a display formula, themed" src="docs/images/page-light.png" width="720">
+  </picture>
+</p>
+
+The pieces below are written in Markdown and rendered by the build. Math and charts
+come out as static SVG with no client-side JavaScript and no web font; mermaid
+diagrams use the mermaid runtime.
 
 ### Math
 
@@ -163,6 +175,12 @@ $$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
 swift run tiledown build-site content/ dist/
 # dist/.../index.html now contains an <svg> of glyph <path> outlines, no <script>
 ```
+
+That `$$...$$` block renders to:
+
+<p align="center">
+  <img src="docs/images/formula-quadratic.png" alt="The quadratic formula rendered to SVG" width="300">
+</p>
 
 The typesetting engine is the standalone, dependency-free
 [MathTypeset](https://github.com/mihaelamj/MathTypeset) package, shared with the
