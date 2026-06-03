@@ -1,0 +1,74 @@
+name: Playground WASM
+
+# Rebuilds the in-browser math playground's WebAssembly from engine source whenever
+# the engine changes, and republishes it to the `wasm-playground-asset` branch as a
+# single-commit artifact (kept out of main's history). The tiledown.com playground
+# fetches it from that branch, so it always tracks the current engine.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Packages/Sources/TileMath/**"
+      - "Packages/Sources/TileCore/**"
+      - "Packages/Sources/MathPlaygroundCLI/**"
+      - "Packages/Package.swift"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: playground-wasm
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install binaryen (wasm-opt) and tools
+        run: apt-get update && apt-get install -y binaryen gzip git
+
+      - name: Install Swift WebAssembly SDK
+        run: |
+          URL="https://github.com/swiftwasm/swift/releases/download/swift-wasm-6.2-RELEASE/swift-wasm-6.2-RELEASE-wasm32-unknown-wasip1.artifactbundle.zip"
+          SUM=$(curl -sL "$URL.sha256" | awk '{print $1}')
+          swift sdk install "$URL" --checksum "$SUM"
+
+      - name: Build and optimize the WASM
+        run: |
+          cd Packages
+          swift build --product MathPlaygroundCLI -c release \
+            --swift-sdk 6.2-RELEASE-wasm32-unknown-wasip1 --scratch-path /tmp/wasmbuild
+          wasm-opt -Oz --strip-debug --strip-producers \
+            /tmp/wasmbuild/wasm32-unknown-wasip1/release/MathPlaygroundCLI.wasm -o /tmp/math.wasm
+          gzip -9 -c /tmp/math.wasm > /tmp/tiledown-math.wasm.gz
+          ls -la /tmp/tiledown-math.wasm.gz
+
+      - name: Publish single-commit artifact branch
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "tiledown-ci"
+          git config user.email "ci@tiledown.com"
+          mkdir -p out/docs/playground
+          cp /tmp/tiledown-math.wasm.gz out/docs/playground/tiledown-math.wasm.gz
+          cat > out/docs/playground/README.md <<'EOF'
+          # Playground WASM artifact (generated)
+
+          `tiledown-math.wasm.gz` is a gzipped WebAssembly build of `MathPlaygroundCLI`
+          (the MathTypeset + TileMath math engine), rebuilt by the Playground WASM
+          workflow on every engine change. This branch is a single-commit artifact ref;
+          do not base work on it. The tiledown.com playground fetches this file.
+          EOF
+          cd out
+          git init -q
+          git checkout -q -b wasm-playground-asset
+          git add -A
+          git commit -q -m "chore(playground): rebuild WASM from ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" wasm-playground-asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
