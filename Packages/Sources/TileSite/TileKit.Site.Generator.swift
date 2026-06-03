@@ -279,16 +279,17 @@ private extension TileKit.Site.Generator {
         outputPath: String,
         slug: String,
     ) throws -> TileKit.Site.Page {
-        let document = try markdownParser.parse(
-            fileSystem.readTextFile(at: sourcePath),
-        )
-        return try makePage(
+        let rawSource = try fileSystem.readTextFile(at: sourcePath)
+        let document = try markdownParser.parse(rawSource)
+        var page = try makePage(
             sourcePath: sourcePath,
             outputPath: outputPath,
             sourceSlug: slug,
             slug: slug,
             document: document,
         )
+        page.rawSource = rawSource
+        return page
     }
 
     /// Loads a content page, letting a non-empty `slug` front-matter value
@@ -298,9 +299,8 @@ private extension TileKit.Site.Generator {
         folderSlug: String,
         outputRootPath: String,
     ) throws -> TileKit.Site.Page {
-        let document = try markdownParser.parse(
-            fileSystem.readTextFile(at: sourcePath),
-        )
+        let rawSource = try fileSystem.readTextFile(at: sourcePath)
+        let document = try markdownParser.parse(rawSource)
         let slug = try effectiveSlug(
             folderSlug: folderSlug,
             frontMatter: document.frontMatter,
@@ -316,16 +316,19 @@ private extension TileKit.Site.Generator {
                 sourceSlug: folderSlug,
                 slug: slug,
                 document: document,
+                rawSource: rawSource,
                 html: "",
             )
         }
-        return try makePage(
+        var page = try makePage(
             sourcePath: sourcePath,
             outputPath: resolvedOutputPath,
             sourceSlug: folderSlug,
             slug: slug,
             document: document,
         )
+        page.rawSource = rawSource
+        return page
     }
 
     /// Parses tiles and renders a page from an already-parsed document: the shared

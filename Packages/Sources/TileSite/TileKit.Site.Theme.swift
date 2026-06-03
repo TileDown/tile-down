@@ -61,6 +61,8 @@ public extension TileKit.Site {
         --td-ink: #1c1917;
         --td-muted: #57534e;
         --td-accent: #b45309;
+        --td-syn-key: #2563eb;
+        --td-syn-str: #15803d;
         --td-border: #e7e5e4;
         --td-radius: 12px;
         --td-space: 1rem;
@@ -74,6 +76,8 @@ public extension TileKit.Site {
         --td-ink: #fafaf9;
         --td-muted: #a1a1aa;
         --td-accent: #f59e0b;
+        --td-syn-key: #60a5fa;
+        --td-syn-str: #4ade80;
         --td-border: #27272a;
         }
         @media (prefers-color-scheme: dark) {
@@ -83,6 +87,8 @@ public extension TileKit.Site {
         --td-ink: #fafaf9;
         --td-muted: #a1a1aa;
         --td-accent: #f59e0b;
+        --td-syn-key: #60a5fa;
+        --td-syn-str: #4ade80;
         --td-border: #27272a;
         }
         }
@@ -178,6 +184,7 @@ public extension TileKit.Site {
         .td-sidebar { padding: 1.5rem; border-right: 1px solid var(--td-border); background: var(--td-surface); }
         .td-sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
         @media (max-width: 48rem) { .td-layout-sidebar { grid-template-columns: 1fr; } .td-sidebar { border-right: 0; border-bottom: 1px solid var(--td-border); } }
+        \(sourceStyles)
         """
 
         private static let systemTokens = """
@@ -188,6 +195,8 @@ public extension TileKit.Site {
         --td-ink: #1d1d1f;
         --td-muted: #6e6e73;
         --td-accent: #0066cc;
+        --td-syn-key: #af52de;
+        --td-syn-str: #248a3d;
         --td-border: rgba(0, 0, 0, 0.12);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
         --td-radius: 18px;
@@ -203,6 +212,8 @@ public extension TileKit.Site {
         --td-ink: #f5f5f7;
         --td-muted: #a1a1a6;
         --td-accent: #2997ff;
+        --td-syn-key: #da8fff;
+        --td-syn-str: #30d158;
         --td-border: rgba(255, 255, 255, 0.16);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
         }
@@ -214,6 +225,8 @@ public extension TileKit.Site {
         --td-ink: #f5f5f7;
         --td-muted: #a1a1a6;
         --td-accent: #2997ff;
+        --td-syn-key: #da8fff;
+        --td-syn-str: #30d158;
         --td-border: rgba(255, 255, 255, 0.16);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
         }
@@ -317,6 +330,37 @@ public extension TileKit.Site {
         .td-sidebar { position: sticky; top: 0; align-self: start; min-height: 100vh; padding: 1.25rem; border-right: 1px solid var(--td-border); background: var(--td-surface); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
         .td-sidebar-nav { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 1.5rem; }
         @media (max-width: 48rem) { .td-header { position: static; align-items: flex-start; flex-direction: column; } .td-main { padding-top: 3.5rem; } .td-footer-inner { grid-template-columns: 1fr; } .td-layout-sidebar { grid-template-columns: 1fr; } .td-sidebar { position: static; min-height: auto; border-right: 0; border-bottom: 1px solid var(--td-border); } }
+        \(sourceStyles)
+        """
+
+        /// The "View Markdown source" disclosure: its toggle, the code-window panel,
+        /// and the syntax-highlight token colors. Shared by every theme because it is
+        /// expressed entirely through the theme custom properties (so it follows light
+        /// and dark and the appearance setting). The pre and code rules are scoped
+        /// under `.td-source-window` so they win over the generic `.td-main pre`.
+        private static let sourceStyles = """
+        .td-source { margin-block: 1.8rem 0; }
+        .td-source-summary { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.35rem; padding: 0.4rem 0.95rem; border: 1px solid var(--td-border); border-radius: 0.7rem; background: var(--td-elevated, var(--td-surface)); color: var(--td-ink); font-size: 0.9rem; font-weight: 700; cursor: pointer; list-style: none; -webkit-user-select: none; user-select: none; }
+        .td-source-summary::-webkit-details-marker { display: none; }
+        .td-source-summary::before { content: "</>"; font-family: var(--td-mono); font-weight: 400; color: var(--td-muted); }
+        .td-source-summary:hover { border-color: var(--td-accent); color: var(--td-accent); }
+        .td-source[open] .td-source-summary { margin-block-end: 0.85rem; }
+        .td-source-window { border: 1px solid var(--td-border); border-radius: var(--td-radius); overflow: hidden; background: var(--td-elevated, var(--td-surface)); box-shadow: var(--td-shadow, none); }
+        .td-source-titlebar { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.85rem; background: var(--td-surface); border-bottom: 1px solid var(--td-border); }
+        .td-source-dots { display: inline-flex; gap: 0.4rem; flex: 0 0 auto; }
+        .td-source-dots i { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--td-border); }
+        .td-source-name { font-family: var(--td-mono); font-size: 0.8rem; color: var(--td-muted); }
+        .td-source-copy { margin-inline-start: auto; font: 600 0.78rem var(--td-font); color: var(--td-muted); background: transparent; border: 1px solid var(--td-border); border-radius: 0.5rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+        .td-source-copy:hover { color: var(--td-accent); border-color: var(--td-accent); }
+        .td-source-window .td-source-pre { margin: 0; padding: 1rem 1.15rem; overflow-x: auto; background: transparent; border: 0; border-radius: 0; box-shadow: none; font-size: 0.85rem; line-height: 1.65; }
+        .td-source-window .td-source-code { font-family: var(--td-mono); white-space: pre; background: none; border: 0; padding: 0; font-size: inherit; }
+        .tok-fm-delim, .tok-quote, .tok-list, .tok-fence, .tok-em { color: var(--td-muted); }
+        .tok-em { font-style: italic; }
+        .tok-fm-key, .tok-heading, .tok-strong { color: var(--td-syn-key); }
+        .tok-heading, .tok-strong { font-weight: 700; }
+        .tok-fm-value, .tok-code, .tok-fence-lang { color: var(--td-syn-str); }
+        .tok-link, .tok-math { color: var(--td-accent); }
+        .tok-fence-body { color: var(--td-ink); }
         """
     }
 }

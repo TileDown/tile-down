@@ -151,6 +151,14 @@ struct SiteConfigurationFileTests {
         }
     }
 
+    @Test("the Markdown source disclosure is an opt-in site setting")
+    func parsesShowSource() throws {
+        let off = try TileKit.Site.ConfigurationFile.parse("title: Demo")
+        #expect(!off.configuration.showSource)
+        let enabled = try TileKit.Site.ConfigurationFile.parse("showSource: true")
+        #expect(enabled.configuration.showSource)
+    }
+
     @Test("parses 404 fallback redirect rules")
     func parsesNotFoundRedirects() throws {
         let file = try TileKit.Site.ConfigurationFile.parse(

@@ -12,6 +12,7 @@ rss: true
 rssTitle: Browser Fixture
 rssDescription: A fixture site for the browser test suite.
 shareLinks: true
+showSource: true
 notFoundRedirect.exact./legacy-post: /posts/live/
 notFoundRedirect.prefix./old-tags/special/: /posts/live/
 notFoundRedirect.prefix./old-tags/: /tags/

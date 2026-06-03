@@ -67,6 +67,9 @@ extension TileKit.Site.Generator {
                 // Opt-in analytics snippets, injected verbatim by the layouts.
                 "analyticsHead": .string(configuration.analyticsHead),
                 "analyticsBodyEnd": .string(configuration.analyticsBodyEnd),
+                // Non-empty only when the site opts into the source disclosure,
+                // gating the per-page "Show Markdown source" block and its script.
+                "showSource": .string(configuration.showSource ? "true" : ""),
                 // Forced light/dark sets data-theme on <html>; empty for toggle/auto.
                 "appearanceForced": .string(forcedAppearance(configuration.appearance)),
                 // Non-empty only in toggle mode, gating the button and its script.
@@ -276,24 +279,10 @@ extension TileKit.Site.Generator {
         } else {
             context["article"] = ""
         }
+        for (key, value) in sourceDisclosureContext(page) {
+            context[key] = value
+        }
         return .object(context)
-    }
-
-    /// The posts a page lists. A tag page (carrying tag filter markers) lists
-    /// only the posts with every selected tag; every other page is given all
-    /// posts and the template decides whether to show them (via `postList`).
-    func pagePosts(
-        for page: TileKit.Site.Page,
-        among posts: some Sequence<TileKit.Site.Page>,
-    ) -> [TileKit.Site.Page] {
-        let selectedSlugs = TileKit.Site.Tags.filterSlugs(of: page)
-        guard !selectedSlugs.isEmpty else {
-            return Array(posts)
-        }
-        let requiredSlugs = Set(selectedSlugs)
-        return posts.filter { post in
-            requiredSlugs.isSubset(of: Set(TileKit.Site.Tags.tagSlugs(of: post)))
-        }
     }
 
     func sectionIsTruthy(_ value: String?) -> Bool {
