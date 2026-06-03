@@ -7,6 +7,7 @@ extension TileKit.Site.Generator {
         pages: [TileKit.Site.Page],
         configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
+        pdfWritten: Bool = false,
     ) -> TileKit.Template.Context {
         var result = stringValues(page.document.frontMatter)
         let posts = TileKit.Site.PostCollection(
@@ -28,6 +29,7 @@ extension TileKit.Site.Generator {
             sitePosts: Array(posts),
             postsDirectory: configuration.postsDirectory,
             shareLinksEnabled: configuration.shareLinks,
+            articleHasPDF: pdfWritten,
             siteTitle: title,
         )
         result["pages"] = .list(
@@ -239,6 +241,7 @@ extension TileKit.Site.Generator {
         sitePosts: [TileKit.Site.Page] = [],
         postsDirectory: String = "posts",
         shareLinksEnabled: Bool = false,
+        articleHasPDF: Bool = false,
         siteTitle: String = "",
     ) -> TileKit.Template.Value {
         var context = pageContext(
@@ -274,6 +277,7 @@ extension TileKit.Site.Generator {
                     sitePosts: sitePosts,
                     baseURL: baseURL,
                     shareLinksEnabled: shareLinksEnabled,
+                    hasPDF: articleHasPDF,
                 ),
             )
         } else {

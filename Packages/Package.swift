@@ -22,6 +22,10 @@ let packageDependencies: [Package.Dependency] = [
         url: "https://github.com/mihaelamj/MathTypeset.git",
         from: "0.6.0",
     ),
+    .package(
+        url: "https://github.com/mihaelamj/MarkdownPDF.git",
+        from: "0.3.0",
+    ),
 ]
 
 let allProducts: [Product] = [
@@ -40,6 +44,7 @@ let allProducts: [Product] = [
     .singleTargetLibrary("TileTemplate"),
     .singleTargetLibrary("TileTile"),
     .singleTargetLibrary("TileMath"),
+    .singleTargetLibrary("TilePDF"),
     .singleTargetLibrary("TileKit"),
     .executable(name: "tiledown", targets: ["TiledownCLI"]),
 ]
@@ -170,6 +175,23 @@ let targets: [Target] = {
         swiftSettings: swiftSettings,
     )
     let tileMathTargets = [tileMathTarget, tileMathTestsTarget]
+
+    let tilePDFTarget = Target.target(
+        name: "TilePDF",
+        dependencies: [
+            "TileCore",
+            .product(name: "MarkdownPDF", package: "MarkdownPDF"),
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tilePDFTestsTarget = Target.testTarget(
+        name: "TilePDFTests",
+        dependencies: [
+            "TilePDF",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tilePDFTargets = [tilePDFTarget, tilePDFTestsTarget]
 
     let mathPlaygroundTarget = Target.executableTarget(
         name: "MathPlaygroundCLI",
@@ -365,6 +387,7 @@ let targets: [Target] = {
             "TileTemplate",
             "TileTile",
             "TileMath",
+            "TilePDF",
         ],
         swiftSettings: swiftSettings,
     )
@@ -401,6 +424,7 @@ let targets: [Target] = {
         + tileTemplateTargets
         + tileTileTargets
         + tileMathTargets
+        + tilePDFTargets
         + mathPlaygroundTargets
         + tileOutputTargets
         + tileServiceTargets

@@ -15,6 +15,9 @@ public extension TileKit.Site {
         let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
         let imageChecker: any ImageChecking
+        /// The optional PDF renderer; when nil (or the config opts out), no per-article
+        /// PDFs are produced. Visible to the same-module rendering extension.
+        let pdfRenderer: (any TileKit.PDFRendering)?
 
         public init(
             fileSystem: any FileSystem,
@@ -24,6 +27,7 @@ public extension TileKit.Site {
             templateRenderer: any TileKit.Template.Rendering,
             contentDiscovery: any TileKit.Source.ContentDiscovering,
             imageChecker: any ImageChecking = PassthroughImageChecker(),
+            pdfRenderer: (any TileKit.PDFRendering)? = nil,
         ) {
             self.fileSystem = fileSystem
             self.markdownParser = markdownParser
@@ -32,6 +36,7 @@ public extension TileKit.Site {
             self.templateRenderer = templateRenderer
             self.contentDiscovery = contentDiscovery
             self.imageChecker = imageChecker
+            self.pdfRenderer = pdfRenderer
         }
 
         public func build(

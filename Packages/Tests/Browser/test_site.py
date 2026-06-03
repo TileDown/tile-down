@@ -496,6 +496,23 @@ def check_source_disclosure(page):
     check("404 page has no source disclosure", page.locator(".td-source").count() == 0)
 
 
+def check_article_pdf(page):
+    # swift-only is plain Markdown, so the engine reliably produces its PDF.
+    page.goto(NORMAL + "/posts/swift-only/", wait_until="networkidle")
+    check(
+        "article offers a Download PDF action",
+        page.locator('.td-article-actions a[href$="index.pdf"]').count() == 1,
+    )
+    resp = page.request.get(NORMAL + "/posts/swift-only/index.pdf")
+    check("article PDF is reachable", resp.status == 200, f"status={resp.status}")
+    body = bytes(resp.body())
+    check("article PDF is a real PDF document", body[:5] == b"%PDF-", str(body[:8]))
+
+    # A non-article page (the home page) offers no PDF.
+    page.goto(NORMAL + "/", wait_until="networkidle")
+    check("non-article page has no Download PDF action", page.locator('a[href$="index.pdf"]').count() == 0)
+
+
 def run(page):
     install_404_routes(page)
 
@@ -680,6 +697,7 @@ def run(page):
     # --- Article page: newsroom-style post layout ---
     check_article_page(page)
     check_source_disclosure(page)
+    check_article_pdf(page)
     page.goto(NORMAL + "/writing/typed/", wait_until="networkidle")
     typed_article = page.inner_text("body")
     check("typed post outside postsDir renders article shell", page.locator(".td-article").count() == 1)

@@ -3,6 +3,7 @@
 @_exported import TileMarkdown
 @_exported import TileMath
 @_exported import TileOutput
+@_exported import TilePDF
 @_exported import TileServe
 @_exported import TileServeImpl
 @_exported import TileService

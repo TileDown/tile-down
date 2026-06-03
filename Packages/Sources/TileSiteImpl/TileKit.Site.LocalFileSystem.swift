@@ -73,6 +73,18 @@ public extension TileKit.Site {
             )
         }
 
+        public func writeBytes(
+            _ bytes: [UInt8],
+            at path: String,
+        ) throws {
+            let outputURL = URL(fileURLWithPath: path)
+            try fileManager.createDirectory(
+                at: outputURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true,
+            )
+            try Data(bytes).write(to: outputURL, options: .atomic)
+        }
+
         public func copyFile(
             from sourcePath: String,
             to destinationPath: String,
