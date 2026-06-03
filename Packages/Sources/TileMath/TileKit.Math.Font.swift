@@ -24,6 +24,8 @@ public extension TileKit.Math {
         /// The OpenType `MATH` constants, or `nil` to fall back to heuristic
         /// metrics. Latin Modern Math carries a `MATH` table, so this is set.
         let mathConstants: TrueTypeMathTable.Constants?
+        /// The parsed CFF table, source of glyph outlines.
+        let cffTable: CFF
 
         /// Layout metrics for the `MathTypeset` engine: OpenType when the font
         /// has a `MATH` table, heuristic defaults otherwise.
@@ -37,6 +39,14 @@ public extension TileKit.Math {
         /// A bounds-checked reader over the font bytes.
         var reader: TrueTypeByteReader {
             TrueTypeByteReader(table: "font", bytes: bytes)
+        }
+
+        /// The outline of a glyph in font units (y-up), or `nil` if the glyph id
+        /// is out of range.
+        func outline(
+            glyphID: Int,
+        ) throws -> TileKit.Math.GlyphOutline? {
+            try TileKit.Math.Type2Interpreter(reader: reader, cff: cffTable).outline(forGlyph: glyphID)
         }
 
         /// The glyph id for a Unicode scalar, or `nil` if the font does not map it.

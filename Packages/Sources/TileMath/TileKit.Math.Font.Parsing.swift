@@ -34,6 +34,7 @@ extension TileKit.Math.Font {
         cffLength = cff.length
         self.cmap = try Self.parseCmap(reader, at: cmap.offset)
         mathConstants = Self.mathConstants(bytes: bytes, table: tables["MATH"], numGlyphs: glyphCount)
+        cffTable = try TileKit.Math.CFF.parse(reader, cffOffset: cff.offset)
         self.bytes = bytes
     }
 
