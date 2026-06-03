@@ -1,5 +1,7 @@
 import Foundation
 import MarkdownPDF
+import TileCore
+import TilePDF
 
 /// Renders Markdown to a PDF document. Reads the Markdown from standard input and
 /// writes the PDF to the path in argv[1] (default "out.pdf"). An optional argv[2] is
@@ -27,7 +29,7 @@ if let fontPath, let fontData = FileManager.default.contents(atPath: fontPath) {
 }
 
 do {
-    let data = try MarkdownPDFRenderer(options: options).render(markdown: markdown)
+    let data = try MarkdownPDFRenderer(options: options).render(markdown: TileKit.PDF.markdownForPDF(markdown))
     try data.write(to: URL(fileURLWithPath: outputPath))
 } catch {
     FileHandle.standardError.write(Data("render failed: \(error)\n".utf8))

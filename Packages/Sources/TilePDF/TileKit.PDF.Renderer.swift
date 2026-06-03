@@ -21,7 +21,7 @@ public extension TileKit.PDF {
         public func renderPDF(markdown: String) -> [UInt8]? {
             guard let data = try? MarkdownPDFRenderer(
                 options: PDFOptions(mathTypesetting: .enabled),
-            ).render(markdown: markdown) else {
+            ).render(markdown: TileKit.PDF.markdownForPDF(markdown)) else {
                 return nil
             }
             return [UInt8](data)
