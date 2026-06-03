@@ -2,7 +2,7 @@ import Foundation
 
 struct ChartSVGRenderer {
     let width = 720.0
-    let left = 58.0
+    let left = 80.0
     let right = 24.0
     let top = 24.0
     let bottom = 58.0
