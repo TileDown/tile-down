@@ -18,6 +18,10 @@ let packageDependencies: [Package.Dependency] = [
         url: "https://github.com/apple/swift-markdown",
         from: "0.6.0",
     ),
+    .package(
+        url: "https://github.com/mihaelamj/MathTypeset.git",
+        from: "0.1.0",
+    ),
 ]
 
 let allProducts: [Product] = [
@@ -35,6 +39,7 @@ let allProducts: [Product] = [
     .singleTargetLibrary("TileSource"),
     .singleTargetLibrary("TileTemplate"),
     .singleTargetLibrary("TileTile"),
+    .singleTargetLibrary("TileMath"),
     .singleTargetLibrary("TileKit"),
     .executable(name: "tiledown", targets: ["TiledownCLI"]),
 ]
@@ -140,6 +145,24 @@ let targets: [Target] = {
         swiftSettings: swiftSettings,
     )
     let tileTileTargets = [tileTileTarget, tileTileTestsTarget]
+
+    let tileMathTarget = Target.target(
+        name: "TileMath",
+        dependencies: [
+            "TileCore",
+            .product(name: "MathTypeset", package: "MathTypeset"),
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileMathTestsTarget = Target.testTarget(
+        name: "TileMathTests",
+        dependencies: [
+            "TileCore",
+            "TileMath",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileMathTargets = [tileMathTarget, tileMathTestsTarget]
 
     let tileOutputTarget = Target.target(
         name: "TileOutput",
@@ -324,6 +347,7 @@ let targets: [Target] = {
             "TileSource",
             "TileTemplate",
             "TileTile",
+            "TileMath",
         ],
         swiftSettings: swiftSettings,
     )
@@ -359,6 +383,7 @@ let targets: [Target] = {
         + tileSourceTargets
         + tileTemplateTargets
         + tileTileTargets
+        + tileMathTargets
         + tileOutputTargets
         + tileServiceTargets
         + tileServiceFormTargets
