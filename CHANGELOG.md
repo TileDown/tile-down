@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Fill is `currentColor`, so the math follows the text color in light and dark
   themes, and dimensions are in `em`, so it scales with the surrounding font. A
   visually hidden MathML companion carries the accessible, copyable form. (#127)
+- Full Unicode symbol coverage for math, via `MathTypeset` 0.3.0: operators,
+  relations, set and logic symbols, arrows, and the full Greek alphabet now
+  render as their glyphs (for example `\sum` as the summation sign and `\pm` as
+  the plus-minus sign) in both the SVG and the MathML, instead of their command
+  names. (#127)
 
 ### Fixed
 
