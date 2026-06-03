@@ -104,6 +104,9 @@ public extension TileKit.Tile {
         .td-chart-value,
         .td-chart-legend-text {
           fill: var(--td-muted);
+          /* Never stroke text: it inherits the chart's line/axis stroke otherwise,
+             which fattens and blurs the labels into a faux-bold smear. */
+          stroke: none;
           font-size: 16px;
           font-weight: 400;
           font-synthesis: none;
