@@ -25,6 +25,14 @@ public extension TileKit.Site {
             at path: String,
         ) throws
 
+        /// Writes raw bytes to `path`, creating any missing parent directories and
+        /// overwriting an existing file. The binary-safe write the text helper
+        /// cannot serve, used for generated binaries such as per-article PDFs.
+        func writeBytes(
+            _ bytes: [UInt8],
+            at path: String,
+        ) throws
+
         /// Copies a file's bytes verbatim, creating any missing parent
         /// directories and overwriting an existing destination. This is the
         /// binary-safe path the text helpers cannot serve, used to copy assets

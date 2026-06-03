@@ -36,6 +36,7 @@ extension TileKit.Site.Generator {
         sitePosts: [TileKit.Site.Page],
         baseURL: String,
         shareLinksEnabled: Bool,
+        hasPDF: Bool,
     ) -> TileKit.Template.Context {
         var context: TileKit.Template.Context = [
             "kicker": .string(articleKicker(page)),
@@ -66,6 +67,12 @@ extension TileKit.Site.Generator {
         context["relatedPosts"] = .list(pageContexts(relatedPosts, baseURL: baseURL))
         context["hasRelatedPosts"] = .string(relatedPosts.isEmpty ? "" : "true")
         addShareLinks(to: &context, for: page, baseURL: baseURL, enabled: shareLinksEnabled)
+        // The "Download PDF" action: present only when a PDF was actually written
+        // for this article (the generator renders it first and reports back), so the
+        // link never points at a missing file. The PDF sits at index.pdf beside the
+        // article's index.html.
+        context["hasPDF"] = .string(hasPDF ? "true" : "")
+        context["pdfURL"] = .string(url(for: page.slug, baseURL: baseURL) + "index.pdf")
         return context
     }
 

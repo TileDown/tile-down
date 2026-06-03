@@ -331,6 +331,8 @@ private extension TileKit.Site.ConfigurationFile {
             result.configuration.shareLinks = try boolean(item.value)
         case "showSource":
             result.configuration.showSource = try boolean(item.value)
+        case "articlePDF":
+            result.configuration.articlePDF = try boolean(item.value)
         default:
             return false
         }

@@ -61,6 +61,10 @@ public extension TileKit.Site {
         /// carrying its verbatim source file. Disabled by default; a teaching site
         /// opts in so readers can see the Tiledown Markdown behind each page.
         public var showSource: Bool
+        /// Whether each article gets a typeset PDF built from its source, offered as
+        /// a "Download PDF" action. Disabled by default; requires a PDF renderer
+        /// wired at the composition root, so it is inert without one.
+        public var articlePDF: Bool
         /// Fallback redirects emitted into root `404.html` for static hosts that
         /// cannot express wildcard redirects natively.
         public var notFoundRedirects: NotFoundRedirects
@@ -85,6 +89,7 @@ public extension TileKit.Site {
             analyticsBodyEnd: String = "",
             shareLinks: Bool = false,
             showSource: Bool = false,
+            articlePDF: Bool = false,
             notFoundRedirects: NotFoundRedirects = .init(),
             staticPassthroughs: [StaticPassthrough] = [],
         ) {
@@ -104,6 +109,7 @@ public extension TileKit.Site {
             self.analyticsBodyEnd = analyticsBodyEnd
             self.shareLinks = shareLinks
             self.showSource = showSource
+            self.articlePDF = articlePDF
             self.notFoundRedirects = notFoundRedirects
             self.staticPassthroughs = staticPassthroughs
         }

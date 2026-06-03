@@ -8,6 +8,7 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
     }
 
     var files: [String: String]
+    private(set) var binaryFiles: [String: [UInt8]] = [:]
     private(set) var listedPaths: [String] = []
 
     init(
@@ -50,6 +51,13 @@ final class MemoryFileSystem: TileKit.Site.FileSystem {
         at path: String,
     ) throws {
         files[path] = contents
+    }
+
+    func writeBytes(
+        _ bytes: [UInt8],
+        at path: String,
+    ) throws {
+        binaryFiles[path] = bytes
     }
 
     func copyFile(

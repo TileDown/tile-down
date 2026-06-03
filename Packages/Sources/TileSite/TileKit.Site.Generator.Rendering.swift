@@ -25,12 +25,16 @@ extension TileKit.Site.Generator {
         configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
     ) throws -> String {
+        // Render the PDF first so the HTML's "Download PDF" link is offered only
+        // when a PDF was actually written (a renderer failure leaves no link).
+        let pdfWritten = try writeArticlePDF(page: page, configuration: configuration)
         let output = try render(
             page: page,
             pages: pages,
             template: template,
             configuration: configuration,
             sitePaths: sitePaths,
+            pdfWritten: pdfWritten,
         )
         let finalOutput = page.slug == Self.notFoundSlug
             ? injectNotFoundRedirectScript(
@@ -48,6 +52,7 @@ extension TileKit.Site.Generator {
         template: String,
         configuration: TileKit.Site.Configuration,
         sitePaths: TileKit.Site.GeneratedSitePaths,
+        pdfWritten: Bool = false,
     ) throws -> String {
         try templateRenderer.render(
             template: template,
@@ -56,6 +61,7 @@ extension TileKit.Site.Generator {
                 pages: pages,
                 configuration: configuration,
                 sitePaths: sitePaths,
+                pdfWritten: pdfWritten,
             ),
         )
     }
