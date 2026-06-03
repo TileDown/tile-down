@@ -203,6 +203,15 @@ let targets: [Target] = {
     )
     let mathPlaygroundTargets = [mathPlaygroundTarget]
 
+    let markdownPDFPlaygroundTarget = Target.executableTarget(
+        name: "MarkdownPDFPlaygroundCLI",
+        dependencies: [
+            .product(name: "MarkdownPDF", package: "MarkdownPDF"),
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let markdownPDFPlaygroundTargets = [markdownPDFPlaygroundTarget]
+
     let tileOutputTarget = Target.target(
         name: "TileOutput",
         dependencies: [
@@ -426,6 +435,7 @@ let targets: [Target] = {
         + tileMathTargets
         + tilePDFTargets
         + mathPlaygroundTargets
+        + markdownPDFPlaygroundTargets
         + tileOutputTargets
         + tileServiceTargets
         + tileServiceFormTargets
