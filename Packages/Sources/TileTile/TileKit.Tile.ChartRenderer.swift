@@ -105,7 +105,8 @@ public extension TileKit.Tile {
         .td-chart-legend-text {
           fill: var(--td-muted);
           font-size: 16px;
-          font-weight: 500;
+          font-weight: 400;
+          font-synthesis: none;
         }
         .td-chart-value {
           font-variant-numeric: tabular-nums;

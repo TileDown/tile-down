@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-06-03
+
+### Fixed
+
+- Chart axis, value, and legend labels were faux-bold (medium weight plus font
+  synthesis), which read as fat and slightly distorted. Set them to normal
+  weight with `font-synthesis: none`, keeping the 16px size from 0.2.1. (#141)
+
 ## [0.2.1] - 2026-06-03
 
 ### Fixed

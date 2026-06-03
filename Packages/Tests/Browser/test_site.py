@@ -347,6 +347,19 @@ def check_article_page(page):
     )
     check("chart labels use a readable font size", min_font >= 15, f"min font-size {min_font}px")
 
+    # Chart labels must not be bold/faux-bold (they looked fat at weight 500).
+    max_weight = page.evaluate(
+        """() => {
+            let heaviest = 0;
+            document.querySelectorAll('.td-chart-svg text').forEach((t) => {
+                if (!t.textContent.trim()) { return; }
+                heaviest = Math.max(heaviest, parseInt(getComputedStyle(t).fontWeight, 10) || 400);
+            });
+            return heaviest;
+        }"""
+    )
+    check("chart labels are not bold", max_weight <= 400, f"max weight {max_weight}")
+
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
     title_box = box(page, ".td-article-title")
