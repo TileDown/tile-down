@@ -104,7 +104,7 @@ extension Command {
                     TileKit.Tile.ChartFenceRenderer(),
                     TileKit.Tile.MermaidFenceRenderer(),
                 ]),
-                mathRenderer: TileKit.Math.MathMLRenderer(),
+                mathRenderer: TileKit.Math.SVGRenderer(),
             ),
             tileRegistry: makeTileRegistry(serviceBindings: serviceBindings),
         )
