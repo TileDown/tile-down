@@ -89,7 +89,7 @@ extension ChartSVGRenderer {
         var row = 0
         for label in labels {
             // 18: swatch width plus gap before the label. 18: trailing gap.
-            let itemWidth = 18 + estimatedTextWidth(label, fontSize: 13) + 18
+            let itemWidth = 18 + estimatedTextWidth(label, fontSize: 16) + 18
             if xCursor > left, xCursor + itemWidth > maxX {
                 row += 1
                 xCursor = left
