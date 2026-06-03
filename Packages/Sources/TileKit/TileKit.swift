@@ -1,6 +1,7 @@
 @_exported import TileContent
 @_exported import TileCore
 @_exported import TileMarkdown
+@_exported import TileMath
 @_exported import TileOutput
 @_exported import TileServe
 @_exported import TileServeImpl

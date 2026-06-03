@@ -10,6 +10,9 @@ disabled_rules:
 excluded:
   - Packages/.build
   - Examples/aleahim
+  # The SwiftPM manifest is a declarative target list that grows with the
+  # package; file/line-length limits target source readability, not manifests.
+  - Packages/Package.swift
 force_unwrapping: error
 force_try: error
 force_cast: error
