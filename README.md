@@ -13,6 +13,53 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 > The repository is named `tile-down`; the product and CLI are `tiledown`.
 
+## What it renders
+
+Math, charts, and diagrams are written in Markdown and rendered by the build. Math
+and charts come out as static SVG with no client-side JavaScript and no web font.
+Mermaid diagrams use the mermaid runtime.
+
+### Math
+
+A `$$...$$` block is typeset to a self-contained SVG of real glyph outlines, themed
+with `currentColor`, with a hidden MathML companion for accessibility.
+
+```tex
+$$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+```
+
+<p align="center">
+  <img src="docs/images/formula-quadratic.png" alt="The quadratic formula rendered to SVG" width="340">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/images/formula-integral.png" alt="A Gaussian integral rendered to SVG" width="290">
+</p>
+
+### Charts
+
+A fenced `chart` block becomes a static SVG chart (bar, line, scatter, doughnut)
+with no chart library and no runtime.
+
+```chart
+type: bar
+title: Developer happiness by static site generator
+categories: TileDown, Hugo, Jekyll, Bespoke PHP
+y-label: happy devs (%)
+series: This year = 92, 71, 64, 12
+```
+
+<p align="center">
+  <img src="docs/images/chart-bar.png" alt="A bar chart rendered to SVG" width="560">
+</p>
+
+### Graphs and diagrams
+
+A fenced `mermaid` block renders a graph through the mermaid runtime; a `pie` block
+renders as a static SVG chart, matching the sibling MarkdownPDF project.
+
+<p align="center">
+  <img src="docs/images/diagram-flowchart.png" alt="A flowchart rendered with mermaid" width="480">
+</p>
+
 ## Status: pre-1.0, and already powering a live site
 
 Tiledown is at version `0.3.0`, and it already builds and deploys its own project
@@ -51,160 +98,6 @@ The architecture and the planned road are real and written down:
 - [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) - the ordered work queue.
 - [docs/decisions/](docs/decisions/) - accepted architecture decisions.
 - [docs/research/](docs/research/) - the research behind the source-model pivot.
-
-## Roadmap
-
-The public issue tracker is organized into epics. These diagrams include every
-open public issue as of June 2, 2026.
-
-Status key. The roadmap status colors move with the work: open issue, active
-branch, review PR, then merged.
-
-```mermaid
-flowchart LR
-  Done["In main now"]:::done
-  Review["PR in review"]:::review
-  Epic["Epic grouping"]:::epic
-  Todo["Open issue, no PR"]:::todo
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
-```
-
-### Current shipped slice
-
-```mermaid
-flowchart TD
-  Current["0.1.0 engine slice"]:::done
-  Current --> SingleFile["Single Markdown file build"]:::done
-  Current --> SiteBuild["Folder site build"]:::done
-  Current --> CommonMark["CommonMark parsing"]:::done
-  Current --> Themes["Built-in layout and system theme"]:::done
-  Current --> Tags["Posts, tags, RSS, latest posts"]:::done
-  Current --> TilesNow["Callout, counter, embed, chart, mermaid, service-form"]:::done
-  Current --> Outputs["HTML, CSS, JSON, canonical fmt"]:::done
-  Current --> BrowserGate["Local Playwright browser gate"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-```
-
-### Roadmap by epic
-
-```mermaid
-flowchart LR
-  Engine["0.1.0 engine slice"]:::done --> Site["Usable static site generator"]:::done
-  Site --> Assets["#17 Assets and theming"]:::done
-  Site --> Output["#82 Static output"]:::done
-  Site --> Tiles["#83 Tile catalog"]:::done
-  Site --> Workflow["#84 Local workflow"]:::done
-  Site --> Renderer["#85 Renderer cleanup"]:::done
-  Site --> Docs["#86 Docs and hygiene"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
-
-### #17 Assets and theming
-
-```mermaid
-flowchart TD
-  Epic["#17 Site-scoped assets and theming"]:::epic
-  Epic --> Theme["#20 Site theme and theme properties"]:::done
-  Epic --> Persistence["#77 Theme choice persistence"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
-
-### #82 Static output
-
-```mermaid
-flowchart TD
-  Epic["#82 Launch-ready static output"]:::epic
-  Epic --> Static["#79 Static passthrough"]:::done
-  Epic --> Types["#49 Content types"]:::done
-  Epic --> Redirects["#45 Redirect output"]:::done
-  Epic --> NotFound["#47 404 page"]:::done
-  Epic --> Sitemap["#46 sitemap.xml"]:::done
-  Epic --> RSS["#78 RSS content:encoded"]:::done
-  Epic --> BaseURL["#37 baseURL asset links"]:::done
-  Epic --> Slugs["#87 Migration slugs"]:::done
-  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::done
-  Epic --> SEO["#100 SEO metadata"]:::done
-  Epic --> HeroFM["#103 Hero front matter"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
-```
-
-### #83 Tile catalog
-
-```mermaid
-flowchart TD
-  Epic["#83 Authoring tile catalog"]:::epic
-  Epic --> DemoTiles["Callout and counter demo tiles"]:::done
-  Epic --> Embed["#80 Safe embed tile"]:::done
-  Epic --> Mermaid["#56 Mermaid tile"]:::done
-  Epic --> Charts["#57 Chart tile"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
-
-### #84 Local workflow
-
-```mermaid
-flowchart TD
-  Epic["#84 Local author workflow and verification"]:::epic
-  Epic --> Serve["#33 tiledown serve"]:::done
-  Epic --> BrowserGate["#60 Browser-test gate docs"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
-
-### #85 Renderer cleanup
-
-```mermaid
-flowchart TD
-  Epic["#85 Renderer correctness and cleanup"]:::epic
-  Epic --> BooleanFM["#36 Boolean front matter"]:::done
-  Epic --> Mustache["#38 Mustache section typo detection"]:::done
-  Epic --> Escaping["#40 Shared HTML escaping"]:::done
-  Epic --> ContentWalk["#41 Single content tree walk"]:::done
-  Epic --> CSSLint["#35 Embedded CSS lint posture"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
-
-### #86 Docs and hygiene
-
-```mermaid
-flowchart TD
-  Epic["#86 Documentation and contribution hygiene"]:::epic
-  Epic --> Contributing["#58 CONTRIBUTING refresh"]:::done
-  Epic --> Imports["#59 TileSite import contract"]:::done
-  Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::done
-
-  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
-  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
-  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
-```
 
 ## What actually runs today
 
@@ -402,6 +295,160 @@ quotes), with raw HTML escaped; templates are a Mustache-style subset.
 
 See [Examples/minimal-site](Examples/minimal-site) for a small site with home,
 about, contact, three posts, footer social links, the `system` theme, and RSS.
+
+## Roadmap
+
+The public issue tracker is organized into epics. These diagrams include every
+open public issue as of June 2, 2026.
+
+Status key. The roadmap status colors move with the work: open issue, active
+branch, review PR, then merged.
+
+```mermaid
+flowchart LR
+  Done["In main now"]:::done
+  Review["PR in review"]:::review
+  Epic["Epic grouping"]:::epic
+  Todo["Open issue, no PR"]:::todo
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+```
+
+### Current shipped slice
+
+```mermaid
+flowchart TD
+  Current["0.1.0 engine slice"]:::done
+  Current --> SingleFile["Single Markdown file build"]:::done
+  Current --> SiteBuild["Folder site build"]:::done
+  Current --> CommonMark["CommonMark parsing"]:::done
+  Current --> Themes["Built-in layout and system theme"]:::done
+  Current --> Tags["Posts, tags, RSS, latest posts"]:::done
+  Current --> TilesNow["Callout, counter, embed, chart, mermaid, service-form"]:::done
+  Current --> Outputs["HTML, CSS, JSON, canonical fmt"]:::done
+  Current --> BrowserGate["Local Playwright browser gate"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+```
+
+### Roadmap by epic
+
+```mermaid
+flowchart LR
+  Engine["0.1.0 engine slice"]:::done --> Site["Usable static site generator"]:::done
+  Site --> Assets["#17 Assets and theming"]:::done
+  Site --> Output["#82 Static output"]:::done
+  Site --> Tiles["#83 Tile catalog"]:::done
+  Site --> Workflow["#84 Local workflow"]:::done
+  Site --> Renderer["#85 Renderer cleanup"]:::done
+  Site --> Docs["#86 Docs and hygiene"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
+
+### #17 Assets and theming
+
+```mermaid
+flowchart TD
+  Epic["#17 Site-scoped assets and theming"]:::epic
+  Epic --> Theme["#20 Site theme and theme properties"]:::done
+  Epic --> Persistence["#77 Theme choice persistence"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
+
+### #82 Static output
+
+```mermaid
+flowchart TD
+  Epic["#82 Launch-ready static output"]:::epic
+  Epic --> Static["#79 Static passthrough"]:::done
+  Epic --> Types["#49 Content types"]:::done
+  Epic --> Redirects["#45 Redirect output"]:::done
+  Epic --> NotFound["#47 404 page"]:::done
+  Epic --> Sitemap["#46 sitemap.xml"]:::done
+  Epic --> RSS["#78 RSS content:encoded"]:::done
+  Epic --> BaseURL["#37 baseURL asset links"]:::done
+  Epic --> Slugs["#87 Migration slugs"]:::done
+  Epic --> LegacyRedirects["#97 404 legacy redirects"]:::done
+  Epic --> SEO["#100 SEO metadata"]:::done
+  Epic --> HeroFM["#103 Hero front matter"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f4f7,stroke:#8e8e93,color:#111827
+```
+
+### #83 Tile catalog
+
+```mermaid
+flowchart TD
+  Epic["#83 Authoring tile catalog"]:::epic
+  Epic --> DemoTiles["Callout and counter demo tiles"]:::done
+  Epic --> Embed["#80 Safe embed tile"]:::done
+  Epic --> Mermaid["#56 Mermaid tile"]:::done
+  Epic --> Charts["#57 Chart tile"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
+
+### #84 Local workflow
+
+```mermaid
+flowchart TD
+  Epic["#84 Local author workflow and verification"]:::epic
+  Epic --> Serve["#33 tiledown serve"]:::done
+  Epic --> BrowserGate["#60 Browser-test gate docs"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
+
+### #85 Renderer cleanup
+
+```mermaid
+flowchart TD
+  Epic["#85 Renderer correctness and cleanup"]:::epic
+  Epic --> BooleanFM["#36 Boolean front matter"]:::done
+  Epic --> Mustache["#38 Mustache section typo detection"]:::done
+  Epic --> Escaping["#40 Shared HTML escaping"]:::done
+  Epic --> ContentWalk["#41 Single content tree walk"]:::done
+  Epic --> CSSLint["#35 Embedded CSS lint posture"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
+
+### #86 Docs and hygiene
+
+```mermaid
+flowchart TD
+  Epic["#86 Documentation and contribution hygiene"]:::epic
+  Epic --> Contributing["#58 CONTRIBUTING refresh"]:::done
+  Epic --> Imports["#59 TileSite import contract"]:::done
+  Epic --> NextSteps["#61 NEXT_STEPS refresh"]:::done
+
+  classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
+  classDef epic fill:#f2e5ff,stroke:#af52de,color:#111827
+  classDef todo fill:#f2f2f7,stroke:#8e8e93,color:#111827
+```
 
 ## Build and test
 
