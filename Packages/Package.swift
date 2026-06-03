@@ -161,7 +161,11 @@ let targets: [Target] = {
         name: "TileMathTests",
         dependencies: [
             "TileCore",
+            "TileMarkdown",
             "TileMath",
+        ],
+        resources: [
+            .copy("Fixtures/math-formulas.md"),
         ],
         swiftSettings: swiftSettings,
     )

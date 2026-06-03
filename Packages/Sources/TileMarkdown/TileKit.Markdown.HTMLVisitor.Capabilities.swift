@@ -25,10 +25,14 @@ extension HTMLVisitor {
     mutating func renderedDisplayMath(
         _ paragraph: Paragraph,
     ) -> String? {
-        guard mathRenderer != nil else {
+        guard let mathRenderer else {
             return nil
         }
-        let text = paragraph.plainText.trimmingCharacters(in: .whitespacesAndNewlines)
+        // The raw source preserves TeX backslash sequences (`\\`, `\{`) that the
+        // visited text would have collapsed; fall back to the visited text only
+        // when the source range is unavailable.
+        let text = (rawSource(of: paragraph) ?? paragraph.plainText)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         guard text.hasPrefix("$$"), text.hasSuffix("$$"), text.count > 4 else {
             return nil
         }
@@ -37,11 +41,42 @@ extension HTMLVisitor {
         guard !inner.isEmpty, !inner.contains("$$") else {
             return nil
         }
-        guard let block = mathRenderer?.rendered(tex: inner, display: true) else {
+        guard let block = mathRenderer.rendered(tex: inner, display: true) else {
             return nil
         }
         collect(block)
         return block.html
+    }
+
+    /// The verbatim Markdown source for a node, recovered from its source range,
+    /// or `nil` if the range is absent or out of bounds.
+    private func rawSource(
+        of markup: some Markup,
+    ) -> String? {
+        guard let range = markup.range,
+              let start = sourceIndex(line: range.lowerBound.line, column: range.lowerBound.column),
+              let end = sourceIndex(line: range.upperBound.line, column: range.upperBound.column),
+              start <= end
+        else {
+            return nil
+        }
+        return String(source[start ..< end])
+    }
+
+    /// Maps a 1-based (line, column) source location to a `String.Index`.
+    private func sourceIndex(
+        line: Int,
+        column: Int,
+    ) -> String.Index? {
+        var index = source.startIndex
+        var currentLine = 1
+        while currentLine < line, index < source.endIndex {
+            if source[index] == "\n" {
+                currentLine += 1
+            }
+            index = source.index(after: index)
+        }
+        return source.index(index, offsetBy: column - 1, limitedBy: source.endIndex)
     }
 
     /// Records a rendered block's page-local CSS and JavaScript, each once.
