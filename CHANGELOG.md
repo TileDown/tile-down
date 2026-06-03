@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no bundled font and no runtime script. Malformed input degrades to its escaped
   source. A pixel-consistent SVG renderer (using the engine's positioned layout,
   with this MathML kept as the accessible companion) and inline `$...$` follow. (#127)
+- Foundation for the SVG math renderer: the Latin Modern Math font (OFL/GUST) is
+  vendored and a pure-Swift OpenType reader parses its `cmap`/`hmtx`/`head` for
+  glyph advances (the engine's `measureText` contract) and its `MATH` table for
+  layout metrics. Verified against the font's own metrics. (#127)
 
 ## [0.2.2] - 2026-06-03
 

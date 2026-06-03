@@ -20,7 +20,7 @@ let packageDependencies: [Package.Dependency] = [
     ),
     .package(
         url: "https://github.com/mihaelamj/MathTypeset.git",
-        from: "0.1.0",
+        from: "0.2.3",
     ),
 ]
 
@@ -151,6 +151,9 @@ let targets: [Target] = {
         dependencies: [
             "TileCore",
             .product(name: "MathTypeset", package: "MathTypeset"),
+        ],
+        resources: [
+            .copy("Resources/latinmodern-math.otf"),
         ],
         swiftSettings: swiftSettings,
     )
