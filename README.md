@@ -15,7 +15,7 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 ## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.2.0`, and it already builds and deploys its own project
+Tiledown is at version `0.2.1`, and it already builds and deploys its own project
 website, [tiledown.com](https://tiledown.com/), from this engine on every change.
 It is usable today for static content sites like that one. It is pre-1.0, so the
 toolchain and some APIs can still change; pin a commit if you need a stable
@@ -213,7 +213,7 @@ From `Packages/`:
 
 ```sh
 swift run tiledown version
-# Tiledown 0.2.0
+# Tiledown 0.2.1
 ```
 
 Build one page from Markdown and a template:

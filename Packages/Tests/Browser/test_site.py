@@ -333,6 +333,20 @@ def check_article_page(page):
     )
     check("no chart text overflows or overlaps (static and interactive charts)", problems == [], str(problems))
 
+    # Chart label text must be a readable size, not the cramped 13px that scaled
+    # down to ~10px in a content column.
+    min_font = page.evaluate(
+        """() => {
+            let smallest = 99;
+            document.querySelectorAll('.td-chart-svg text').forEach((t) => {
+                if (!t.textContent.trim()) { return; }
+                smallest = Math.min(smallest, parseFloat(getComputedStyle(t).fontSize));
+            });
+            return smallest;
+        }"""
+    )
+    check("chart labels use a readable font size", min_font >= 15, f"min font-size {min_font}px")
+
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
     title_box = box(page, ".td-article-title")

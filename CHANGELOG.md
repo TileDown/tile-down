@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-03
+
+### Fixed
+
+- Chart labels no longer collide at the bottom of the plot: category labels, the
+  x-axis caption, and the legend are stacked a full line apart and the SVG height
+  grows to contain them (pie/doughnut legends grow when they wrap). (#137)
+- Chart axis, value, and legend text is enlarged from 13px to 16px medium weight,
+  which scaled down to ~10px and was hard to read in a content column. (#138)
+
+### Changed
+
+- The browser gate now measures chart text geometry: it flags text-on-text
+  overlap and unreadable label sizes, not only text escaping the SVG bounds, so
+  these regressions cannot return unseen. (#136)
+
 ## [0.2.0] - 2026-06-03
 
 ### Added
