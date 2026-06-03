@@ -14,7 +14,17 @@ public extension TileKit.Math {
         /// `em` relative to this, so the math scales with the surrounding text.
         static let baseSize = 10.0
 
-        public init() {}
+        /// A font supplied by the caller (for hosts without bundle resources, such
+        /// as WebAssembly). When `nil` the bundled Latin Modern Math font is used.
+        private let injectedFont: TileKit.Math.Font?
+
+        public init() {
+            injectedFont = nil
+        }
+
+        init(font: TileKit.Math.Font) {
+            injectedFont = font
+        }
 
         public func rendered(
             tex: String,
@@ -22,7 +32,7 @@ public extension TileKit.Math {
         ) -> TileKit.FencedBlock? {
             let trimmed = tex.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty,
-                  let font = TileKit.Math.Font.latinModern,
+                  let font = injectedFont ?? TileKit.Math.Font.latinModern,
                   let parsed = try? MathParser().parse(trimmed),
                   let box = laidOut(parsed.root, font: font, display: display)
             else {
