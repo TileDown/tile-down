@@ -15,7 +15,7 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 ## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.2.2`, and it already builds and deploys its own project
+Tiledown is at version `0.3.0`, and it already builds and deploys its own project
 website, [tiledown.com](https://tiledown.com/), from this engine on every change.
 It is usable today for static content sites like that one. It is pre-1.0, so the
 toolchain and some APIs can still change; pin a commit if you need a stable
@@ -28,7 +28,9 @@ from `tiledown.yml`. It can also emit derived JSON of the parsed tile tree
 (`tiledown json`) and rewrite a document to its canonical form (`tiledown fmt`).
 Markdown is real CommonMark via
 [swift-markdown](https://github.com/apple/swift-markdown). The compatibility
-target is CommonMark plus GitHub Flavored Markdown tables and images. Tile CSS is wrapped in
+target is CommonMark plus GitHub Flavored Markdown tables and images. Display math
+written as `$$...$$` is typeset at build time to self-contained SVG, with no
+client-side JavaScript and no web font (see Math below). Tile CSS is wrapped in
 CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
 write an RSS feed from the shared post collection. The CLI also has a local
@@ -213,7 +215,7 @@ From `Packages/`:
 
 ```sh
 swift run tiledown version
-# Tiledown 0.2.2
+# Tiledown 0.3.0
 ```
 
 Build one page from Markdown and a template:
@@ -249,6 +251,32 @@ swift run tiledown serve --port 8765 content/
 
 `serve` writes to a sibling `.tiledown/serve/` directory by default. Pass
 `--output dist/` when you want a stable preview output path.
+
+### Math
+
+Write a formula in a display block and the build typesets it to a self-contained
+SVG. There is no MathJax, no math runtime, and no web font: the glyphs are real
+outlines extracted from the bundled Latin Modern Math font in pure Swift, the fill
+is `currentColor` so it follows light and dark themes, and a hidden MathML copy
+travels with each formula for accessibility.
+
+```markdown
+The quadratic formula:
+
+$$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+```
+
+```sh
+swift run tiledown build-site content/ dist/
+# dist/.../index.html now contains an <svg> of glyph <path> outlines, no <script>
+```
+
+The typesetting engine is the standalone, dependency-free
+[MathTypeset](https://github.com/mihaelamj/MathTypeset) package, shared with the
+[MarkdownPDF](https://github.com/mihaelamj/MarkdownPDF) generator so the same TeX
+source typesets to the same shapes whether the target is a web page or a PDF.
+Tiledown supports a TeX subset; display (`$$...$$`) math is in, inline `$...$` is
+next. Live example: [tiledown.com/posts/math-in-markdown](https://tiledown.com/posts/math-in-markdown/).
 
 Add `content/tiledown.yml` to select site settings:
 
