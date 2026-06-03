@@ -50,6 +50,7 @@ public extension TileKit.Markdown {
                 extraSchemes: passthroughSchemes,
                 fencedRenderer: fencedRenderer,
                 mathRenderer: mathRenderer,
+                source: markdown,
             )
             let html = visitor.visitDocument(Document(parsing: markdown))
             return .init(html: html, css: visitor.fencedCSS, javascript: visitor.fencedJS)
@@ -76,6 +77,12 @@ struct HTMLVisitor: MarkupVisitor {
 
     /// Typesets recognized `$$...$$` display math; `nil` falls back to source.
     let mathRenderer: (any TileKit.MathRendering)?
+
+    /// The original Markdown source, used to recover the raw text of a display
+    /// math block from its source range. Reading the raw source (rather than the
+    /// visited text) preserves TeX backslash sequences like `\\` and `\{` that
+    /// CommonMark's escape processing would otherwise collapse.
+    let source: String
 
     /// Page-local stylesheets collected from rendered fenced capability blocks.
     var fencedCSS: [String] = []

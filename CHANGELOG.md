@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   glyph advances (the engine's `measureText` contract) and its `MATH` table for
   layout metrics. Verified against the font's own metrics. (#127)
 
+### Fixed
+
+- Display math now reads its TeX from the raw Markdown source, so backslash
+  sequences such as `\\` (matrix and cases row separators) and `\{` survive
+  instead of being collapsed by CommonMark's escape processing. Matrices, cases,
+  and similar constructs render correctly. Verified against MarkdownPDF's own
+  `math-formulas.md` witness corpus, vendored as a parity fixture. (#127)
+
 ## [0.2.2] - 2026-06-03
 
 ### Fixed
