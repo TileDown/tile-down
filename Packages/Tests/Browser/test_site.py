@@ -473,8 +473,23 @@ def check_source_disclosure(page):
     # The window follows the appearance toggle: a token color changes light->dark.
     light = page.evaluate("() => getComputedStyle(document.querySelector('.tok-fm-key')).color")
     page.locator("[data-td-theme-toggle]").click()
+    toggled_theme = page.evaluate("() => document.documentElement.getAttribute('data-theme')")
     dark = page.evaluate("() => getComputedStyle(document.querySelector('.tok-fm-key')).color")
     check("source colors follow the light/dark setting", light != dark, f"{light} vs {dark}")
+
+    # The chosen theme follows the reader across navigation (persisted by the
+    # appearance toggle), and the source window honors it on the next page.
+    page.goto(NORMAL + "/", wait_until="networkidle")
+    home_theme = page.evaluate("() => document.documentElement.getAttribute('data-theme')")
+    page.goto(NORMAL + "/posts/live/", wait_until="networkidle")
+    back_theme = page.evaluate("() => document.documentElement.getAttribute('data-theme')")
+    back_color = page.evaluate("() => getComputedStyle(document.querySelector('.tok-fm-key')).color")
+    check(
+        "theme choice persists across navigation",
+        toggled_theme == home_theme == back_theme and toggled_theme is not None,
+        f"{toggled_theme} / {home_theme} / {back_theme}",
+    )
+    check("source window honors the persisted theme after navigation", back_color == dark, f"{back_color} vs {dark}")
 
     # A page with no source file (the synthesized 404) shows no disclosure.
     page.goto(NORMAL + "/this-page-does-not-exist/", wait_until="networkidle")
