@@ -150,7 +150,7 @@ extension ChartSVGRenderer {
         range: ClosedRange<Double>,
         plotHeight: Double,
     ) -> String {
-        let values = [range.lowerBound, (range.lowerBound + range.upperBound) / 2, range.upperBound]
+        let values = axisTicks(in: range)
         return values.map { value in
             let valueY = yPosition(value, range: range, plotHeight: plotHeight)
             let gridLine = line(
@@ -182,16 +182,54 @@ extension ChartSVGRenderer {
         top + (range.upperBound - value) / (range.upperBound - range.lowerBound) * plotHeight
     }
 
+    /// The value axis range, snapped to "nice" round bounds so the axis reads
+    /// 0, 20, 40, ... 100 rather than 0, 49.95, 99.9. Always includes zero.
     func valueRange(
         _ data: ChartData,
     ) -> ClosedRange<Double> {
         let values = data.series.flatMap(\.values)
         let lower = min(0, values.min() ?? 0)
-        var upper = max(0, values.max() ?? 1)
-        if lower == upper {
-            upper += 1
+        let upper = max(0, values.max() ?? 1)
+        guard upper > lower else {
+            return lower ... (lower + 1)
         }
-        return lower ... upper
+        let step = niceStep(span: upper - lower)
+        let niceLower = (lower / step).rounded(.down) * step
+        let niceUpper = (upper / step).rounded(.up) * step
+        return niceLower ... niceUpper
+    }
+
+    /// Evenly spaced "nice" tick values across an already-nice range (its bounds
+    /// are multiples of the step), so grid lines land on round numbers.
+    func axisTicks(
+        in range: ClosedRange<Double>,
+    ) -> [Double] {
+        let span = range.upperBound - range.lowerBound
+        guard span > 0 else {
+            return [range.lowerBound]
+        }
+        let step = niceStep(span: span)
+        var ticks: [Double] = []
+        var value = range.lowerBound
+        while value <= range.upperBound + step / 2 {
+            ticks.append(value)
+            value += step
+        }
+        return ticks
+    }
+
+    /// A "nice" tick step for a span: 1, 2, or 5 times a power of ten, targeting
+    /// about four intervals (five ticks). The Heckbert "nice numbers" rule.
+    private func niceStep(
+        span: Double,
+        intervals: Double = 4,
+    ) -> Double {
+        let rough = span / intervals
+        let exponent = log10(rough).rounded(.down)
+        let power = pow(10, exponent)
+        let fraction = rough / power
+        let niceFraction = fraction < 1.5 ? 1.0 : fraction < 3 ? 2.0 : fraction < 7 ? 5.0 : 10.0
+        return niceFraction * power
     }
 
     private func bar(
