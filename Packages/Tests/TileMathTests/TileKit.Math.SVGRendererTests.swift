@@ -41,6 +41,15 @@ struct SVGRendererTests {
         #expect(out.contains("aria-hidden=\"true\"")) // the svg is hidden from SR; MathML is read
     }
 
+    @Test("a radical draws its sign as scaling stroke lines")
+    func radicalStrokes() {
+        // MathTypeset 0.4.0 emits the radical sign as `.line` strokes that scale
+        // with the radicand; the emitter renders them as <line stroke=...>.
+        let out = html(#"\sqrt{x^2 + y^2}"#)
+        #expect(out.contains("<line "))
+        #expect(out.contains("stroke=\"currentColor\""))
+    }
+
     @Test("unparsable input yields nil so it falls back to source")
     func malformedIsNil() {
         #expect(renderer.rendered(tex: #"\frac{a"#, display: true) == nil)
