@@ -35,13 +35,18 @@ PHRASES=(
 
 while IFS= read -r f; do
   [ -f "$f" ] || continue
-  if LC_ALL=C grep -qF -- "$EMDASH" "$f" 2>/dev/null; then
+  # Skip binary assets: the byte-level scans below are meaningless on them, and a
+  # large binary can incidentally contain the U+2014 byte sequence.
+  case "$f" in
+    *.wasm|*.otf|*.ttf|*.woff|*.woff2|*.png|*.jpg|*.jpeg|*.gif|*.ico|*.pdf|*.zip) continue ;;
+  esac
+  if LC_ALL=C grep -qFI -- "$EMDASH" "$f" 2>/dev/null; then
     echo "style: em dash (U+2014) in $f" >&2
     FAIL=1
   fi
   if ! is_enforcement_file "$f"; then
     for p in "${PHRASES[@]}"; do
-      if LC_ALL=C grep -qF -- "$p" "$f" 2>/dev/null; then
+      if LC_ALL=C grep -qFI -- "$p" "$f" 2>/dev/null; then
         echo "style: forbidden attribution phrase in $f" >&2
         FAIL=1
       fi
