@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   render as their glyphs (for example `\sum` as the summation sign and `\pm` as
   the plus-minus sign) in both the SVG and the MathML, instead of their command
   names. (#127)
+- Radical signs scale to their radicand, via `MathTypeset` 0.4.0: `\sqrt` is drawn
+  as scaling vector strokes (a new `line` layout element) so the radical sign
+  grows to enclose tall content like `\sqrt{x^2 + y^2}` and meets the overbar,
+  instead of a fixed small sign. The SVG renderer emits the strokes as themed
+  `<line>` elements. (#127)
 
 ### Fixed
 

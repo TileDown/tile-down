@@ -85,6 +85,12 @@ public extension TileKit.Math {
             case let .rule(posX, posY, width, height, _):
                 "<rect x=\"\(SVGPath.number(posX))\" y=\"\(SVGPath.number(baselineY - posY - height))\""
                     + " width=\"\(SVGPath.number(width))\" height=\"\(SVGPath.number(height))\"/>"
+            case let .line(startX, startY, endX, endY, thickness, _):
+                // A diagonal stroke (the scaling radical sign). Flip y the same way.
+                "<line x1=\"\(SVGPath.number(startX))\" y1=\"\(SVGPath.number(baselineY - startY))\""
+                    + " x2=\"\(SVGPath.number(endX))\" y2=\"\(SVGPath.number(baselineY - endY))\""
+                    + " stroke=\"currentColor\" stroke-width=\"\(SVGPath.number(thickness))\""
+                    + " stroke-linejoin=\"miter\" stroke-linecap=\"butt\"/>"
             }
         }
 
