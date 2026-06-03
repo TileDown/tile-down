@@ -128,7 +128,10 @@ public extension TileKit.Math {
 
         static let css = """
         .td-math-svg, .td-math svg { display: inline-block; }
-        .td-math-display { display: block; text-align: center; margin: 1.1rem 0; overflow-x: auto; }
+        /* Display math is sized in em, so it would otherwise render at body-text
+           scale and read as tiny. Enlarge it for a proper display presence; inline
+           math keeps its 1em so it sits on the text baseline. */
+        .td-math-display { display: block; text-align: center; margin: 1.4rem 0; overflow-x: auto; font-size: 1.6em; }
         .td-math-display svg { vertical-align: middle; }
         .td-math-a11y {
             position: absolute; width: 1px; height: 1px;
