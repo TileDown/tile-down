@@ -25,7 +25,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: swift:6.2
+    # Pinned to the exact patch (6.3.0) that matches the swiftwasm 6.3-RELEASE
+    # SDK below. WebAssembly .swiftmodules require an exact host-compiler match,
+    # and the floating swift:6.3 tag will move to 6.3.1, so pin the patch here.
+    container: swift:6.3.0
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -35,15 +38,18 @@ jobs:
 
       - name: Install Swift WebAssembly SDK
         run: |
-          URL="https://github.com/swiftwasm/swift/releases/download/swift-wasm-6.2-RELEASE/swift-wasm-6.2-RELEASE-wasm32-unknown-wasip1.artifactbundle.zip"
-          SUM=$(curl -sL "$URL.sha256" | awk '{print $1}')
+          # The container has no curl, so the checksum is pinned to the immutable
+          # swiftwasm 6.3-RELEASE artifact bundle rather than fetched. This SDK
+          # must match the container's compiler version exactly (see above).
+          URL="https://github.com/swiftwasm/swift/releases/download/swift-wasm-6.3-RELEASE/swift-wasm-6.3-RELEASE-wasm32-unknown-wasip1.artifactbundle.zip"
+          SUM="6704d137e532f1ac31eafedd80658f9ee61239f2b6291216a02da32361ea9dcb"
           swift sdk install "$URL" --checksum "$SUM"
 
       - name: Build and optimize the WASM
         run: |
           cd Packages
           swift build --product MathPlaygroundCLI -c release \
-            --swift-sdk 6.2-RELEASE-wasm32-unknown-wasip1 --scratch-path /tmp/wasmbuild
+            --swift-sdk 6.3-RELEASE-wasm32-unknown-wasip1 --scratch-path /tmp/wasmbuild
           wasm-opt -Oz --strip-debug --strip-producers \
             /tmp/wasmbuild/wasm32-unknown-wasip1/release/MathPlaygroundCLI.wasm -o /tmp/math.wasm
           gzip -9 -c /tmp/math.wasm > /tmp/tiledown-math.wasm.gz
@@ -52,8 +58,9 @@ jobs:
       - name: Publish single-commit artifact branch
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config user.name "tiledown-ci"
-          git config user.email "ci@tiledown.com"
+          # Global so the identity also applies to the fresh repo created in out/.
+          git config --global user.name "tiledown-ci"
+          git config --global user.email "ci@tiledown.com"
           mkdir -p out/docs/playground
           cp /tmp/tiledown-math.wasm.gz out/docs/playground/tiledown-math.wasm.gz
           cat > out/docs/playground/README.md <<'EOF'
@@ -68,7 +75,8 @@ jobs:
           git init -q
           git checkout -q -b wasm-playground-asset
           git add -A
-          git commit -q -m "chore(playground): rebuild WASM from ${GITHUB_SHA::7}"
+          short=$(echo "$GITHUB_SHA" | cut -c1-7)
+          git commit -q -m "chore(playground): rebuild WASM from $short"
           git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" wasm-playground-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
