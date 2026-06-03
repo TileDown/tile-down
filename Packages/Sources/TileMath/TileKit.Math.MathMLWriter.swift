@@ -29,6 +29,8 @@ extension TileKit.Math {
                 matrix(rows: rows, open: open, close: close, leftAlign: leftAlign)
             case let .scaledDelimiter(symbol, _):
                 "<mo>\(esc(symbol))</mo>"
+            case let .space(width):
+                "<mspace width=\"\(SVGPath.number(width))em\"/>"
             }
         }
 

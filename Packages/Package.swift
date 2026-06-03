@@ -20,7 +20,7 @@ let packageDependencies: [Package.Dependency] = [
     ),
     .package(
         url: "https://github.com/mihaelamj/MathTypeset.git",
-        from: "0.4.0",
+        from: "0.6.0",
     ),
 ]
 

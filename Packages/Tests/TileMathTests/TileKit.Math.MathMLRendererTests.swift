@@ -63,6 +63,11 @@ struct MathMLRendererTests {
         #expect(renderer.rendered(tex: "x", display: true)?.css.contains("math.td-math-display") == true)
     }
 
+    @Test("a thin space becomes mspace")
+    func thinSpace() {
+        #expect(html(#"a\,b"#).contains("<mspace"))
+    }
+
     @Test("unparsable input yields nil so it falls back to source")
     func malformedIsNil() {
         #expect(renderer.rendered(tex: #"\frac{a"#, display: true) == nil)
