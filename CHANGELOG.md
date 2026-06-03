@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Display math recognition: a paragraph that is a single `$$...$$` block is
+  recognized as display math and routed through a new `MathRendering` seam,
+  instead of leaking its source as literal text. A placeholder renderer keeps the
+  formula source visible until the typesetting engine is wired in; the real
+  engine-backed renderer (SVG plus hidden MathML) drops in behind the same seam
+  with no change to the Markdown layer. Inline `$...$` follows. (#127)
+
 ## [0.2.2] - 2026-06-03
 
 ### Fixed
