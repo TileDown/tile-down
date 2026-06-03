@@ -171,6 +171,16 @@ let targets: [Target] = {
     )
     let tileMathTargets = [tileMathTarget, tileMathTestsTarget]
 
+    let mathPlaygroundTarget = Target.executableTarget(
+        name: "MathPlaygroundCLI",
+        dependencies: [
+            "TileCore",
+            "TileMath",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let mathPlaygroundTargets = [mathPlaygroundTarget]
+
     let tileOutputTarget = Target.target(
         name: "TileOutput",
         dependencies: [
@@ -391,6 +401,7 @@ let targets: [Target] = {
         + tileTemplateTargets
         + tileTileTargets
         + tileMathTargets
+        + mathPlaygroundTargets
         + tileOutputTargets
         + tileServiceTargets
         + tileServiceFormTargets
