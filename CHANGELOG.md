@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with no shipped font or runtime. Verified against fontTools: exact outlines for
   reference glyphs and matching control bounds across letters, digits, delimiters,
   and large math symbols (sum, integral, radical, pi, partial). (#127)
+- SVG rendering of display math, now the default: `$$...$$` is laid out by the
+  shared `MathTypeset` engine and emitted as a self-contained `<svg>` of glyph
+  outlines (`<path>`) and rules (`<rect>`) at the engine's exact coordinates, so it
+  renders identically in every browser with no shipped font and no runtime script.
+  Fill is `currentColor`, so the math follows the text color in light and dark
+  themes, and dimensions are in `em`, so it scales with the surrounding font. A
+  visually hidden MathML companion carries the accessible, copyable form. (#127)
 
 ### Fixed
 
