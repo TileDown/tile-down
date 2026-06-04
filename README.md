@@ -74,7 +74,7 @@ renders as a static SVG chart, matching the sibling MarkdownPDF project.
 
 ## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.3.0`, and it already builds and deploys its own project
+Tiledown is at version `0.4.0`, and it already builds and deploys its own project
 website, [tiledown.com](https://tiledown.com/), from this engine on every change.
 It is usable today for static content sites like that one. It is pre-1.0, so the
 toolchain and some APIs can still change; pin a commit if you need a stable
@@ -121,7 +121,7 @@ From `Packages/`:
 ```sh
 swift run tiledown help
 swift run tiledown version
-# Tiledown 0.3.0
+# Tiledown 0.4.0
 ```
 
 Build one page from Markdown and a template:

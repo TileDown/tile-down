@@ -35,7 +35,9 @@ struct SourceHighlighterTests {
         let out = html("```swift\nlet x = 1\n```")
         #expect(out.contains(#"<span class="tok-fence">```</span>"#))
         #expect(out.contains(#"<span class="tok-fence-lang">swift</span>"#))
-        #expect(out.contains(#"<span class="tok-fence-body">let x = 1</span>"#))
+        #expect(out.contains(#"<span class="tok-fence-body">"#))
+        #expect(out.contains(#"<span class="tok-keyword">let</span>"#))
+        #expect(out.contains(#"<span class="tok-number">1</span>"#))
     }
 
     @Test("list and quote markers are tokenized")

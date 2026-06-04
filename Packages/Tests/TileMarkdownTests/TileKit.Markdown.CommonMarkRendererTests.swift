@@ -49,15 +49,16 @@ struct CommonMarkRendererTests {
 
     @Test("renders fenced code blocks with a language class")
     func fencedCode() {
-        #expect(
-            renderer.renderHTML(
-                """
-                ```swift
-                let x = 1
-                ```
-                """,
-            ) == #"<pre><code class="language-swift">let x = 1</code></pre>"#,
+        let html = renderer.renderHTML(
+            """
+            ```swift
+            let x = 1
+            ```
+            """,
         )
+        #expect(html.contains(#"<code class="language-swift">"#))
+        #expect(html.contains(#"<span class="tok-keyword">let</span>"#))
+        #expect(html.contains(#"<span class="tok-number">1</span>"#))
     }
 
     @Test("escapes text special characters")

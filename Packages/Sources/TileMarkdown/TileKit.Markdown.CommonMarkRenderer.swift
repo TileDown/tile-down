@@ -158,7 +158,11 @@ struct HTMLVisitor: MarkupVisitor {
         while code.hasSuffix("\n") {
             code.removeLast()
         }
-        return "<pre><code\(languageClass)>\(escape(code))</code></pre>"
+        let highlighted = TileKit.SyntaxHighlighter.html(
+            for: code,
+            language: codeBlock.language,
+        )
+        return "<pre><code\(languageClass)>\(highlighted)</code></pre>"
     }
 
     mutating func visitLink(
