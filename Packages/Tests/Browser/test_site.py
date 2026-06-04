@@ -754,6 +754,16 @@ def run(page):
     page.goto(NORMAL + "/tags/release/swift/", wait_until="networkidle")
     both_tags = page.inner_text("body")
     check("release AND swift lists matching post", "Live Post" in both_tags and "Swift Only" not in both_tags)
+    click_center(page, page.locator(".td-tagbar .td-tag-clear").first)
+    page.wait_for_url("**/tags/")
+    cleared_tags = page.inner_text("body")
+    check(
+        "clear tag filter shows all posts",
+        "Live Post" in cleared_tags
+        and "Swift Only" in cleared_tags
+        and "Migrated Post" in cleared_tags
+        and page.locator(".td-post-card").count() == 4,
+    )
 
     # --- Article page: newsroom-style post layout ---
     check_article_page(page)

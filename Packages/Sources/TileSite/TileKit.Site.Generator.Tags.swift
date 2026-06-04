@@ -15,8 +15,14 @@ extension TileKit.Site.Generator {
     func tagPages(
         among posts: some Sequence<TileKit.Site.Page>,
         outputRootPath: String,
+        includeLandingPage: Bool = true,
     ) -> [TileKit.Site.Page] {
-        tagSelections(among: posts).map { selection in
+        let selections = tagSelections(among: posts)
+        guard !selections.isEmpty else {
+            return []
+        }
+
+        let filteredPages: [TileKit.Site.Page] = selections.map { selection in
             let filterSlugs = selection.map(\.slug)
             let slug = TileKit.Site.Tags.pageSlug(forFilterSlugs: filterSlugs)
             var frontMatter = [
@@ -38,6 +44,28 @@ extension TileKit.Site.Generator {
                 html: "",
             )
         }
+        guard includeLandingPage else {
+            return filteredPages
+        }
+        return [tagLandingPage(outputRootPath: outputRootPath)] + filteredPages
+    }
+
+    private func tagLandingPage(
+        outputRootPath: String,
+    ) -> TileKit.Site.Page {
+        .init(
+            sourcePath: "",
+            outputPath: join(outputRootPath, "tags/index.html"),
+            slug: "tags",
+            document: .init(
+                frontMatter: [
+                    "title": "All articles",
+                    "postList": "true",
+                ],
+                body: "",
+            ),
+            html: "",
+        )
     }
 
     private func tagSelections(

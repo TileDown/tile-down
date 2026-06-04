@@ -80,7 +80,7 @@ public extension TileKit.Site {
                 among: contentPages,
                 postsDirectory: request.configuration.postsDirectory,
             )
-            let pages = try assembledPages(contentPages, posts: posts, request: request)
+            let pages = try assembledPages(source, posts: posts, request: request)
             try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 

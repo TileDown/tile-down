@@ -5,13 +5,28 @@ extension TileKit.Site.Generator {
     /// Merges content pages with the generated tag pages, then resolves every
     /// Markdown reference (`page:`/`post:`/`tag:`/`social:`/`link:`) in their HTML.
     func assembledPages(
+        _ source: SourcePages,
+        posts: TileKit.Site.PostCollection,
+        request: TileKit.Site.ContentBuildRequest,
+    ) throws -> [TileKit.Site.Page] {
+        try assembledPages(
+            source.contentPages,
+            posts: posts,
+            request: request,
+            hasAuthoredTagLandingPage: source.hasAuthoredTagLandingPage,
+        )
+    }
+
+    func assembledPages(
         _ contentPages: [TileKit.Site.Page],
         posts: TileKit.Site.PostCollection,
         request: TileKit.Site.ContentBuildRequest,
+        hasAuthoredTagLandingPage: Bool = false,
     ) throws -> [TileKit.Site.Page] {
         let merged = contentPages + tagPages(
             among: posts,
             outputRootPath: request.outputRootPath,
+            includeLandingPage: !hasAuthoredTagLandingPage,
         )
         let resolved = try resolveReferences(
             in: merged,
