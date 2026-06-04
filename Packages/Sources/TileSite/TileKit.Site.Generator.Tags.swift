@@ -60,6 +60,7 @@ extension TileKit.Site.Generator {
             document: .init(
                 frontMatter: [
                     "title": "All articles",
+                    "nav": "false",
                     "postList": "true",
                 ],
                 body: "",
