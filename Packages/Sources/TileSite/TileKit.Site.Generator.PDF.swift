@@ -1,3 +1,4 @@
+import Foundation
 import TileCore
 
 extension TileKit.Site.Generator {
@@ -15,29 +16,90 @@ extension TileKit.Site.Generator {
             && pageIsPost(page, postsDirectory: configuration.postsDirectory)
     }
 
-    /// Renders and writes the per-article PDF beside its HTML when applicable, and
-    /// reports whether a PDF was actually written. A render failure omits the PDF
-    /// (and returns `false`) rather than failing the build, so the "Download PDF"
+    /// Renders and writes the per-article PDF when applicable, and returns its
+    /// generated output path. A render failure omits the PDF
+    /// (and returns `nil`) rather than failing the build, so the "Download PDF"
     /// link is offered only when the file truly exists.
     func writeArticlePDF(
         page: TileKit.Site.Page,
         configuration: TileKit.Site.Configuration,
-    ) throws -> Bool {
+        outputRootPath: String,
+    ) throws -> String? {
         guard shouldRenderArticlePDF(page, configuration: configuration),
               let bytes = pdfRenderer?.renderPDF(markdown: page.rawSource)
         else {
-            return false
+            return nil
         }
-        try fileSystem.writeBytes(bytes, at: pdfOutputPath(for: page.outputPath))
-        return true
+        let outputPath = pdfOutputPath(
+            for: page,
+            postsDirectory: configuration.postsDirectory,
+            outputRootPath: outputRootPath,
+        )
+        try fileSystem.writeBytes(
+            bytes,
+            at: outputPath,
+        )
+        return outputPath
     }
 
-    /// The PDF output path for an HTML output path: the same path with a `.pdf`
-    /// extension (e.g. `posts/x/index.html` -> `posts/x/index.pdf`).
-    func pdfOutputPath(for htmlOutputPath: String) -> String {
-        guard htmlOutputPath.hasSuffix(".html") else {
-            return htmlOutputPath + ".pdf"
+    /// The PDF output path for an article: a root-level PDF named after the
+    /// article slug, with the configured posts directory stripped first
+    /// (e.g. `posts/x` or `blog/x` -> `<outputRootPath>/x.pdf`).
+    func pdfOutputPath(
+        for page: TileKit.Site.Page,
+        postsDirectory: String,
+        outputRootPath: String,
+    ) -> String {
+        join(
+            outputRootPath,
+            articlePDFFileName(for: page, postsDirectory: postsDirectory),
+        )
+    }
+
+    /// The public PDF URL for an article, with `baseURL` applied in the same way
+    /// as other generated root-relative URLs.
+    func pdfURL(
+        for page: TileKit.Site.Page,
+        postsDirectory: String,
+        baseURL: String,
+    ) -> String {
+        baseURLPrefixedRootRelativeURL(
+            "/" + articlePDFFileName(for: page, postsDirectory: postsDirectory),
+            baseURL: baseURL,
+        )
+    }
+
+    private func articlePDFFileName(
+        for page: TileKit.Site.Page,
+        postsDirectory: String,
+    ) -> String {
+        let relativeSlug = articleRelativeSlug(
+            page.slug,
+            postsDirectory: postsDirectory,
+        )
+        let fileSlug = relativeSlug
+            .split(separator: "/")
+            .joined(separator: "-")
+        return (fileSlug.isEmpty ? "article" : fileSlug) + ".pdf"
+    }
+
+    private func articleRelativeSlug(
+        _ slug: String,
+        postsDirectory: String,
+    ) -> String {
+        let normalizedSlug = slug.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let normalizedPostsDirectory = postsDirectory.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+
+        guard !normalizedPostsDirectory.isEmpty else {
+            return normalizedSlug
         }
-        return String(htmlOutputPath.dropLast(".html".count)) + ".pdf"
+        if normalizedSlug == normalizedPostsDirectory {
+            return normalizedSlug
+        }
+        let prefix = normalizedPostsDirectory + "/"
+        if normalizedSlug.hasPrefix(prefix) {
+            return String(normalizedSlug.dropFirst(prefix.count))
+        }
+        return normalizedSlug
     }
 }

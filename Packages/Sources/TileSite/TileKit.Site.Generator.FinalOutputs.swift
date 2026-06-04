@@ -22,14 +22,16 @@ extension TileKit.Site.Generator {
             template: plan.template,
             configuration: plan.request.configuration,
             sitePaths: plan.sitePaths,
+            outputRootPath: plan.request.outputRootPath,
         )
-        try outputPaths.append(
-            writeRenderedPage(
+        outputPaths += try writeRenderedPage(
+            .init(
                 page: plan.notFoundPage,
                 pages: plan.pages,
                 template: plan.template,
                 configuration: plan.request.configuration,
                 sitePaths: plan.sitePaths,
+                outputRootPath: plan.request.outputRootPath,
             ),
         )
         outputPaths += try contentRedirects(
