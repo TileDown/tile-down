@@ -61,6 +61,31 @@ extension SiteGeneratorTests {
 
         #expect(fileSystem.files["dist/index.html"] == "Apple;Zebra;")
     }
+
+    @Test("nav false hides a top-level page from site sections")
+    func navFalseHidesSection() throws {
+        let template = #"{{#site.sections}}<a href="{{ url }}">{{ title }}</a>{{/site.sections}}"#
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/blog/index.md": "---\ntitle: Blog\n---\n# Blog",
+                "content/cv/index.md": "---\ntitle: Curriculum Vitae\nnav: false\n---\n# CV",
+                "templates/page.html": template,
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+            ),
+        )
+
+        #expect(fileSystem.files["dist/index.html"] == #"<a href="/blog/">Blog</a>"#)
+        #expect(fileSystem.files["dist/cv/index.html"] != nil)
+    }
 }
 
 extension SiteGeneratorTests {
