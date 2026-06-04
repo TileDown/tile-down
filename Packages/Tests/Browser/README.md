@@ -26,10 +26,10 @@ Swift-only; this is test tooling that never ships in the product.
 Packages/Tests/Browser/run.sh
 ```
 
-`run.sh` builds the fixture variants, serves the normal, `--drafts`, and system
-theme variants through `tiledown serve`, serves the baseURL subpath fixture from
-its parent directory, runs `test_site.py`, and tears everything down. Exit code is
-0 only if every check passes.
+`run.sh` builds variants of `Examples/everything/content`, serves the normal,
+`--drafts`, and system theme variants through `tiledown serve`, serves the
+baseURL subpath variant from its parent directory, runs `test_site.py`, and tears
+everything down. Exit code is 0 only if every check passes.
 
 This browser gate is part of the full local stack:
 
@@ -54,7 +54,11 @@ narrow local iteration where browser coverage is intentionally deferred.
 
 ## Fixture
 
-`fixture/content/` is a small, self-contained site that deliberately exercises
-every feature under test (a table, an image, a `local` counter tile, a draft
-post, a slug override, a post listing, RSS, and the standard theme with the
-appearance toggle). It is committed demo content, independent of any real site.
+`Examples/everything/content/` is a small, self-contained site that deliberately
+exercises every browser-visible feature under test. It is committed demo
+content, independent of any real site, and it doubles as the canonical example
+site users can build locally.
+
+When adding a new browser-visible TileDown feature, update
+`Examples/everything/content/` and add or adjust the matching checks in
+`test_site.py`.

@@ -1,0 +1,77 @@
+{
+  "id": "calculator",
+  "name": "Calculator",
+  "version": "1.0.0",
+  "requirements": {
+    "credentials": [
+      {
+        "id": "calculator-api",
+        "type": "bearer",
+        "exposure": "server"
+      }
+    ]
+  },
+  "operations": [
+    {
+      "id": "positive-decimal-calculation",
+      "modes": [
+        "proxy"
+      ],
+      "transport": {
+        "method": "POST",
+        "path": "/calculate"
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "first",
+          "second"
+        ],
+        "properties": {
+          "first": {
+            "type": "string",
+            "x-tiledownType": "positiveDecimal"
+          },
+          "second": {
+            "type": "string",
+            "x-tiledownType": "positiveDecimal"
+          }
+        }
+      },
+      "inputUi": {
+        "first": {
+          "label": "First value",
+          "control": "text",
+          "order": 1
+        },
+        "second": {
+          "label": "Second value",
+          "control": "text",
+          "order": 2
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "x-tiledownType": "decimal"
+          }
+        }
+      },
+      "outputUi": {
+        "result": {
+          "label": "Result",
+          "format": "decimal"
+        }
+      },
+      "auth": {
+        "credential": "calculator-api",
+        "exposure": "server"
+      }
+    }
+  ]
+}

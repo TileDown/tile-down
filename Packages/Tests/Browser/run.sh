@@ -10,7 +10,8 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Browser/ -> Tests/ -> Packages/. The Swift package (and `tiledown`) live here.
 packages="$(cd "$here/../.." && pwd)"
-fixture_source="$here/fixture/content"
+repo_root="$(cd "$packages/.." && pwd)"
+fixture_source="$repo_root/Examples/everything/content"
 work="$(mktemp -d)"
 normal_fixture="$work/normal-fixture"
 drafts_fixture="$work/drafts-fixture"
