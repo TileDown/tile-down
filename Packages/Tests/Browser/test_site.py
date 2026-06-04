@@ -513,10 +513,51 @@ def check_article_pdf(page):
     check("non-article page has no Download PDF action", page.locator('a[href$="index.pdf"]').count() == 0)
 
 
+def check_service_form(page):
+    page.goto(NORMAL + "/services/", wait_until="networkidle")
+    form = page.locator("[data-td-service-form-root]").first
+    check("service-form root renders", form.count() == 1)
+    check("service-form binds service id", form.get_attribute("data-td-service") == "calculator")
+    check(
+        "service-form binds operation id",
+        form.get_attribute("data-td-operation") == "positive-decimal-calculation",
+    )
+    check("service-form contract secret is not rendered", "calculator-api" not in page.content())
+    check("service-form inputs render in configured order", page.locator(".td-service-form__label").all_inner_texts()[:2] == ["First value", "Second value"])
+    config = page.eval_on_selector("script[data-td-config='price-calculator']", "e => JSON.parse(e.textContent)")
+    check(
+        "service-form runtime config uses proxy endpoint",
+        config["endpoint"] == "/_td/services/calculator/positive-decimal-calculation"
+        and config["method"] == "POST",
+        str(config),
+    )
+
+    page.locator(".td-service-form__submit").click()
+    check("service-form validates required fields", page.locator("[aria-invalid='true']").count() == 2)
+    check(
+        "service-form reports validation state",
+        page.locator("[data-td-state='validation']").is_visible()
+        and "Check the highlighted fields." in page.locator("[data-td-state='validation']").inner_text(),
+    )
+
+    page.locator("[name='first']").fill("12.5")
+    page.locator("[name='second']").fill("7.5")
+    page.locator(".td-service-form__submit").click()
+    page.wait_for_function(
+        "() => document.querySelector('[data-td-state=\"success\"]')"
+        " && !document.querySelector('[data-td-state=\"success\"]').hidden"
+    )
+    check("service-form clears validation", page.locator("[aria-invalid='true']").count() == 0)
+    check("service-form submits and renders result", page.locator("[data-td-output-value='result']").inner_text() == "20")
+
+    contract_status = page.evaluate("async () => (await fetch('/contracts/calculator.json', {method:'HEAD'})).status")
+    check("service-form contract source is not published", contract_status == 404, f"status={contract_status}")
+
+
 def run(page):
     install_404_routes(page)
 
-    # --- Home: image, table, counter tile ---
+    # --- Home: image, table, math, references, latest posts, and local tile ---
     page.set_viewport_size({"width": 896, "height": 512})
     page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
@@ -530,6 +571,8 @@ def run(page):
     )
     footer_credit = page.locator(".td-built").inner_text()
     check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
+    footer_socials = page.eval_on_selector_all(".td-socials a", "els => els.map(e => e.textContent.trim())")
+    check("footer renders configured socials and RSS", {"GitHub", "LinkedIn", "RSS"}.issubset(set(footer_socials)), str(footer_socials))
     root_vars = page.evaluate(
         """() => {
             const style = getComputedStyle(document.documentElement);
@@ -596,6 +639,24 @@ def run(page):
     check("GFM table renders", page.query_selector("table") is not None)
     aligns = page.eval_on_selector_all("table thead th", "els => els.map(e => getComputedStyle(e).textAlign)")
     check("table column alignment", aligns == ["left", "right", "center"], str(aligns))
+    check("display math renders to SVG", page.locator(".td-math-display svg").count() == 1)
+    check("display math carries accessible MathML", page.locator(".td-math-display .td-math-a11y").count() == 1)
+    check(
+        "callout tile renders static HTML",
+        page.locator(".td-callout").count() == 1
+        and "Static Tile" in page.locator(".td-callout-title").inner_text()
+        and "without browser JavaScript" in page.locator(".td-callout-body").inner_text(),
+    )
+    home_links = page.eval_on_selector_all("main a", "els => els.map(e => [e.textContent.trim(), e.getAttribute('href')])")
+    check("page reference resolves", ["About", NORMAL + "/about/"] in home_links, str(home_links))
+    check("post reference resolves", ["Live Post", NORMAL + "/posts/live/"] in home_links, str(home_links))
+    check("tag reference resolves", ["Swift posts", NORMAL + "/tags/swift/"] in home_links, str(home_links))
+    check("social reference resolves", ["GitHub", "https://github.com/TileDown/tile-down"] in home_links, str(home_links))
+    check("outbound link shim resolves", ["documentation", NORMAL + "/out/docs/"] in home_links, str(home_links))
+    docs_redirect = page.evaluate("async () => (await fetch('/out/docs/')).text()")
+    check("outbound link shim publishes redirect", "https://tiledown.com/docs/" in docs_redirect)
+    latest_titles = page.eval_on_selector_all(".td-post-card .td-post-title", "els => els.map(e => e.textContent.trim())")
+    check("home latest posts render configured count", latest_titles[:3] == ["Migrated Post", "Typed Article", "Swift Only"], str(latest_titles))
 
     # local-mode tile: two clicks => 2 (no double-bind)
     before = page.eval_on_selector("[data-td-counter-value]", "e => e.textContent")
@@ -698,6 +759,7 @@ def run(page):
     check_article_page(page)
     check_source_disclosure(page)
     check_article_pdf(page)
+    check_service_form(page)
     page.goto(NORMAL + "/writing/typed/", wait_until="networkidle")
     typed_article = page.inner_text("body")
     check("typed post outside postsDir renders article shell", page.locator(".td-article").count() == 1)
@@ -853,6 +915,10 @@ def main():
         page = context.new_page()
         page.route("https://www.youtube-nocookie.com/**", lambda route: route.fulfill(status=204, body=""))
         page.route("https://player.vimeo.com/**", lambda route: route.fulfill(status=204, body=""))
+        page.route(
+            NORMAL + "/_td/services/calculator/positive-decimal-calculation",
+            lambda route: route.fulfill(status=200, content_type="application/json", json={"result": "20"}),
+        )
         page.route(
             "https://cdn.jsdelivr.net/npm/mermaid@10.9.3/**",
             lambda route: route.fulfill(status=200, content_type="text/javascript", body=MERMAID_STUB),

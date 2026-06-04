@@ -21,5 +21,6 @@ swift test
 
 - [ ] `swift build` and `swift test` pass.
 - [ ] Code follows the conventions in `docs/CONVENTIONS.md`.
+- [ ] Browser-visible features update `Examples/everything/content` and Playwright coverage.
 - [ ] `CHANGELOG.md` updated under `Unreleased` (or this change is docs/tests/config only).
 - [ ] No AI attribution and no em dashes in commits, comments, or this description.

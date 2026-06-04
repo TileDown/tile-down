@@ -1,6 +1,7 @@
-# Fixture site for the browser test suite. Small and self-contained; it exists
-# only to exercise the features the Playwright checks assert against.
-title: Browser Fixture
+# Everything example site for the browser test suite. Small and self-contained,
+# but intentionally broad: every shipped browser-visible TileDown surface should
+# have at least one page here.
+title: Everything Example
 baseURL: https://example.com/browser-fixture
 theme: standard
 theme.light.accent: #0057d8
@@ -8,12 +9,20 @@ theme.light.radius: 6px
 theme.dark.accent: #66aaff
 theme.dark.surface: #101820
 appearance: toggle
+fontScale: 1.02
+latestPosts: 3
 rss: true
-rssTitle: Browser Fixture
+rssTitle: Everything Example
 rssDescription: A fixture site for the browser test suite.
 shareLinks: true
 showSource: true
 articlePDF: true
+social.github: https://github.com/TileDown/tile-down
+social.linkedin: https://www.linkedin.com/company/tiledown
+links.docs: https://tiledown.com/docs/
+service.calculator.contract: contracts/calculator.json
+service.calculator.mode: proxy
+service.calculator.proxyRoute: /_td/services/calculator
 notFoundRedirect.exact./legacy-post: /posts/live/
 notFoundRedirect.prefix./old-tags/special/: /posts/live/
 notFoundRedirect.prefix./old-tags/: /tags/

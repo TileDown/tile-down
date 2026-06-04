@@ -48,6 +48,15 @@ Follow testing hierarchy:
 - MUST have ~10% UI/E2E tests (critical paths)
 - MUST NOT invert the pyramid
 
+### Rule 6: Everything example stays current
+
+`Examples/everything/content` is the canonical browser-test example site. Every
+new browser-visible TileDown feature MUST update that example in the same PR.
+This includes new tiles, Markdown rendering behavior, built-in layout behavior,
+content configuration, generated assets, CLI build or preview behavior, and
+migration-facing output. If the feature can be observed in Chromium, the PR MUST
+also update `Packages/Tests/Browser/test_site.py` so Playwright covers it.
+
 ## TEST TYPE DECISION TREE
 
 ```

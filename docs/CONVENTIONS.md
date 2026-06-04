@@ -171,6 +171,10 @@ Tiledown builds and runs on macOS and Linux.
   or filesystem dependence; inject test doubles.
 - One test target per source target, named `<SourceTarget>Tests`.
 - Use parameterised tests (`@Test(arguments:)`) for families of similar cases.
+- Any new browser-visible TileDown feature, including tiles, built-in layout
+  behavior, content configuration, generated assets, CLI preview/build behavior,
+  or migration-facing output, must update `Examples/everything/content`. If a
+  real browser can observe it, update `Packages/Tests/Browser/test_site.py` too.
 
 ## Verification before "done"
 
