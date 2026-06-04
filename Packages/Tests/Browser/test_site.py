@@ -447,6 +447,16 @@ def check_baseurl_subpath(page):
         str(post_hrefs),
     )
 
+    page.goto(BASE + "/docs/posts/swift-only/", wait_until="networkidle")
+    pdf_href = page.locator(".td-article-actions a[download]").first.get_attribute("href")
+    check(
+        "baseURL prefixes article PDF links",
+        pdf_href == BASE + "/docs/swift-only.pdf",
+        str(pdf_href),
+    )
+    resp = page.request.get(BASE + "/docs/swift-only.pdf")
+    check("baseURL article PDF is reachable", resp.status == 200, f"status={resp.status}")
+
 
 def check_source_disclosure(page):
     page.set_viewport_size({"width": 1024, "height": 900})
@@ -523,16 +533,16 @@ def check_article_pdf(page):
     page.goto(NORMAL + "/posts/swift-only/", wait_until="networkidle")
     check(
         "article offers a Download PDF action",
-        page.locator('.td-article-actions a[href$="index.pdf"]').count() == 1,
+        page.locator('.td-article-actions a[href$="/swift-only.pdf"]').count() == 1,
     )
-    resp = page.request.get(NORMAL + "/posts/swift-only/index.pdf")
+    resp = page.request.get(NORMAL + "/swift-only.pdf")
     check("article PDF is reachable", resp.status == 200, f"status={resp.status}")
     body = bytes(resp.body())
     check("article PDF is a real PDF document", body[:5] == b"%PDF-", str(body[:8]))
 
     # A non-article page (the home page) offers no PDF.
     page.goto(NORMAL + "/", wait_until="networkidle")
-    check("non-article page has no Download PDF action", page.locator('a[href$="index.pdf"]').count() == 0)
+    check("non-article page has no Download PDF action", page.locator('.td-article-actions a[href$=".pdf"]').count() == 0)
 
 
 def check_service_form(page):

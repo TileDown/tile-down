@@ -3,6 +3,12 @@ import TileCore
 import TileTemplate
 
 extension TileKit.Site.Generator {
+    struct ArticleContextOptions {
+        var baseURL: String
+        var postsDirectory: String
+        var shareLinksEnabled: Bool
+    }
+
     /// The rendered HTML for the recent-posts placement marker (`:::recent:::` on
     /// its own line), as CommonMark renders it: a paragraph of that literal text.
     private static let recentMarkerHTML = "<p>:::recent:::</p>"
@@ -34,8 +40,7 @@ extension TileKit.Site.Generator {
     func articleContext(
         _ page: TileKit.Site.Page,
         sitePosts: [TileKit.Site.Page],
-        baseURL: String,
-        shareLinksEnabled: Bool,
+        options: ArticleContextOptions,
         hasPDF: Bool,
     ) -> TileKit.Template.Context {
         var context: TileKit.Template.Context = [
@@ -43,7 +48,7 @@ extension TileKit.Site.Generator {
             "date": .string(TileKit.Site.PostSelection.displayDate(page.document.frontMatter["date"])),
             "title": .string(page.document.frontMatter["title"] ?? page.slug),
             "description": .string(page.document.frontMatter["description"] ?? ""),
-            "url": .string(url(for: page.slug, baseURL: baseURL)),
+            "url": .string(url(for: page.slug, baseURL: options.baseURL)),
             "shareLinks": .list([]),
             "hasShareLinks": "",
         ]
@@ -64,15 +69,25 @@ extension TileKit.Site.Generator {
         let relatedPosts = sitePosts
             .filter { $0.slug != page.slug }
             .prefix(3)
-        context["relatedPosts"] = .list(pageContexts(relatedPosts, baseURL: baseURL))
+        context["relatedPosts"] = .list(pageContexts(relatedPosts, baseURL: options.baseURL))
         context["hasRelatedPosts"] = .string(relatedPosts.isEmpty ? "" : "true")
-        addShareLinks(to: &context, for: page, baseURL: baseURL, enabled: shareLinksEnabled)
+        addShareLinks(
+            to: &context,
+            for: page,
+            baseURL: options.baseURL,
+            enabled: options.shareLinksEnabled,
+        )
         // The "Download PDF" action: present only when a PDF was actually written
         // for this article (the generator renders it first and reports back), so the
-        // link never points at a missing file. The PDF sits at index.pdf beside the
-        // article's index.html.
+        // link never points at a missing file.
         context["hasPDF"] = .string(hasPDF ? "true" : "")
-        context["pdfURL"] = .string(url(for: page.slug, baseURL: baseURL) + "index.pdf")
+        context["pdfURL"] = .string(
+            pdfURL(
+                for: page,
+                postsDirectory: options.postsDirectory,
+                baseURL: options.baseURL,
+            ),
+        )
         return context
     }
 

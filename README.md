@@ -222,6 +222,7 @@ theme.dark.accent: #66aaff
 rss: true
 rssPath: feed.xml
 shareLinks: true
+articlePDF: true
 notFoundRedirect.exact./old-post: /posts/new-post/
 notFoundRedirect.prefix./tag/: /tags/
 social.github: https://github.com/TileDown/tile-down
@@ -236,6 +237,14 @@ tiles reskin together.
 When `shareLinks: true` is set, built-in article pages include static share links
 for X, LinkedIn, Facebook, and email. Set `baseURL` for absolute share URLs on a
 published site.
+
+When `articlePDF: true` is set, each dated article gets a root-level PDF named
+from the article slug during `tiledown build-site`, and the built-in article
+layout shows a **Download PDF** action only when that file was written. For
+example, `/blog/core-animation-3d-cube/` publishes `/core-animation-3d-cube.pdf`.
+The default is `false`, so sites opt in explicitly. Because PDFs are generated
+during the normal site build, the same setting works from a local Mac deploy
+script or from CI.
 
 Declare local service contracts for `service-form` tiles in `tiledown.yml`:
 

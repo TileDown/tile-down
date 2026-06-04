@@ -278,8 +278,11 @@ extension TileKit.Site.Generator {
                 articleContext(
                     page,
                     sitePosts: sitePosts,
-                    baseURL: baseURL,
-                    shareLinksEnabled: shareLinksEnabled,
+                    options: .init(
+                        baseURL: baseURL,
+                        postsDirectory: postsDirectory,
+                        shareLinksEnabled: shareLinksEnabled,
+                    ),
                     hasPDF: articleHasPDF,
                 ),
             )

@@ -26,11 +26,12 @@ extension SiteGeneratorTests {
         )
     }
 
+    @discardableResult
     private func buildArticlePDFFixture(
         fileSystem: MemoryFileSystem,
         pdfRenderer: (any TileKit.PDFRendering)?,
         articlePDF: Bool,
-    ) throws {
+    ) throws -> TileKit.Site.ContentBuildResult {
         let generator = TileKit.Site.Generator(
             fileSystem: fileSystem,
             markdownParser: TileKit.Source.FrontMatterParser(),
@@ -43,7 +44,7 @@ extension SiteGeneratorTests {
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
             pdfRenderer: pdfRenderer,
         )
-        _ = try generator.buildContent(
+        return try generator.buildContent(
             .init(
                 contentRootPath: "content",
                 template: .layout(.topNav),
@@ -53,20 +54,26 @@ extension SiteGeneratorTests {
         )
     }
 
-    @Test("articlePDF writes a PDF beside each article and links it")
+    @Test("articlePDF writes a root-level slug PDF for each article and links it")
     func articlePDFWritesAndLinks() throws {
         let fileSystem = articlePDFFileSystem()
-        try buildArticlePDFFixture(fileSystem: fileSystem, pdfRenderer: StubPDFRenderer(), articlePDF: true)
+        let result = try buildArticlePDFFixture(
+            fileSystem: fileSystem,
+            pdfRenderer: StubPDFRenderer(),
+            articlePDF: true,
+        )
 
-        // The post gets a PDF written from its source, and the article links it.
-        #expect(fileSystem.binaryFiles["dist/posts/first/index.pdf"] == Array("%PDF-1.4 stub".utf8))
+        // The post gets a root-level slug PDF written from its source, and the
+        // article links it.
+        #expect(fileSystem.binaryFiles["dist/first.pdf"] == Array("%PDF-1.4 stub".utf8))
+        #expect(result.outputPaths.contains("dist/first.pdf"))
         let post = try #require(fileSystem.files["dist/posts/first/index.html"])
-        #expect(post.contains(#"<a href="/posts/first/index.pdf" download>Download PDF</a>"#))
+        #expect(post.contains(#"<a href="/first.pdf" download>Download PDF</a>"#))
 
         // A non-article page (the home page) gets neither.
         #expect(fileSystem.binaryFiles["dist/index.pdf"] == nil)
         let home = try #require(fileSystem.files["dist/index.html"])
-        #expect(!home.contains("index.pdf"))
+        #expect(!home.contains("Download PDF"))
     }
 
     @Test("articlePDF disabled writes no PDF and no link, even with a renderer wired")
@@ -87,5 +94,46 @@ extension SiteGeneratorTests {
         #expect(fileSystem.binaryFiles.isEmpty)
         let post = try #require(fileSystem.files["dist/posts/first/index.html"])
         #expect(!post.contains("Download PDF"))
+    }
+
+    @Test("articlePDF strips configured posts directory from PDF file name")
+    func articlePDFUsesArticleSlugWithoutPostsDirectory() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/blog/core-animation-3d-cube/index.md": """
+                ---
+                title: Cube
+                date: 2026-06-01
+                ---
+                # Cube
+                """,
+            ],
+        )
+        let generator = TileKit.Site.Generator(
+            fileSystem: fileSystem,
+            markdownParser: TileKit.Source.FrontMatterParser(),
+            tileParser: TileKit.Tile.DirectiveParser(),
+            htmlRenderer: TileKit.Output.HTMLRenderer(
+                markdownRenderer: TileKit.Markdown.CommonMarkRenderer(),
+                tileRegistry: .init(),
+            ),
+            templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
+            contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+            pdfRenderer: StubPDFRenderer(),
+        )
+        let result = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(postsDirectory: "blog", articlePDF: true),
+            ),
+        )
+
+        #expect(fileSystem.binaryFiles["dist/core-animation-3d-cube.pdf"] == Array("%PDF-1.4 stub".utf8))
+        #expect(result.outputPaths.contains("dist/core-animation-3d-cube.pdf"))
+        let post = try #require(fileSystem.files["dist/blog/core-animation-3d-cube/index.html"])
+        #expect(post.contains(#"<a href="/core-animation-3d-cube.pdf" download>Download PDF</a>"#))
     }
 }
