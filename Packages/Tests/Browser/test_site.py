@@ -576,6 +576,64 @@ def check_service_form(page):
     check("service-form contract source is not published", contract_status == 404, f"status={contract_status}")
 
 
+def check_source_code_page(page):
+    page.goto(NORMAL + "/source-code/", wait_until="networkidle")
+    expected = {
+        "bash",
+        "c",
+        "cpp",
+        "csharp",
+        "css",
+        "go",
+        "html",
+        "java",
+        "javascript",
+        "json",
+        "kotlin",
+        "python",
+        "ruby",
+        "rust",
+        "sql",
+        "swift",
+        "typescript",
+        "xml",
+        "yaml",
+    }
+    languages = page.eval_on_selector_all(
+        "main pre code[class^='language-']",
+        "els => els.map(e => e.className.replace('language-', ''))",
+    )
+    check("source code example includes at least fifteen languages", len(set(languages)) >= 15, str(languages))
+    check("source code example covers supported language set", expected.issubset(set(languages)), str(languages))
+
+    tokenized = page.eval_on_selector_all(
+        "main pre code[class^='language-']",
+        """els => els
+            .filter(e => e.querySelector('[class^="tok-"]'))
+            .map(e => e.className.replace('language-', ''))""",
+    )
+    check("source code examples are statically tokenized", expected.issubset(set(tokenized)), str(tokenized))
+
+    colors = page.evaluate(
+        """() => {
+            const color = selector => {
+                const element = document.querySelector(selector);
+                return element ? getComputedStyle(element).color : null;
+            };
+            return {
+                code: color('main pre code.language-swift'),
+                keyword: color('main pre code.language-swift .tok-keyword'),
+                type: color('main pre code.language-swift .tok-type'),
+                string: color('main pre code.language-swift .tok-string'),
+                number: color('main pre code.language-c .tok-number')
+            };
+        }"""
+    )
+    palette = {value for value in colors.values() if value}
+    check("source code examples use distinct token colors", len(palette) >= 5, str(colors))
+    check("source code page keeps source disclosure", page.locator(".td-source").count() == 1)
+
+
 def run(page):
     install_404_routes(page)
 
@@ -687,6 +745,9 @@ def run(page):
     after = page.eval_on_selector("[data-td-counter-value]", "e => e.textContent")
     check("counter tile increments per click", before == "0" and after == "2", f"{before}->{after}")
     check("home has no mermaid runtime", page.evaluate("'__tdMermaidRuntime' in window") is False)
+
+    check_source_code_page(page)
+    page.goto(NORMAL + "/", wait_until="networkidle")
 
     # --- baseURL subpath: root-relative generated URLs still load ---
     check_baseurl_subpath(page)

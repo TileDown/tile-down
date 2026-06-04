@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-06-04
+
+### Added
+
+- The Everything example now includes a Source Code page with static highlighted
+  fences for the supported language set, covered by the browser gate.
+
+### Fixed
+
+- Generated tag landing pages are hidden from normal site navigation while
+  remaining available for tag Clear/chip links.
+
 ## [0.4.0] - 2026-06-04
 
 ### Added

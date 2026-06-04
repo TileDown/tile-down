@@ -72,9 +72,18 @@ renders as a static SVG chart, matching the sibling MarkdownPDF project.
   <img src="docs/images/diagram-flowchart.png" alt="A flowchart rendered with mermaid" width="480">
 </p>
 
+### Source code
+
+Fenced code blocks are highlighted at build time into static HTML spans and the
+shared site stylesheet. There is no runtime highlighter.
+
+<p align="center">
+  <img src="docs/images/source-code.png" alt="A Tiledown source code page with statically highlighted code blocks" width="720">
+</p>
+
 ## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.4.0`, and it already builds and deploys its own project
+Tiledown is at version `0.4.1`, and it already builds and deploys its own project
 website, [tiledown.com](https://tiledown.com/), from this engine on every change.
 It is usable today for static content sites like that one. It is pre-1.0, so the
 toolchain and some APIs can still change; pin a commit if you need a stable
@@ -121,7 +130,7 @@ From `Packages/`:
 ```sh
 swift run tiledown help
 swift run tiledown version
-# Tiledown 0.4.0
+# Tiledown 0.4.1
 ```
 
 Build one page from Markdown and a template:
@@ -280,6 +289,12 @@ Higher-order generated filters are capped at three selected tags so a densely
 tagged post cannot expand to every possible tag subset.
 Custom tag bars should render only `site.tags` items with `isVisibleInTagBar` on
 multi-tag pages; the built-in layouts already do this.
+
+<p align="center">
+  <img src="docs/images/tags-all.png" alt="The generated all articles tag landing page with tag filters" width="350">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/images/tags-filtered.png" alt="A generated filtered tag page with the Swift tag selected" width="350">
+</p>
 
 Pages can set a hero image in front matter. Add `imageDark` when a screenshot or
 diagram needs a separate dark-mode asset:
