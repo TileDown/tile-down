@@ -120,6 +120,9 @@ extension SiteGeneratorTests {
         <lastmod>2026-05-20</lastmod>
         </url>
         <url>
+        <loc>https://example.com/site/tags/</loc>
+        </url>
+        <url>
         <loc>https://example.com/site/tags/release/</loc>
         </url>
         </urlset>

@@ -30,6 +30,7 @@ extension SiteGeneratorTests {
                 "dist/index.html",
                 "dist/posts/index.html",
                 "dist/posts/live/index.html",
+                "dist/tags/index.html",
                 "dist/tags/release/index.html",
                 "dist/404.html",
                 "dist/old-post/index.html",
