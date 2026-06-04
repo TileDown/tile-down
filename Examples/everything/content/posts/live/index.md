@@ -20,6 +20,20 @@ The RSS body keeps [a root link](/about/) and an inline image.
 
 ![RSS logo](/assets/logo.svg)
 
+A Swift code fence stays static but receives build-time token colors:
+
+```swift
+struct ReleaseNote {
+    let title: String
+    let shipped = true
+    let priority = 1
+
+    func summary() -> String {
+        "TileDown highlights code at build time"
+    }
+}
+```
+
 :::tile embed
 url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 title: TileDown demo video

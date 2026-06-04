@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-04
+
 ### Added
 
 - `tiledown doctor` checks a content directory without writing into it, reports
   config/content/build diagnostics, supports JSON output, and adds publish checks
   for production readiness.
+- Static, build-time syntax highlighting now colors generated code fences and
+  the Markdown source disclosure without requiring runtime JavaScript. It ships
+  language profiles for Swift, JavaScript, TypeScript, Python, Ruby, Go, Rust,
+  Kotlin, Java, C, C++, C#, HTML/XML, CSS, JSON, YAML, shell, and SQL. (#169)
+- Article pages can publish a PDF generated from their Markdown source, reusing
+  the MarkdownPDF pipeline. (#162)
+- Sites can opt into a "View Markdown source" disclosure that renders each page's
+  escaped, syntax-highlighted source. (#160)
+- Built-in site navigation and tag bars gained configurable controls for blog
+  and tag-filter workflows.
 
 ### Fixed
 
@@ -20,6 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   top-level fatal error handler.
 - `tiledown doctor --publish` now checks generated local URLs in links and asset
   references without failing on article prose that mentions localhost examples.
+- Clearing a generated tag filter now lands on `/tags/` and shows all articles
+  instead of an empty or missing page. (#168)
+- Article PDFs now render `:::chart` directive tiles instead of dropping them.
+  (#167)
+- Chart labels, ticks, and axes render with cleaner spacing and normal-weight
+  text. (#165, #166)
+- Display math renders at a readable size and handles the current MathTypeset
+  space-node output. (#156, #164)
 
 ## [0.3.0] - 2026-06-03
 

@@ -207,6 +207,28 @@ def check_article_page(page):
         "" if media_box is None or body_box is None else f"gap={body_box['y'] - (media_box['y'] + media_box['height']):.0f}",
     )
     check("article related posts render", "More updates" in article_text and "Swift Only" in article_text)
+
+    code_colors = page.evaluate(
+        """() => {
+            const c = s => {
+                const e = document.querySelector('.td-article-body pre code ' + s);
+                return e ? getComputedStyle(e).color : null;
+            };
+            return {
+                keyword: c('.tok-keyword'),
+                type: c('.tok-type'),
+                string: c('.tok-string'),
+                number: c('.tok-number')
+            };
+        }"""
+    )
+    code_palette = {v for v in code_colors.values() if v}
+    check(
+        "article code fence uses distinct syntax colors",
+        len(code_palette) >= 4,
+        str(code_colors),
+    )
+
     embed = page.locator(".td-embed iframe").first
     embed_box = box(page, ".td-embed-frame")
     check("article embed iframe renders", embed.count() == 1)

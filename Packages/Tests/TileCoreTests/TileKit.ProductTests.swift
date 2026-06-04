@@ -10,6 +10,6 @@ struct ProductTests {
 
     @Test("reports its version")
     func version() {
-        #expect(TileKit.Product.version == "0.3.0")
+        #expect(TileKit.Product.version == "0.4.0")
     }
 }

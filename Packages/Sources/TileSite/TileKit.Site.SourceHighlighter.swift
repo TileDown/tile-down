@@ -18,6 +18,7 @@ public extension TileKit.Site {
             var output: [String] = []
             var inFrontMatter = false
             var fenceMarker: Character?
+            var fenceLanguage: String?
             let lines = source.components(separatedBy: "\n")
 
             for (index, line) in lines.enumerated() {
@@ -41,14 +42,19 @@ public extension TileKit.Site {
                 if let marker = fenceMarker {
                     if isFenceLine(trimmed, marker: marker) {
                         fenceMarker = nil
+                        fenceLanguage = nil
                         output.append(fenceLine(line))
                     } else {
-                        output.append(span("tok-fence-body", line))
+                        output.append(rawSpan(
+                            "tok-fence-body",
+                            TileKit.SyntaxHighlighter.html(for: line, language: fenceLanguage),
+                        ))
                     }
                     continue
                 }
                 if let marker = openingFenceMarker(trimmed) {
                     fenceMarker = marker
+                    fenceLanguage = languageForFence(trimmed)
                     output.append(fenceLine(line))
                     continue
                 }
@@ -202,6 +208,15 @@ public extension TileKit.Site {
             trimmed.hasPrefix(String(repeating: marker, count: 3))
         }
 
+        private static func languageForFence(_ trimmed: String) -> String? {
+            guard let marker = openingFenceMarker(trimmed) else {
+                return nil
+            }
+            let body = trimmed.drop { $0 == marker }
+            let language = body.trimmingCharacters(in: .whitespaces)
+            return language.isEmpty ? nil : language
+        }
+
         /// The index of the closing `)` of a `[..](..)` link starting at `start`,
         /// or `nil` if the text is not a well-formed inline link from there.
         private static func linkEnd(in chars: [Character], from start: Int) -> Int? {
@@ -248,6 +263,10 @@ public extension TileKit.Site {
 
         private static func span(_ className: String, _ raw: String) -> String {
             "<span class=\"\(className)\">\(escape(raw))</span>"
+        }
+
+        private static func rawSpan(_ className: String, _ html: String) -> String {
+            "<span class=\"\(className)\">\(html)</span>"
         }
 
         private static func escape(_ raw: String) -> String {

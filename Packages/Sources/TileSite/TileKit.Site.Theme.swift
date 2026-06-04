@@ -1,4 +1,4 @@
-// swiftlint:disable line_length type_body_length
+// swiftlint:disable file_length line_length type_body_length
 // The theme is CSS; its lines cannot wrap without changing the stylesheet, so line
 // length is disabled for this CSS-only file.
 import TileCore
@@ -62,7 +62,13 @@ public extension TileKit.Site {
         --td-muted: #57534e;
         --td-accent: #b45309;
         --td-syn-key: #2563eb;
+        --td-syn-type: #0f766e;
+        --td-syn-fn: #0369a1;
         --td-syn-str: #15803d;
+        --td-syn-num: #c2410c;
+        --td-syn-cmt: #78716c;
+        --td-syn-attr: #be123c;
+        --td-syn-op: #9333ea;
         --td-border: #e7e5e4;
         --td-radius: 12px;
         --td-space: 1rem;
@@ -77,7 +83,13 @@ public extension TileKit.Site {
         --td-muted: #a1a1aa;
         --td-accent: #f59e0b;
         --td-syn-key: #60a5fa;
+        --td-syn-type: #5eead4;
+        --td-syn-fn: #7dd3fc;
         --td-syn-str: #4ade80;
+        --td-syn-num: #fdba74;
+        --td-syn-cmt: #a8a29e;
+        --td-syn-attr: #fda4af;
+        --td-syn-op: #d8b4fe;
         --td-border: #27272a;
         }
         @media (prefers-color-scheme: dark) {
@@ -88,7 +100,13 @@ public extension TileKit.Site {
         --td-muted: #a1a1aa;
         --td-accent: #f59e0b;
         --td-syn-key: #60a5fa;
+        --td-syn-type: #5eead4;
+        --td-syn-fn: #7dd3fc;
         --td-syn-str: #4ade80;
+        --td-syn-num: #fdba74;
+        --td-syn-cmt: #a8a29e;
+        --td-syn-attr: #fda4af;
+        --td-syn-op: #d8b4fe;
         --td-border: #27272a;
         }
         }
@@ -196,7 +214,13 @@ public extension TileKit.Site {
         --td-muted: #6e6e73;
         --td-accent: #0066cc;
         --td-syn-key: #af52de;
+        --td-syn-type: #007c78;
+        --td-syn-fn: #0066cc;
         --td-syn-str: #248a3d;
+        --td-syn-num: #c65d00;
+        --td-syn-cmt: #6e6e73;
+        --td-syn-attr: #d70015;
+        --td-syn-op: #5856d6;
         --td-border: rgba(0, 0, 0, 0.12);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
         --td-radius: 18px;
@@ -213,7 +237,13 @@ public extension TileKit.Site {
         --td-muted: #a1a1a6;
         --td-accent: #2997ff;
         --td-syn-key: #da8fff;
+        --td-syn-type: #5de6d6;
+        --td-syn-fn: #64d2ff;
         --td-syn-str: #30d158;
+        --td-syn-num: #ff9f0a;
+        --td-syn-cmt: #a1a1a6;
+        --td-syn-attr: #ff6961;
+        --td-syn-op: #7d7aff;
         --td-border: rgba(255, 255, 255, 0.16);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
         }
@@ -226,7 +256,13 @@ public extension TileKit.Site {
         --td-muted: #a1a1a6;
         --td-accent: #2997ff;
         --td-syn-key: #da8fff;
+        --td-syn-type: #5de6d6;
+        --td-syn-fn: #64d2ff;
         --td-syn-str: #30d158;
+        --td-syn-num: #ff9f0a;
+        --td-syn-cmt: #a1a1a6;
+        --td-syn-attr: #ff6961;
+        --td-syn-op: #7d7aff;
         --td-border: rgba(255, 255, 255, 0.16);
         --td-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
         }
@@ -356,13 +392,19 @@ public extension TileKit.Site {
         .td-source-window .td-source-code { font-family: var(--td-mono); white-space: pre; background: none; border: 0; padding: 0; font-size: inherit; }
         .tok-fm-delim, .tok-quote, .tok-list, .tok-fence, .tok-em { color: var(--td-muted); }
         .tok-em { font-style: italic; }
-        .tok-fm-key, .tok-heading, .tok-strong { color: var(--td-syn-key); }
-        .tok-heading, .tok-strong { font-weight: 700; }
-        .tok-fm-value, .tok-code, .tok-fence-lang { color: var(--td-syn-str); }
+        .tok-fm-key, .tok-heading, .tok-strong, .tok-keyword, .tok-property { color: var(--td-syn-key); }
+        .tok-heading, .tok-strong, .tok-keyword, .tok-property { font-weight: 700; }
+        .tok-type { color: var(--td-syn-type); }
+        .tok-function { color: var(--td-syn-fn); }
+        .tok-fm-value, .tok-code, .tok-fence-lang, .tok-string { color: var(--td-syn-str); }
+        .tok-number, .tok-literal { color: var(--td-syn-num); }
+        .tok-comment { color: var(--td-syn-cmt); font-style: italic; }
+        .tok-attribute { color: var(--td-syn-attr); }
+        .tok-operator { color: var(--td-syn-op); }
         .tok-link, .tok-math { color: var(--td-accent); }
         .tok-fence-body { color: var(--td-ink); }
         """
     }
 }
 
-// swiftlint:enable line_length type_body_length
+// swiftlint:enable file_length line_length type_body_length
