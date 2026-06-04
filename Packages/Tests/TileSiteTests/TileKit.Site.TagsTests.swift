@@ -121,6 +121,32 @@ struct SiteTagsTests {
         #expect(!home.contains("<nav class=\"bar\">"))
     }
 
+    @Test("a source page can opt into the built-in tag bar")
+    func sourcePageCanOptIntoTagBar() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/posts/index.md": "---\ntitle: Posts\npostList: true\ntagBar: true\n---\n# Posts",
+                "content/posts/alpha/index.md": "---\ntitle: Alpha\ndate: 2026-05-28\ntags: swift, ios\n---\n# Alpha",
+                "content/posts/beta/index.md": "---\ntitle: Beta\ndate: 2026-05-29\ntags: docs\n---\n# Beta",
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        let posts = try #require(fileSystem.files["dist/posts/index.html"])
+        #expect(posts.contains(#"<nav class="td-tagbar" aria-label="All tags">"#))
+        #expect(posts.contains(#"href="/tags/swift/">swift</a>"#))
+        #expect(posts.contains(#"href="/tags/docs/">docs</a>"#))
+    }
+
     @Test("a multi-tag page marks selected tags and links each one to remove it")
     func multiTagPageShowsSelectedTagLinks() throws {
         var files = taggedFixtureFiles()

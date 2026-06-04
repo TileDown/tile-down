@@ -206,6 +206,9 @@ extension TileKit.Site.Generator {
     ) -> [TileKit.Site.Page] {
         pages
             .filter { !$0.slug.isEmpty && !$0.slug.contains("/") }
+            .filter { page in
+                page.document.frontMatter["nav"].map(sectionIsTruthy) ?? true
+            }
             .sorted { first, second in
                 let firstWeight = weight(first)
                 let secondWeight = weight(second)
@@ -314,7 +317,8 @@ extension TileKit.Site.Generator {
         // Non-empty on the tags landing page and any per-tag page, gating the
         // sticky tag bar that lets a reader jump between tags.
         let onTagPage = page.slug == "tags" || page.slug.hasPrefix("tags/")
-        context["tagBar"] = .string(onTagPage ? "true" : "")
+        let optsIntoTagBar = sectionIsTruthy(page.document.frontMatter["tagBar"])
+        context["tagBar"] = .string(onTagPage || optsIntoTagBar ? "true" : "")
         if let heroImage = heroImageContext(
             page,
             baseURL: baseURL,
