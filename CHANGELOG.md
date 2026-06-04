@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `tiledown doctor` checks a content directory without writing into it, reports
+  config/content/build diagnostics, supports JSON output, and adds publish checks
+  for production readiness.
+
+### Fixed
+
+- `tiledown help`, `tiledown --help`, `tiledown -h`, and bare `tiledown` now
+  print usage cleanly, and invalid CLI arguments no longer escape to Swift's
+  top-level fatal error handler.
+- `tiledown doctor --publish` now checks generated local URLs in links and asset
+  references without failing on article prose that mentions localhost examples.
+
 ## [0.3.0] - 2026-06-03
 
 ### Added

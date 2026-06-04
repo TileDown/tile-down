@@ -119,6 +119,7 @@ repository's engine and the same `tiledown build-site` command shown below.
 From `Packages/`:
 
 ```sh
+swift run tiledown help
 swift run tiledown version
 # Tiledown 0.3.0
 ```
@@ -156,6 +157,17 @@ swift run tiledown serve --port 8765 content/
 
 `serve` writes to a sibling `.tiledown/serve/` directory by default. Pass
 `--output dist/` when you want a stable preview output path.
+
+Check a content directory without writing into it:
+
+```sh
+swift run tiledown doctor content/
+swift run tiledown doctor --publish content/
+```
+
+`doctor` builds into a temporary directory. Content generators are skipped by
+default because they execute commands; pass `--run-generators` to run them in a
+temporary copy of the content tree.
 
 ### Math
 
