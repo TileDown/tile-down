@@ -83,11 +83,10 @@ shared site stylesheet. There is no runtime highlighter.
 
 ## Status: pre-1.0, and already powering a live site
 
-The latest tagged release is `0.4.1`. Current `main` is ahead of that release and
-contains unreleased site features, including article PDFs named by slug, local
-image embedding in generated PDFs, favicons, optional brand subtitles, copied
-article permalinks, and first-class Bluesky and Mastodon site settings. Tiledown
-already builds and deploys its own project website,
+The latest tagged release is `0.5.0`. It includes article PDFs named by slug,
+local image embedding in generated PDFs, favicons, optional brand subtitles,
+copied article permalinks, and first-class Bluesky and Mastodon site settings.
+Tiledown already builds and deploys its own project website,
 [tiledown.com](https://tiledown.com/), from this engine on every change. It is
 usable today for static content sites like that one. It is pre-1.0, so the
 toolchain and some APIs can still change; pin a release tag or commit if you need
@@ -134,7 +133,7 @@ From `Packages/`:
 ```sh
 swift run tiledown help
 swift run tiledown version
-# Tiledown 0.4.1
+# Tiledown 0.5.0
 ```
 
 Build one page from Markdown and a template:
