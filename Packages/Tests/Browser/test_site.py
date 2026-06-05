@@ -665,7 +665,15 @@ def run(page):
     footer_credit = page.locator(".td-built").inner_text()
     check("footer uses TileDown brand", "Built with TileDown" in footer_credit, footer_credit)
     footer_socials = page.eval_on_selector_all(".td-socials a", "els => els.map(e => e.textContent.trim())")
-    check("footer renders configured socials and RSS", {"GitHub", "LinkedIn", "RSS"}.issubset(set(footer_socials)), str(footer_socials))
+    check(
+        "footer renders configured socials and RSS",
+        {"GitHub", "LinkedIn", "Bluesky", "Mastodon", "RSS"}.issubset(set(footer_socials)),
+        str(footer_socials),
+    )
+    check(
+        "footer renders Mastodon rel me",
+        page.locator('.td-socials a[href="https://mastodon.social/@tiledown"]').get_attribute("rel") == "me",
+    )
     root_vars = page.evaluate(
         """() => {
             const style = getComputedStyle(document.documentElement);

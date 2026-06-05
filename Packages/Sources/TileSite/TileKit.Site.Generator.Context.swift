@@ -375,6 +375,7 @@ extension TileKit.Site.Generator {
     ) -> TileKit.Template.Context {
         [
             "label": .string(link.label),
+            "rel": .string(link.rel),
             "url": .string(link.url),
         ]
     }

@@ -80,13 +80,15 @@ rssDescription: Notes on whatever I am building.
 
 ## Social and outbound links
 
-`social.<network>: <url>` adds a labeled social link to the chrome. `github` and
-`linkedin` get the labels "GitHub" and "LinkedIn"; any other network uses the key
-as its label.
+`social.<network>: <url>` adds a labeled social link to the chrome. `github`,
+`linkedin`, `bluesky`, and `mastodon` get the labels "GitHub", "LinkedIn",
+"Bluesky", and "Mastodon"; any other network uses the key as its label.
+Mastodon links render with `rel="me"` for profile verification.
 
 ```yaml
 social.github: https://github.com/you
 social.linkedin: https://www.linkedin.com/in/you
+social.bluesky: https://bsky.app/profile/you.example.com
 social.mastodon: https://mastodon.social/@you
 ```
 

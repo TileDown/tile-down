@@ -95,10 +95,12 @@ public extension TileKit.Site {
                 return false
             }
             let label = try socialLabel(for: item.key)
+            let rel = try socialRel(for: item.key)
             result.configuration.socialLinks.append(
                 .init(
                     label: label,
                     url: item.value,
+                    rel: rel,
                 ),
             )
             return true
@@ -288,13 +290,27 @@ private extension TileKit.Site.ConfigurationFile {
         }
 
         return switch value {
+        case "bluesky":
+            "Bluesky"
         case "github":
             "GitHub"
         case "linkedin":
             "LinkedIn"
+        case "mastodon":
+            "Mastodon"
         case let value:
             value
         }
+    }
+
+    static func socialRel(
+        for key: String,
+    ) throws -> String {
+        let value = String(key.dropFirst("social.".count))
+        guard !value.isEmpty else {
+            throw TileKit.Site.ConfigurationFileError.unknownKey(key)
+        }
+        return value == "mastodon" ? "me" : ""
     }
 
     /// Parses a `latestPosts` count: a non-negative integer. A malformed value
