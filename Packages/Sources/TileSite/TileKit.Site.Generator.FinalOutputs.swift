@@ -18,11 +18,14 @@ extension TileKit.Site.Generator {
     ) throws -> [String] {
         var outputPaths = plan.initialOutputPaths
         outputPaths += try writeRenderedPages(
-            pages: plan.pages,
-            template: plan.template,
-            configuration: plan.request.configuration,
-            sitePaths: plan.sitePaths,
-            outputRootPath: plan.request.outputRootPath,
+            .init(
+                pages: plan.pages,
+                template: plan.template,
+                configuration: plan.request.configuration,
+                sitePaths: plan.sitePaths,
+                outputRootPath: plan.request.outputRootPath,
+                contentRootPath: plan.request.contentRootPath,
+            ),
         )
         outputPaths += try writeRenderedPage(
             .init(
@@ -32,6 +35,7 @@ extension TileKit.Site.Generator {
                 configuration: plan.request.configuration,
                 sitePaths: plan.sitePaths,
                 outputRootPath: plan.request.outputRootPath,
+                contentRootPath: plan.request.contentRootPath,
             ),
         )
         outputPaths += try contentRedirects(

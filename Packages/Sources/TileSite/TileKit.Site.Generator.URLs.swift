@@ -1,6 +1,18 @@
 import TileCore
 
 extension TileKit.Site.Generator {
+    func url(
+        for slug: String,
+        baseURL: String = "",
+    ) -> String {
+        let path = slug.isEmpty ? "/" : "/" + slug + "/"
+        guard !baseURL.isEmpty else {
+            return path
+        }
+        let relativePath = path.hasPrefix("/") ? String(path.dropFirst()) : path
+        return baseURL.hasSuffix("/") ? baseURL + relativePath : baseURL + "/" + relativePath
+    }
+
     /// Applies `baseURL` to a generated root-relative URL while leaving external,
     /// protocol-relative, fragment, query, and authored relative URLs unchanged.
     func baseURLPrefixedRootRelativeURL(

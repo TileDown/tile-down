@@ -2,6 +2,7 @@
 # but intentionally broad: every shipped browser-visible TileDown surface should
 # have at least one page here.
 title: Everything Example
+versionName: Complete Fixture
 baseURL: https://example.com/browser-fixture
 theme: standard
 theme.light.accent: #0057d8

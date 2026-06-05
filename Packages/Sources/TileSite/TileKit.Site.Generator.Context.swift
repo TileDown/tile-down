@@ -369,6 +369,7 @@ extension TileKit.Site.Generator {
             ],
         )
     }
+
     func socialLinkContext(
         _ link: TileKit.Site.SocialLink,
     ) -> TileKit.Template.Context {
@@ -384,17 +385,5 @@ extension TileKit.Site.Generator {
         values.reduce(into: [:]) { result, item in
             result[item.key] = .string(item.value)
         }
-    }
-
-    func url(
-        for slug: String,
-        baseURL: String = "",
-    ) -> String {
-        let path = slug.isEmpty ? "/" : "/" + slug + "/"
-        guard !baseURL.isEmpty else {
-            return path
-        }
-        let relativePath = path.hasPrefix("/") ? String(path.dropFirst()) : path
-        return baseURL.hasSuffix("/") ? baseURL + relativePath : baseURL + "/" + relativePath
     }
 }

@@ -8,24 +8,31 @@ extension TileKit.Site.Generator {
         var configuration: TileKit.Site.Configuration
         var sitePaths: TileKit.Site.GeneratedSitePaths
         var outputRootPath: String
+        var contentRootPath: String
+    }
+
+    struct RenderedPagesPlan {
+        var pages: [TileKit.Site.Page]
+        var template: String
+        var configuration: TileKit.Site.Configuration
+        var sitePaths: TileKit.Site.GeneratedSitePaths
+        var outputRootPath: String
+        var contentRootPath: String
     }
 
     func writeRenderedPages(
-        pages: [TileKit.Site.Page],
-        template: String,
-        configuration: TileKit.Site.Configuration,
-        sitePaths: TileKit.Site.GeneratedSitePaths,
-        outputRootPath: String,
+        _ plan: RenderedPagesPlan,
     ) throws -> [String] {
-        try pages.flatMap { page in
+        try plan.pages.flatMap { page in
             try writeRenderedPage(
                 .init(
                     page: page,
-                    pages: pages,
-                    template: template,
-                    configuration: configuration,
-                    sitePaths: sitePaths,
-                    outputRootPath: outputRootPath,
+                    pages: plan.pages,
+                    template: plan.template,
+                    configuration: plan.configuration,
+                    sitePaths: plan.sitePaths,
+                    outputRootPath: plan.outputRootPath,
+                    contentRootPath: plan.contentRootPath,
                 ),
             )
         }
@@ -40,6 +47,7 @@ extension TileKit.Site.Generator {
             page: plan.page,
             configuration: plan.configuration,
             outputRootPath: plan.outputRootPath,
+            contentRootPath: plan.contentRootPath,
         )
         let output = try render(
             page: plan.page,

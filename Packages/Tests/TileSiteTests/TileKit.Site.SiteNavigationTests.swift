@@ -226,7 +226,7 @@ extension SiteGeneratorTests {
         let home = try #require(fileSystem.files["dist/index.html"])
         let expectedBrand =
             #"<a class="td-brand td-brand-stacked" href="/"><span class="td-brand-title">My Site</span>"#
-            + #"<span class="td-brand-subtitle">First Light</span></a>"#
+                + #"<span class="td-brand-subtitle">First Light</span></a>"#
         #expect(
             home.contains(expectedBrand),
         )

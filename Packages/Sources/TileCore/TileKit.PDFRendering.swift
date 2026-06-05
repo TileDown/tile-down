@@ -1,3 +1,5 @@
+import Foundation
+
 public extension TileKit {
     /// A protocol seam for rendering a page's Markdown source into a PDF document,
     /// so the engine can emit a downloadable PDF beside an article without importing
@@ -10,5 +12,12 @@ public extension TileKit {
     /// simply omits the download rather than failing the build.
     protocol PDFRendering: Sendable {
         func renderPDF(markdown: String) -> [UInt8]?
+        func renderPDF(markdown: String, assetsBaseURL: URL?) -> [UInt8]?
+    }
+}
+
+public extension TileKit.PDFRendering {
+    func renderPDF(markdown: String, assetsBaseURL _: URL?) -> [UInt8]? {
+        renderPDF(markdown: markdown)
     }
 }

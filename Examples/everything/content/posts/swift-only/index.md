@@ -8,3 +8,5 @@ tags: swift
 # Swift Only
 
 This post shares the Swift tag, but not the release tag.
+
+![PDF sample image](/assets/pdf-sample.jpg)
