@@ -193,6 +193,22 @@ let targets: [Target] = {
     )
     let tilePDFTargets = [tilePDFTarget, tilePDFTestsTarget]
 
+    let tileImageTarget = Target.target(
+        name: "TileImage",
+        dependencies: [
+            "TileCore",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileImageTestsTarget = Target.testTarget(
+        name: "TileImageTests",
+        dependencies: [
+            "TileImage",
+        ],
+        swiftSettings: swiftSettings,
+    )
+    let tileImageTargets = [tileImageTarget, tileImageTestsTarget]
+
     let mathPlaygroundTarget = Target.executableTarget(
         name: "MathPlaygroundCLI",
         dependencies: [
@@ -277,6 +293,7 @@ let targets: [Target] = {
         name: "TileSite",
         dependencies: [
             "TileCore",
+            "TileImage",
             "TileMarkdown",
             "TileOutput",
             "TileSource",
@@ -291,9 +308,11 @@ let targets: [Target] = {
             "TileCore",
             "TileMarkdown",
             "TileOutput",
+            "TilePDF",
             "TileService",
             "TileServiceForm",
             "TileSite",
+            "TileSiteImpl",
             "TileSource",
             "TileTemplate",
             "TileTile",
@@ -436,6 +455,7 @@ let targets: [Target] = {
         + tileTileTargets
         + tileMathTargets
         + tilePDFTargets
+        + tileImageTargets
         + mathPlaygroundTargets
         + markdownPDFPlaygroundTargets
         + tileOutputTargets

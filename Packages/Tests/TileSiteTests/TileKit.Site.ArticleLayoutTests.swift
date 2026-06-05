@@ -144,7 +144,7 @@ extension SiteGeneratorTests {
         #expect(post.contains(#"<nav class="td-article-actions" aria-label="Article actions">"#))
         let permalinkAction =
             #"<a href="https://example.com/posts/first/" data-td-copy-permalink "#
-            + #"title="Copy permalink">Permalink</a>"#
+                + #"title="Copy permalink">Permalink</a>"#
         #expect(post.contains(permalinkAction))
         #expect(post.contains("navigator.clipboard.writeText(url)"))
         #expect(post.contains(#"<a href="https://example.com/feed.xml">RSS</a>"#))

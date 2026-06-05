@@ -33,4 +33,27 @@ struct SourceTransformTests {
         let source = "# H\n\nA paragraph with a ```chart fence already.\n"
         #expect(TileKit.PDF.markdownForPDF(source) == source)
     }
+
+    @Test("image-only lines become standalone paragraphs")
+    func separatesImageOnlyLines() {
+        let out = TileKit.PDF.markdownForPDF("""
+        Prose before image.
+        ![](/images/cube.png)
+        Prose after image.
+        """)
+
+        #expect(out.contains("Prose before image.\n\n![](/images/cube.png)\n\nProse after image."))
+    }
+
+    @Test("image-looking code fence lines are not separated")
+    func leavesImageLinesInsideCodeFences() {
+        let source = """
+        ```markdown
+        Prose before image.
+        ![](/images/cube.png)
+        ```
+        """
+
+        #expect(TileKit.PDF.markdownForPDF(source) == source)
+    }
 }

@@ -19,9 +19,13 @@ public extension TileKit.PDF {
         public init() {}
 
         public func renderPDF(markdown: String) -> [UInt8]? {
+            renderPDF(markdown: markdown, assetsBaseURL: nil)
+        }
+
+        public func renderPDF(markdown: String, assetsBaseURL: URL?) -> [UInt8]? {
             guard let data = try? MarkdownPDFRenderer(
                 options: PDFOptions(mathTypesetting: .enabled),
-            ).render(markdown: TileKit.PDF.markdownForPDF(markdown)) else {
+            ).render(markdown: TileKit.PDF.markdownForPDF(markdown), assetsBaseURL: assetsBaseURL) else {
                 return nil
             }
             return [UInt8](data)

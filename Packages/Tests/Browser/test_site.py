@@ -539,6 +539,8 @@ def check_article_pdf(page):
     check("article PDF is reachable", resp.status == 200, f"status={resp.status}")
     body = bytes(resp.body())
     check("article PDF is a real PDF document", body[:5] == b"%PDF-", str(body[:8]))
+    check("article PDF embeds local image", b"/Subtype /Image" in body and b"/DCTDecode" in body)
+    check("article PDF has no image placeholders", b"[Image:" not in body)
 
     # A non-article page (the home page) offers no PDF.
     page.goto(NORMAL + "/", wait_until="networkidle")
@@ -652,6 +654,7 @@ def run(page):
     page.emulate_media(color_scheme="light")
     page.goto(NORMAL + "/", wait_until="networkidle")
     check("home title", page.title() == "Home", page.title())
+    check("home header renders brand version name", page.locator(".td-brand-subtitle").inner_text() == "Complete Fixture")
     check("home metadata description", meta_content(page, 'meta[name="description"]') == "A fixture home page for generated site behavior.")
     check("home metadata open graph", meta_content(page, 'meta[property="og:type"]') == "website")
     check("home metadata twitter card", meta_content(page, 'meta[name="twitter:card"]') == "summary_large_image")
