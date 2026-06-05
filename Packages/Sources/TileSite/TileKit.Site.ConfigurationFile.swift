@@ -111,6 +111,13 @@ public extension TileKit.Site {
             _ item: (key: String, value: String),
             to result: inout ConfigurationFile,
         ) throws {
+            if applyBrandScalarSetting(item, to: &result) {
+                return
+            }
+            if try applyPostListScalarSetting(item, to: &result) {
+                return
+            }
+
             switch item.key {
             case "title":
                 result.configuration.title = item.value
@@ -122,16 +129,42 @@ public extension TileKit.Site {
                 result.configuration.theme = try theme(named: item.value)
             case "appearance":
                 result.configuration.appearance = try appearance(named: item.value)
-            case "postsDir":
-                result.configuration.postsDirectory = postsDirectory(from: item.value)
-            case "latestPosts":
-                result.configuration.latestPostCount = try latestPostCount(from: item.value)
-            case "postsLabel":
-                result.configuration.postsLabel = item.value
             case "fontScale":
                 result.configuration.fontScale = try fontScale(from: item.value)
             default:
                 throw ConfigurationFileError.unknownKey(item.key)
+            }
+        }
+
+        private static func applyBrandScalarSetting(
+            _ item: (key: String, value: String),
+            to result: inout ConfigurationFile,
+        ) -> Bool {
+            switch item.key {
+            case "subtitle", "versionName":
+                result.configuration.subtitle = item.value
+                return true
+            default:
+                return false
+            }
+        }
+
+        private static func applyPostListScalarSetting(
+            _ item: (key: String, value: String),
+            to result: inout ConfigurationFile,
+        ) throws -> Bool {
+            switch item.key {
+            case "postsDir":
+                result.configuration.postsDirectory = postsDirectory(from: item.value)
+                return true
+            case "latestPosts":
+                result.configuration.latestPostCount = try latestPostCount(from: item.value)
+                return true
+            case "postsLabel":
+                result.configuration.postsLabel = item.value
+                return true
+            default:
+                return false
             }
         }
 

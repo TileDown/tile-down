@@ -86,7 +86,7 @@ public extension TileKit.Site {
         </head>
         <body>
         <header class="td-header">
-        <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
+        {{#site.subtitle}}<a class="td-brand td-brand-stacked" href="{{ site.homeURL }}"><span class="td-brand-title">{{ site.title }}</span><span class="td-brand-subtitle">{{ site.subtitle }}</span></a>{{/site.subtitle}}{{^site.subtitle}}<a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>{{/site.subtitle}}
         <nav class="td-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}"{{#isCurrent}} aria-current="page"{{/isCurrent}}>{{ title }}</a>{{/site.sections}}</nav>
         {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </header>
@@ -150,7 +150,7 @@ public extension TileKit.Site {
         </head>
         <body class="td-layout-sidebar">
         <aside class="td-sidebar">
-        <a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>
+        {{#site.subtitle}}<a class="td-brand td-brand-stacked" href="{{ site.homeURL }}"><span class="td-brand-title">{{ site.title }}</span><span class="td-brand-subtitle">{{ site.subtitle }}</span></a>{{/site.subtitle}}{{^site.subtitle}}<a class="td-brand" href="{{ site.homeURL }}">{{ site.title }}</a>{{/site.subtitle}}
         <nav class="td-sidebar-nav">{{#site.sections}}<a class="td-nav-link" href="{{ url }}"{{#isCurrent}} aria-current="page"{{/isCurrent}}>{{ title }}</a>{{/site.sections}}</nav>
         {{#site.appearanceToggle}}<button class="td-theme-toggle" type="button" data-td-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">&#9728;</button>{{/site.appearanceToggle}}
         </aside>

@@ -8,6 +8,8 @@ public extension TileKit.Site {
     struct Configuration: Equatable, Sendable {
         /// The site title, exposed to templates as `site.title`.
         public var title: String
+        /// A short secondary brand line, exposed to templates as `site.subtitle`.
+        public var subtitle: String
         /// The site base URL, exposed to templates as `site.baseURL` and used for
         /// absolute links and shared asset paths.
         public var baseURL: String
@@ -92,6 +94,7 @@ public extension TileKit.Site {
             articlePDF: Bool = false,
             notFoundRedirects: NotFoundRedirects = .init(),
             staticPassthroughs: [StaticPassthrough] = [],
+            subtitle: String = "",
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -112,6 +115,7 @@ public extension TileKit.Site {
             self.articlePDF = articlePDF
             self.notFoundRedirects = notFoundRedirects
             self.staticPassthroughs = staticPassthroughs
+            self.subtitle = subtitle
         }
     }
 }
