@@ -123,6 +123,8 @@ public extension TileKit.Site {
                 result.configuration.title = item.value
             case "baseURL":
                 result.configuration.baseURL = item.value
+            case "favicon", "faviconPath":
+                result.configuration.faviconPath = item.value
             case "layout":
                 result.layout = try layout(named: item.value)
             case "theme":

@@ -13,6 +13,9 @@ public extension TileKit.Site {
         /// The site base URL, exposed to templates as `site.baseURL` and used for
         /// absolute links and shared asset paths.
         public var baseURL: String
+        /// Optional favicon URL or path, exposed to built-in layouts as a
+        /// `<link rel="icon">` href. Empty by default.
+        public var faviconPath: String
         /// The site theme, composed into the shared stylesheet. Defaults to
         /// `.standard`; pass `nil` for an unstyled site where tiles still style
         /// themselves.
@@ -94,10 +97,12 @@ public extension TileKit.Site {
             articlePDF: Bool = false,
             notFoundRedirects: NotFoundRedirects = .init(),
             staticPassthroughs: [StaticPassthrough] = [],
+            faviconPath: String = "",
             subtitle: String = "",
         ) {
             self.title = title
             self.baseURL = baseURL
+            self.faviconPath = faviconPath
             self.theme = theme
             self.socialLinks = socialLinks
             self.feed = feed
