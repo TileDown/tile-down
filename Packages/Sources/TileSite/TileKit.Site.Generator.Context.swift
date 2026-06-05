@@ -62,6 +62,7 @@ extension TileKit.Site.Generator {
                 "subtitle": .string(configuration.subtitle),
                 "baseURL": .string(baseURL),
                 "homeURL": .string(url(for: "", baseURL: baseURL)),
+                "faviconPath": .string(baseURLPrefixedRootRelativeURL(configuration.faviconPath, baseURL: baseURL)),
                 // The tags landing URL, for a "clear filter" link that stays in the
                 // tags area and shows every article.
                 "tagsURL": .string(url(for: "tags", baseURL: baseURL)),
@@ -368,7 +369,6 @@ extension TileKit.Site.Generator {
             ],
         )
     }
-
     func socialLinkContext(
         _ link: TileKit.Site.SocialLink,
     ) -> TileKit.Template.Context {

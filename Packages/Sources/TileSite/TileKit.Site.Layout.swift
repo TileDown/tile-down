@@ -80,6 +80,7 @@ public extension TileKit.Site {
         })();
         </script>{{/site.appearanceToggle}}
         \(metadataHead)
+        {{#site.faviconPath}}<link rel="icon" href="{{ site.faviconPath }}">{{/site.faviconPath}}
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
@@ -145,6 +146,7 @@ public extension TileKit.Site {
         })();
         </script>{{/site.appearanceToggle}}
         \(metadataHead)
+        {{#site.faviconPath}}<link rel="icon" href="{{ site.faviconPath }}">{{/site.faviconPath}}
         {{#site.stylesheetPath}}<link rel="stylesheet" href="{{ site.stylesheetPath }}">{{/site.stylesheetPath}}
         {{#site.feedPath}}<link rel="alternate" type="application/rss+xml" href="{{ site.feedPath }}">{{/site.feedPath}}
         {{#site.analyticsHead}}{{{ site.analyticsHead }}}{{/site.analyticsHead}}
