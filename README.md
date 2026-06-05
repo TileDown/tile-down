@@ -13,6 +13,8 @@ tiles) browser JavaScript. The engine library is `TileKit`, the CLI is `tiledown
 
 > The repository is named `tile-down`; the product and CLI are `tiledown`.
 
+> If Tiledown helps your Swift static-site workflow, consider [sponsoring its development](https://github.com/sponsors/mihaelamj). Sponsorship helps keep the engine, CLI, docs, and Apple/Linux tooling moving.
+
 ## What it renders
 
 Ordinary Markdown becomes a themed page: headings, lists, GitHub-flavored tables,
