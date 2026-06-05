@@ -9,8 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Article PDFs now publish as root-level files named from each article slug, and
+  the built-in article layout links them only after generation writes the file.
+- Generated sites can configure a favicon through `favicon` or `faviconPath`.
+- Built-in site chrome can show an optional brand subtitle or version label with
+  `versionName` or `subtitle`.
 - Site settings now support first-class `social.bluesky` and `social.mastodon`
   links. Mastodon profile links render with `rel="me"` for verification.
+- The Everything example now covers article PDF generation, PDF image embedding,
+  source disclosure, static source-code highlighting, configured Bluesky and
+  Mastodon links, and the browser assertions for those surfaces.
+
+### Changed
+
+- Repository policy now documents that new features must not add external
+  dependencies, build tools, package requirements, CDN assets, or hosted services.
+- CI uses the current checkout action generation across macOS, Linux, and browser
+  jobs.
+
+### Fixed
+
+- Article PDFs now embed local hero and body images by preparing local image URLs
+  for MarkdownPDF, including root-relative and relative content assets.
+- Article PDF generation no longer renders front matter as prose.
+- Article permalink controls now copy the permalink instead of behaving only as a
+  normal link.
 
 ## [0.4.1] - 2026-06-04
 

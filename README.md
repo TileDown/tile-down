@@ -83,11 +83,15 @@ shared site stylesheet. There is no runtime highlighter.
 
 ## Status: pre-1.0, and already powering a live site
 
-Tiledown is at version `0.4.1`, and it already builds and deploys its own project
-website, [tiledown.com](https://tiledown.com/), from this engine on every change.
-It is usable today for static content sites like that one. It is pre-1.0, so the
-toolchain and some APIs can still change; pin a commit if you need a stable
-toolchain.
+The latest tagged release is `0.4.1`. Current `main` is ahead of that release and
+contains unreleased site features, including article PDFs named by slug, local
+image embedding in generated PDFs, favicons, optional brand subtitles, copied
+article permalinks, and first-class Bluesky and Mastodon site settings. Tiledown
+already builds and deploys its own project website,
+[tiledown.com](https://tiledown.com/), from this engine on every change. It is
+usable today for static content sites like that one. It is pre-1.0, so the
+toolchain and some APIs can still change; pin a release tag or commit if you need
+a stable toolchain.
 
 What works today is a real, growing slice. The engine builds, and the CLI can
 build a single Markdown file through a Mustache-style template, or build a folder
@@ -351,6 +355,15 @@ quotes), with raw HTML escaped; templates are a Mustache-style subset.
 
 See [Examples/minimal-site](Examples/minimal-site) for a small site with home,
 about, contact, three posts, footer social links, the `system` theme, and RSS.
+
+See [Examples/everything](Examples/everything) for the canonical browser fixture.
+It exercises the broad generated-site surface: built-in layouts, theme switching,
+hero images, Markdown, math, static and interactive tiles, service forms, posts,
+tags, RSS, article PDFs with images, Markdown source disclosure, static source
+code highlighting, redirects, 404 fallback redirects, static passthrough,
+baseURL rewriting, outbound link shims, and configured GitHub, LinkedIn, Bluesky,
+Mastodon, and RSS links. The Playwright browser gate builds this fixture in
+normal, draft, system-theme, and baseURL-subpath variants.
 
 ## Roadmap
 
