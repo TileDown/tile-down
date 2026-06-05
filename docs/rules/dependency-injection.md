@@ -99,7 +99,7 @@ If Tiledown grows into multiple packages, keep a checked-in `docs/package-import
 
 ## 8. Foundation-only is the end state for producer packages.
 
-The end goal for a multi-package split: producer packages import **only external primitives** (Foundation, system frameworks, vetted third-party SSG dependencies). Zero internal package imports. Each producer declares its own protocols inline. The composition root grows to bridge between per-package protocols.
+The end goal for a multi-package split: producer packages import **only platform primitives and existing declared products** (Foundation, system frameworks, and dependencies already present in `Packages/Package.swift`). Zero internal package imports. Each producer declares its own protocols inline. The composition root grows to bridge between per-package protocols. New external dependencies remain forbidden by [external-dependencies.md](external-dependencies.md).
 
 Until then, a producer package may import:
 
@@ -139,6 +139,7 @@ When a CLI command, option, or other user-facing surface changes, update the doc
 
 Before adding `import X` to a producer module:
 
-1. Is `X` external (Foundation, system framework, a vetted third-party dependency)? Allowed.
+1. Is `X` Foundation, a system framework, or an existing declared dependency? Allowed.
 2. Is the target an executable target / composition root? Allowed.
-3. Otherwise: **STOP.** Surface the situation. The target state is foundation-only.
+3. Would `X` require a new external dependency? **STOP.** That is forbidden by [external-dependencies.md](external-dependencies.md).
+4. Otherwise: **STOP.** Surface the situation. The target state is foundation-only.

@@ -92,7 +92,7 @@ Need to add new code?
 
 1. **It is a complete feature or distinct verb** (a self-contained user-facing flow, or one CLI command's logic).
 2. **It is reusable infrastructure** that can be tested in isolation and used by more than one consumer (a caching middleware, a transport).
-3. **It wraps a third-party integration**, isolating that external dependency behind a seam.
+3. **It wraps an existing declared integration**, isolating the concrete behavior behind a seam without adding a new dependency.
 4. **It is platform-specific** code that is cleaner separated (iOS-only vs macOS-only).
 5. **It is a build-optimization win**: large, stable, or expensive-to-compile code (for example generated code) that rarely changes.
 

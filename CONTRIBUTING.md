@@ -63,6 +63,8 @@ Engine and tooling code follows the conventions documented in
 
 - Progressive architecture: simplest thing that works first; add abstraction only
   when a second real consumer exists.
+- No new external dependencies, including packages, binary tools, CDN assets,
+  hosted build/runtime services, or package-manager requirements.
 - Every public type lives under a namespace that mirrors its folder; one
   non-private type per file; file named for the qualified type.
 - Dependencies are injected through initialisers. No force-unwrapping in shipping

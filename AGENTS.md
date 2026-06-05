@@ -38,6 +38,7 @@ writing code and match what is there.
 - [docs/rules/code-style.md](docs/rules/code-style.md) and
   [docs/rules/namespacing.md](docs/rules/namespacing.md)
 - [docs/rules/dependency-injection.md](docs/rules/dependency-injection.md)
+- [docs/rules/external-dependencies.md](docs/rules/external-dependencies.md)
 - [docs/rules/concurrency.md](docs/rules/concurrency.md)
 - [docs/rules/cross-platform.md](docs/rules/cross-platform.md)
 - [docs/rules/testing.md](docs/rules/testing.md) and

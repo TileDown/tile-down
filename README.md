@@ -540,9 +540,10 @@ Chromium through Playwright. It requires Python Playwright and Chromium; see
 ## Project conventions
 
 Swift only, except JavaScript emitted as browser runtime for client-side tiles.
-Dependencies injected through initializers, types namespaced under `TileKit`, one
-type per file. See [AGENTS.md](AGENTS.md) and [docs/rules/](docs/rules/) for the
-full conventions, and [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
+No new external dependencies. Dependencies injected through initializers, types
+namespaced under `TileKit`, one type per file. See [AGENTS.md](AGENTS.md) and
+[docs/rules/](docs/rules/) for the full conventions, and
+[CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
 
 ## License
 
