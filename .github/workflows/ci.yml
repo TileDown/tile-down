@@ -16,7 +16,7 @@ jobs:
     name: Style and namespacing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Style gate (no em dashes, no tool attribution)
         run: bash scripts/check-style.sh
       - name: Namespacing gate (one type per file)
@@ -26,7 +26,7 @@ jobs:
     name: Swift (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Format, lint, build, test
         run: |
           brew install swiftformat swiftlint
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     container: swift:6.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and test
         run: |
           cd Packages && swift build && swift test
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     container: swift:6.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install Playwright
         run: |
           apt-get update
