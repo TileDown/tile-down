@@ -142,7 +142,11 @@ extension SiteGeneratorTests {
         #expect(post.contains(#"<h1 class="td-article-title">First Post</h1>"#))
         #expect(post.contains(#"<p class="td-article-dek">A concise article summary for the dek.</p>"#))
         #expect(post.contains(#"<nav class="td-article-actions" aria-label="Article actions">"#))
-        #expect(post.contains(#"<a href="https://example.com/posts/first/">Permalink</a>"#))
+        let permalinkAction =
+            #"<a href="https://example.com/posts/first/" data-td-copy-permalink "#
+            + #"title="Copy permalink">Permalink</a>"#
+        #expect(post.contains(permalinkAction))
+        #expect(post.contains("navigator.clipboard.writeText(url)"))
         #expect(post.contains(#"<a href="https://example.com/feed.xml">RSS</a>"#))
         #expect(post.contains(#"<nav class="td-article-share" aria-label="Share article">"#))
     }
