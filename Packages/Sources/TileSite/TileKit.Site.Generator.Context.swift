@@ -59,6 +59,7 @@ extension TileKit.Site.Generator {
         return .object(
             [
                 "title": .string(title),
+                "subtitle": .string(configuration.subtitle),
                 "baseURL": .string(baseURL),
                 "homeURL": .string(url(for: "", baseURL: baseURL)),
                 // The tags landing URL, for a "clear filter" link that stays in the

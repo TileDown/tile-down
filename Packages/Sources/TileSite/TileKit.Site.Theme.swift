@@ -123,6 +123,9 @@ public extension TileKit.Site {
         .td-header, .td-main, .td-content { max-width: var(--td-measure); margin-inline: auto; padding-inline: var(--td-space); }
         .td-header { display: flex; align-items: center; justify-content: space-between; gap: var(--td-space); padding-block: 1.25rem; border-bottom: 1px solid var(--td-border); }
         .td-brand { font-weight: 700; font-size: 1.25rem; color: var(--td-ink); text-decoration: none; }
+        .td-brand-stacked { display: inline-flex; flex-direction: column; gap: 0.1rem; line-height: 1.05; }
+        .td-brand-title, .td-brand-subtitle { display: block; }
+        .td-brand-subtitle { color: var(--td-muted); font-size: 0.66em; font-weight: 600; }
         .td-nav { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
         .td-nav a, .td-footer a { color: var(--td-muted); text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover { color: var(--td-ink); }
@@ -281,6 +284,9 @@ public extension TileKit.Site {
         a { color: var(--td-accent); text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
         .td-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.5rem; padding: 0.75rem max(1rem, calc((100vw - var(--td-measure)) / 2)); border-bottom: 1px solid var(--td-border); background: var(--td-surface); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
         .td-brand { color: var(--td-ink); font-size: 0.95rem; font-weight: 700; text-decoration: none; }
+        .td-brand-stacked { display: inline-flex; flex-direction: column; gap: 0.08rem; line-height: 1.05; }
+        .td-brand-title, .td-brand-subtitle { display: block; }
+        .td-brand-subtitle { color: var(--td-muted); font-size: 0.72em; font-weight: 600; }
         .td-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.85rem; }
         .td-nav a, .td-footer a, .td-sidebar-nav a { color: var(--td-muted); font-size: 0.9rem; text-decoration: none; }
         .td-nav a:hover, .td-footer a:hover, .td-sidebar-nav a:hover { color: var(--td-accent); }

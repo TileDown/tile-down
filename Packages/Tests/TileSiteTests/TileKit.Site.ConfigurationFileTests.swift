@@ -283,3 +283,25 @@ struct SiteConfigurationFileTests {
         }
     }
 }
+
+@Suite("Site configuration brand settings")
+struct SiteConfigurationBrandTests {
+    @Test("parses brand subtitle aliases")
+    func parsesBrandSubtitleAliases() throws {
+        let versionName = try TileKit.Site.ConfigurationFile.parse(
+            """
+            title: Demo
+            versionName: First Light
+            """,
+        )
+        #expect(versionName.configuration.subtitle == "First Light")
+
+        let subtitle = try TileKit.Site.ConfigurationFile.parse(
+            """
+            title: Demo
+            subtitle: Field Notes
+            """,
+        )
+        #expect(subtitle.configuration.subtitle == "Field Notes")
+    }
+}

@@ -201,6 +201,38 @@ extension SiteGeneratorTests {
             ),
         )
     }
+
+    @Test("top-nav layout renders configured brand subtitle")
+    func topNavLayoutBrandSubtitle() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Welcome",
+            ],
+        )
+        let generator = makeGenerator(fileSystem: fileSystem)
+
+        _ = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: .init(
+                    title: "My Site",
+                    subtitle: "First Light",
+                ),
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        let expectedBrand =
+            #"<a class="td-brand td-brand-stacked" href="/"><span class="td-brand-title">My Site</span>"#
+            + #"<span class="td-brand-subtitle">First Light</span></a>"#
+        #expect(
+            home.contains(expectedBrand),
+        )
+        let css = try #require(fileSystem.files["dist/styles.css"])
+        #expect(css.contains(".td-brand-subtitle"))
+    }
 }
 
 extension SiteGeneratorTests {
