@@ -58,7 +58,7 @@ of the public output.
   and context preparation in domain targets.
 - Add an implementation target only for concrete I/O such as filesystem, HTTP,
   process execution, or platform-specific behavior.
-- Do not add a dependency until a slice has an acceptance check that needs it.
+- Do not add new external dependencies.
 - Do not read process environment in library code. The CLI or an injected
   resolver passes typed values into the library.
 - Generated browser JavaScript is allowed for tile runtime behavior. JavaScript

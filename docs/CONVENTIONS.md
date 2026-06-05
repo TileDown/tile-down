@@ -161,8 +161,8 @@ Tiledown builds and runs on macOS and Linux.
   a protocol seam: one implementation per platform, wired by the composition root.
   Subprocess use is allowed.
 - Prefer pure-Swift implementations over Foundation-only conveniences in the core.
-- On the server side, prefer cross-platform libraries (for example AsyncHTTPClient
-  over URLSession, swift-log over os.log).
+- Do not add new external dependencies, package-manager requirements, CDN assets,
+  or hosted services. See [`rules/external-dependencies.md`](rules/external-dependencies.md).
 
 ## Testing
 

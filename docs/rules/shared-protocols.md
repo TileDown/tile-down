@@ -8,15 +8,15 @@ Companion to [dependency-injection.md](dependency-injection.md) and [package-imp
 
 Across the package's targets, every internal target falls into one of two categories:
 
-1. **Producer / feature targets** import only `SharedProtocols` plus external dependencies (Foundation, SwiftUI, Combine, third-party SPM). Their SPM `dependencies:` list is `["SharedProtocols", ...external products]` and nothing else internal.
-2. **Composition root and live-writer targets** (the CLI, networking, storage, environment, and similar glue) import `SharedProtocols` plus the external framework they bridge. Their `dependencies:` list is `["SharedProtocols", ...the framework being wrapped]`. These are the only places where protocol-to-concrete glue exists.
+1. **Producer / feature targets** import only `SharedProtocols` plus platform primitives and existing declared products. Their SPM `dependencies:` list is `["SharedProtocols", ...existing products]` and nothing else internal.
+2. **Composition root and live-writer targets** (the CLI, networking, storage, environment, and similar glue) import `SharedProtocols` plus the existing framework they bridge. Their `dependencies:` list is `["SharedProtocols", ...the framework being wrapped]`. These are the only places where protocol-to-concrete glue exists.
 
 There is no third category.
 
 ## Hard rules
 
 1. **`SharedProtocols` has zero internal dependencies.** Its SPM `dependencies:` list is `[]`.
-2. **Allowed imports inside `SharedProtocols`:** any external framework (`Foundation`, `SwiftUI`, `Combine`, a logging library, etc.). **Forbidden:** any internal package.
+2. **Allowed imports inside `SharedProtocols`:** platform primitives and existing declared products (`Foundation`, `SwiftUI`, `Combine`, and similar). **Forbidden:** any internal package or new external dependency.
 3. **Declarations are top-level.** `public protocol Recording`, not nested under a namespace anchor like `extension SharedProtocols { protocol Recording }`.
 4. **Naming follows the domain noun form.** `Recording`, `FileSystem`, `HTTPRequester`. The protocol is the noun; the conformer is `LiveRecording`. You do not have to suffix the protocol with `-able` or `-ing`.
 5. **One concept per file**, filename equal to the type name. Group related files in subfolders (`Coordinators/`, `Providers/`) when there are three or more related declarations.

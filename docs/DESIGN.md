@@ -1336,7 +1336,7 @@ accepted decisions are:
 | R1 | SSG parity grows too large before first output | high | high | ship one vertical slice first |
 | R2 | Markdown round-trip is harder than expected | med | high | constrain syntax and test serializer laws |
 | R3 | Service tiles leak secrets if auth exposure is vague | med | high | require explicit credential exposure |
-| R4 | Dependencies pull platform assumptions into core | med | med | add dependencies slice by slice |
+| R4 | Dependencies pull platform assumptions into core | med | med | keep the dependency set closed |
 
 ---
 

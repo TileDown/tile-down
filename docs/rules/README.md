@@ -17,6 +17,8 @@ the full set.
   namespace anchors.
 - [dependency-injection.md](dependency-injection.md) - no singletons, inject every
   collaborator through `init`, protocol seams.
+- [external-dependencies.md](external-dependencies.md) - no new external
+  dependencies, packages, tools, CDN assets, or hosted build/runtime services.
 - [concurrency.md](concurrency.md) - Swift 6 strict concurrency: `Sendable`,
   actors, `@MainActor`.
 - [cross-platform.md](cross-platform.md) - the core builds on macOS and Linux;

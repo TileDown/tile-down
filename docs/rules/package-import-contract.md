@@ -30,7 +30,9 @@ Priority order: target name > public type > file name > folder layout.
 
 Before adding an `import X` line to a producer target, ask:
 
-1. Is `X` external (Foundation, a system framework, ArgumentParser, Testing, a vetted third-party dependency)? Allowed.
+1. Is `X` the Swift standard library, Foundation, a system framework, or an
+   existing declared dependency? Allowed. Adding a new third-party dependency is
+   forbidden by [external-dependencies.md](external-dependencies.md).
 2. Is the target an `executableTarget` / composition root (for example the `tiledown` CLI)? Allowed; the composition root wires the universe.
 3. Is `X` a foundation-tier target that is foundation-only by construction (shared constants, value types, read-only diagnostics)? Allowed.
 4. Is `X` a protocol-seam package (foundation-only by contract, carrying only protocols and value types)? Allowed.
@@ -40,7 +42,11 @@ If you proceed past the stop rule, you have coupled two producers, which is exac
 
 ## The rules
 
-1. **External primitives are always allowed.** `Foundation`, `os`, `OSLog`, `Combine`, system frameworks, `ArgumentParser`, `Testing`, `XCTest`, and vetted third-party SPM products are ambient and never count as a violation.
+1. **External primitives and existing declared products are allowed.**
+   `Foundation`, `os`, `OSLog`, `Combine`, system frameworks,
+   `ArgumentParser`, `Testing`, `XCTest`, and products already declared in
+   `Packages/Package.swift` do not count as violations. New external
+   dependencies are forbidden by [external-dependencies.md](external-dependencies.md).
 2. **A producer target may import its own protocol-seam companion.** That is the foundation-only protocol and value-type seam the producer publishes.
 3. **A producer target may import other protocol-seam targets.** They are foundation-only by construction; importing one carries no behavioural coupling.
 4. **A producer target may not import another producer (feature) target.** Cross-feature coupling goes through protocols defined in a seam package; the concrete is supplied at the composition root.
@@ -113,6 +119,8 @@ This does not ban closures as method parameters or property values; `onProgress:
 ## Related rules
 
 - [dependency-injection.md](dependency-injection.md): underlying DI principles
+- [external-dependencies.md](external-dependencies.md): no new external packages,
+  tools, CDN assets, or hosted build/runtime services
 - [shared-protocols.md](shared-protocols.md): where the protocol seams live
 - [package-architecture.md](package-architecture.md): package layers and granularity
 - [package-structure.md](package-structure.md): repository and manifest layout
