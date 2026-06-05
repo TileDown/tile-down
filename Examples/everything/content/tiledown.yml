@@ -20,6 +20,8 @@ showSource: true
 articlePDF: true
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/company/tiledown
+social.bluesky: https://bsky.app/profile/tiledown.com
+social.mastodon: https://mastodon.social/@tiledown
 links.docs: https://tiledown.com/docs/
 service.calculator.contract: contracts/calculator.json
 service.calculator.mode: proxy

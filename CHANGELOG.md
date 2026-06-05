@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Site settings now support first-class `social.bluesky` and `social.mastodon`
+  links. Mastodon profile links render with `rel="me"` for verification.
+
 ## [0.4.1] - 2026-06-04
 
 ### Added

@@ -5,13 +5,18 @@ public extension TileKit.Site {
     struct SocialLink: Equatable, Sendable {
         public var label: String
         public var url: String
+        /// Optional relationship attribute for identity links such as Mastodon
+        /// verification. Empty by default, so existing links render unchanged.
+        public var rel: String
 
         public init(
             label: String,
             url: String,
+            rel: String = "",
         ) {
             self.label = label
             self.url = url
+            self.rel = rel
         }
     }
 }

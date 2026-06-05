@@ -227,6 +227,8 @@ notFoundRedirect.exact./old-post: /posts/new-post/
 notFoundRedirect.prefix./tag/: /tags/
 social.github: https://github.com/TileDown/tile-down
 social.linkedin: https://www.linkedin.com/
+social.bluesky: https://bsky.app/profile/tiledown.com
+social.mastodon: https://mastodon.social/@tiledown
 ```
 
 Theme property overrides use the curated `--td-*` custom property surface. For

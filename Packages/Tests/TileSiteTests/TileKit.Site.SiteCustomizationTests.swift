@@ -9,6 +9,34 @@ import TileTile
 
 @Suite("Site customization")
 struct SiteCustomizationTests {
+    @Test("built-in layouts render configured social settings")
+    func socialSettingsRender() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/index.md": "---\ntitle: Home\n---\n# Home",
+                "content/tiledown.yml": """
+                social.bluesky: https://bsky.app/profile/tiledown.com
+                social.mastodon: https://mastodon.social/@tiledown
+                """,
+            ],
+        )
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .layout(.topNav),
+                outputRootPath: "dist",
+                configuration: TileKit.Site.ConfigurationFile.parse(
+                    fileSystem.files["content/tiledown.yml"] ?? "",
+                ).configuration,
+            ),
+        )
+
+        let home = try #require(fileSystem.files["dist/index.html"])
+        #expect(home.contains(#"<a href="https://bsky.app/profile/tiledown.com">Bluesky</a>"#))
+        #expect(home.contains(#"<a href="https://mastodon.social/@tiledown" rel="me">Mastodon</a>"#))
+    }
+
     @Test("postsLabel renames the posts landing page in nav and heading")
     func postsLabelOverride() throws {
         let fileSystem = MemoryFileSystem(
