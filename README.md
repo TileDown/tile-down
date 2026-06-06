@@ -50,9 +50,15 @@ $$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
 ```
 
 <p align="center">
-  <img src="docs/images/formula-quadratic.png" alt="The quadratic formula rendered to SVG" width="340">
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/images/formula-integral.png" alt="A Gaussian integral rendered to SVG" width="290">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/formula-quadratic-dark.png">
+    <img alt="The quadratic formula rendered to SVG" src="docs/images/formula-quadratic-light.png" width="320">
+  </picture>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/formula-integral-dark.png">
+    <img alt="A Gaussian integral rendered to SVG" src="docs/images/formula-integral-light.png" width="230">
+  </picture>
 </p>
 
 ### Charts
@@ -212,7 +218,10 @@ swift run tiledown build-site content/ dist/
 That `$$...$$` block renders to:
 
 <p align="center">
-  <img src="docs/images/formula-quadratic.png" alt="The quadratic formula rendered to SVG" width="300">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/formula-quadratic-dark.png">
+    <img alt="The quadratic formula rendered to SVG" src="docs/images/formula-quadratic-light.png" width="320">
+  </picture>
 </p>
 
 The typesetting engine is the standalone, dependency-free
