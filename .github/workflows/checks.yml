@@ -1,7 +1,8 @@
-name: CI
+name: Checks
 
-# Mechanical gates. Linux also runs the Playwright browser gate because the
-# engine targets Linux and the generated site has browser-visible behavior.
+# Non-platform gates: source-style/namespacing rules and the Linux Playwright
+# browser fixture (the engine targets Linux and the generated site has
+# browser-visible behavior).
 
 on:
   push:
@@ -22,29 +23,7 @@ jobs:
       - name: Namespacing gate (one type per file)
         run: bash scripts/check-namespacing.sh
 
-  swift-macos:
-    name: Swift (macOS)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Format, lint, build, test
-        run: |
-          brew install swiftformat swiftlint
-          swiftformat . --config .swiftformat --lint
-          swiftlint --config .swiftlint.yml --strict
-          cd Packages && swift build && swift test
-
-  swift-linux:
-    name: Swift (Linux)
-    runs-on: ubuntu-latest
-    container: swift:6.1
-    steps:
-      - uses: actions/checkout@v6
-      - name: Build and test
-        run: |
-          cd Packages && swift build && swift test
-
-  browser-linux:
+  browser:
     name: Browser (Linux)
     runs-on: ubuntu-latest
     container: swift:6.1
@@ -57,5 +36,4 @@ jobs:
           python3 -m pip install --break-system-packages playwright || python3 -m pip install playwright
           python3 -m playwright install --with-deps chromium
       - name: Browser fixture
-        run: |
-          PYTHON=python3 Packages/Tests/Browser/run.sh
+        run: PYTHON=python3 Packages/Tests/Browser/run.sh

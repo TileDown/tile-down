@@ -1,0 +1,28 @@
+name: Windows (core)
+
+# Windows support is partial: the dev server (TileServeImpl) and PDF asset path are
+# POSIX-only, so the full package does not build here yet. This gate compiles the
+# portable rendering core: Markdown to typed tiles to HTML (TileOutput) and the
+# math engine (TileMath), which carry no POSIX dependencies.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Swift core (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: compnerd/gha-setup-swift@main
+        with:
+          branch: swift-6.1-release
+          tag: 6.1-RELEASE
+      - uses: actions/checkout@v6
+      - name: Build portable core
+        shell: bash
+        run: cd Packages && swift build --target TileOutput --target TileMath

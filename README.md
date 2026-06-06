@@ -1,5 +1,12 @@
 # Tiledown
 
+[![Linux](https://github.com/TileDown/tile-down/actions/workflows/linux.yml/badge.svg)](https://github.com/TileDown/tile-down/actions/workflows/linux.yml)
+[![macOS](https://github.com/TileDown/tile-down/actions/workflows/macos.yml/badge.svg)](https://github.com/TileDown/tile-down/actions/workflows/macos.yml)
+[![Windows (core)](https://github.com/TileDown/tile-down/actions/workflows/windows.yml/badge.svg)](https://github.com/TileDown/tile-down/actions/workflows/windows.yml)
+[![WASI](https://github.com/TileDown/tile-down/actions/workflows/wasi.yml/badge.svg)](https://github.com/TileDown/tile-down/actions/workflows/wasi.yml)
+[![Checks](https://github.com/TileDown/tile-down/actions/workflows/checks.yml/badge.svg)](https://github.com/TileDown/tile-down/actions/workflows/checks.yml)
+![Swift 6.1](https://img.shields.io/badge/Swift-6.1-fa7343?logo=swift&logoColor=white)
+
 **Project website: [tiledown.com](https://tiledown.com/)**
 
 **Follow updates on [@diyamantina](https://x.com/diyamantina).**
