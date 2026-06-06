@@ -138,6 +138,20 @@ The architecture and the planned road are real and written down:
 - [docs/decisions/](docs/decisions/) - accepted architecture decisions.
 - [docs/research/](docs/research/) - the research behind the source-model pivot.
 
+## Install
+
+On Apple Silicon macOS (14 Sonoma or later):
+
+```sh
+brew install tiledown/tap/tiledown
+tiledown help
+```
+
+The formula lives in [TileDown/homebrew-tap](https://github.com/TileDown/homebrew-tap).
+The bottle ships the math font alongside the binary, so build-time TeX-to-SVG math
+works with no extra setup. To build from source instead, see the `swift run`
+commands below.
+
 ## What actually runs today
 
 The live demo at [tiledown.com](https://tiledown.com/) is built from this

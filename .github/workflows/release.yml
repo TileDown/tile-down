@@ -1,0 +1,52 @@
+name: Release bottle
+
+# On every version tag, build the macOS arm64 CLI bottle (binary plus its math
+# font resource bundle), attach it to the GitHub release, and print the sha256
+# so the Homebrew formula in TileDown/homebrew-tap can be bumped.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  bottle:
+    name: macOS arm64 bottle
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build release binary
+        run: cd Packages && swift build -c release --product tiledown
+
+      - name: Package binary and resource bundle
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          BIN="Packages/$(cd Packages && swift build -c release --product tiledown --show-bin-path)"
+          ASSET="tiledown-${VERSION}-macos-arm64.tar.gz"
+          tar -C "$BIN" -czf "$ASSET" tiledown Tiledown_TileMath.bundle
+          SHA="$(shasum -a 256 "$ASSET" | awk '{print $1}')"
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Homebrew bottle"
+            echo ""
+            echo "Asset: \`$ASSET\`"
+            echo ""
+            echo "Bump \`Formula/tiledown.rb\` in TileDown/homebrew-tap:"
+            echo ""
+            echo '```ruby'
+            echo "  url \"https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${ASSET}\""
+            echo "  version \"${VERSION}\""
+            echo "  sha256 \"${SHA}\""
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attach bottle to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" "${{ steps.package.outputs.asset }}" --clobber
