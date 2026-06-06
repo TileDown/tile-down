@@ -157,13 +157,16 @@ commands below.
 The live demo at [tiledown.com](https://tiledown.com/) is built from this
 repository's engine and the same `tiledown build-site` command shown below.
 
-From `Packages/`:
+With the Homebrew install above, `tiledown` is on your `PATH`:
 
 ```sh
-swift run tiledown help
-swift run tiledown version
+tiledown help
+tiledown version
 # Tiledown 0.5.0
 ```
+
+> Building from source instead of Homebrew? Run the same commands from
+> `Packages/` as `swift run tiledown ...`.
 
 Build one page from Markdown and a template:
 
@@ -179,7 +182,7 @@ Build one page from Markdown and a template:
 # template.html
 # <!doctype html><title>{{ page.title }}</title>{{{ page.contents.html }}}
 
-swift run tiledown build source.md template.html out.html
+tiledown build source.md template.html out.html
 ```
 
 Build a content directory with the built-in top-nav layout and standard theme
@@ -187,13 +190,13 @@ Build a content directory with the built-in top-nav layout and standard theme
 written once for the whole site):
 
 ```sh
-swift run tiledown build-site content/ dist/
+tiledown build-site content/ dist/
 ```
 
 Build and preview a content directory on localhost:
 
 ```sh
-swift run tiledown serve --port 8765 content/
+tiledown serve --port 8765 content/
 ```
 
 `serve` writes to a sibling `.tiledown/serve/` directory by default. Pass
@@ -202,8 +205,8 @@ swift run tiledown serve --port 8765 content/
 Check a content directory without writing into it:
 
 ```sh
-swift run tiledown doctor content/
-swift run tiledown doctor --publish content/
+tiledown doctor content/
+tiledown doctor --publish content/
 ```
 
 `doctor` builds into a temporary directory. Content generators are skipped by
@@ -225,7 +228,7 @@ $$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
 ```
 
 ```sh
-swift run tiledown build-site content/ dist/
+tiledown build-site content/ dist/
 # dist/.../index.html now contains an <svg> of glyph <path> outlines, no <script>
 ```
 
@@ -368,16 +371,16 @@ article metadata.
 Or pass a custom template explicitly:
 
 ```sh
-swift run tiledown build-site content/ template.html dist/
+tiledown build-site content/ template.html dist/
 ```
 
 Emit derived JSON of the parsed tile tree, or rewrite a document to canonical form:
 
 ```sh
-swift run tiledown json source.md out.json
-swift run tiledown fmt source.md            # prints canonical form to stdout
-swift run tiledown fmt --write source.md    # rewrites in place
-swift run tiledown fmt --check source.md    # non-zero exit if not canonical
+tiledown json source.md out.json
+tiledown fmt source.md            # prints canonical form to stdout
+tiledown fmt --write source.md    # rewrites in place
+tiledown fmt --check source.md    # non-zero exit if not canonical
 ```
 
 That is the user-facing surface right now. Markdown is CommonMark (headings,
