@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The built-in site footer now shows the TileDown engine version beside the
+  "Built with TileDown" credit.
+
 ## [0.5.0] - 2026-06-05
 
 ### Added
