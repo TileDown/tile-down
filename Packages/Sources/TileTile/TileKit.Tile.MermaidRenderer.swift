@@ -63,9 +63,11 @@ public extension TileKit.Tile {
           border-radius: var(--td-radius);
           color: var(--td-ink);
           margin: 0;
-          min-height: 12rem;
           overflow-x: auto;
           padding: 1rem;
+        }
+        .td-mermaid-source:not([data-td-mermaid-bound]) {
+          min-height: 12rem;
         }
         .td-mermaid-caption {
           color: var(--td-muted);

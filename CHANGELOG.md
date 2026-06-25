@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-26
+
+### Fixed
+
+- Rendered Mermaid diagrams no longer keep a 12rem minimum height after they draw,
+  so a short diagram (a single row of nodes) hugs its content instead of leaving a
+  tall empty box. The minimum height now applies only to the pre-render placeholder.
+
 ## [0.6.0] - 2026-06-25
 
 ### Added
