@@ -210,8 +210,11 @@ enum ChartFence {
         _ fields: Fields,
         count: Int,
     ) throws -> [String] {
+        // A numeric `x:` axis (line charts only; bar rejects it earlier) carries
+        // no category labels: the renderer positions points by their x value and
+        // derives the axis ticks from the value range, like a scatter chart.
         if fields.xValues != nil {
-            return fields.categories
+            return []
         }
         if fields.categories.isEmpty {
             return (1 ... max(1, count)).map(String.init)

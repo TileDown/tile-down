@@ -47,6 +47,31 @@ struct ChartFenceTests {
         #expect(chart.series == [ChartSeries(name: "Accounts", values: [2, 4, 7, 9])])
     }
 
+    @Test("line chart with numeric x values carries points and a numeric axis")
+    func lineWithNumericX() throws {
+        let chart = try ChartFence.parse(
+            """
+            type: line
+            title: Adoption
+            x-label: week
+            y-label: users
+            x: 1, 2, 4, 8
+            series: Accounts = 2, 4, 7, 9
+            """,
+        )
+
+        #expect(chart.kind == .line)
+        // A numeric x axis carries no category labels; the points hold the x values.
+        #expect(chart.labels.isEmpty)
+        #expect(chart.series.count == 1)
+        #expect(chart.series[0].points == [
+            ChartPoint(xPosition: 1, yPosition: 2),
+            ChartPoint(xPosition: 2, yPosition: 4),
+            ChartPoint(xPosition: 4, yPosition: 7),
+            ChartPoint(xPosition: 8, yPosition: 9),
+        ])
+    }
+
     @Test("bar chart without categories auto-numbers labels")
     func barAutoNumbersLabels() throws {
         let chart = try ChartFence.parse(
@@ -252,6 +277,48 @@ struct ChartFenceRenderingTests {
         #expect(svg.contains(">effort</text>"))
         #expect(svg.contains(">impact</text>"))
         #expect(!svg.contains("<script"))
+    }
+
+    @Test("line fence with numeric x renders a polyline on a numeric axis, not collapsed")
+    func lineNumericXRendersPolyline() throws {
+        let chart = try ChartFence.parse(
+            """
+            type: line
+            title: Growth
+            x-label: week
+            y-label: users
+            x: 1, 2, 4, 8
+            series: Accounts = 2, 4, 7, 9
+            """,
+        )
+        let svg = ChartSVGRenderer().render(chart)
+
+        // The series is drawn as a connected line with markers.
+        #expect(svg.contains("<polyline class=\"td-chart-line"))
+        #expect(svg.contains("td-chart-point"))
+        // A true numeric x axis tick (the midpoint of 1...8), not a category index.
+        #expect(svg.contains(">4.5</text>"))
+        #expect(svg.contains(">week</text>"))
+
+        // The points span the plot horizontally rather than collapsing to one x.
+        let xs = polylineXs(svg)
+        #expect(xs.count == 4)
+        #expect(Set(xs).count == 4)
+        #expect((xs.max() ?? 0) - (xs.min() ?? 0) > 200)
+        #expect(!svg.contains("<script"))
+    }
+
+    /// The x coordinates of the first `<polyline points="x,y x,y ...">` in an SVG.
+    private func polylineXs(_ svg: String) -> [Double] {
+        guard let open = svg.range(of: "<polyline"),
+              let pointsStart = svg.range(of: "points=\"", range: open.upperBound ..< svg.endIndex),
+              let pointsEnd = svg.range(of: "\"", range: pointsStart.upperBound ..< svg.endIndex)
+        else {
+            return []
+        }
+        return svg[pointsStart.upperBound ..< pointsEnd.lowerBound]
+            .split(separator: " ")
+            .compactMap { pair in pair.split(separator: ",").first.flatMap { Double($0) } }
     }
 
     @Test("legend labels are packed by width without overlapping")

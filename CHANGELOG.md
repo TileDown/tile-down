@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The built-in site footer now shows the TileDown engine version beside the
   "Built with TileDown" credit.
 
+### Fixed
+
+- Line charts authored with a numeric `x:` axis now render on the web. Their
+  points were collapsing to a single x because the renderer derived no labels
+  for a numeric axis and then divided the plot width by zero. They now plot on a
+  real numeric x-axis, positioned by x value with a connecting polyline, matching
+  the PDF renderer. Category-based line and bar charts are unaffected.
+
 ## [0.5.0] - 2026-06-05
 
 ### Added
