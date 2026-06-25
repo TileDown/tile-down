@@ -156,14 +156,14 @@ extension SiteGeneratorTests {
     ) {
         let encodedURL = "https%3A%2F%2Fexample.com%2Fposts%2Ffirst%2F"
         let xShare = "https://twitter.com/intent/tweet?url=\(encodedURL)&amp;text=First%20Post"
-        let linkedInShare = "https://www.linkedin.com/sharing/share-offsite/?url=\(encodedURL)"
-        let facebookShare = "https://www.facebook.com/sharer/sharer.php?u=\(encodedURL)"
-        let mailShare = "mailto:?subject=First%20Post&amp;body=\(encodedURL)"
+        let hnShare = "https://news.ycombinator.com/submitlink?u=\(encodedURL)&amp;t=First%20Post"
+        let blueskyShare = "https://bsky.app/intent/compose?text=First%20Post%20\(encodedURL)"
+        let mastodonShare = "https://toot.kytta.dev/?text=First%20Post%20\(encodedURL)"
         let shareTarget = #"target="_blank" rel="noopener""#
         #expect(post.contains(xShare))
-        #expect(post.contains(linkedInShare))
-        #expect(post.contains(facebookShare))
-        #expect(post.contains(mailShare))
+        #expect(post.contains(hnShare))
+        #expect(post.contains(blueskyShare))
+        #expect(post.contains(mastodonShare))
         #expect(post.contains(shareTarget))
     }
 

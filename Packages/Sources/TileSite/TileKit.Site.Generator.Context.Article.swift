@@ -117,16 +117,16 @@ extension TileKit.Site.Generator {
                 url: "https://twitter.com/intent/tweet?url=\(encodedURL)&text=\(encodedTitle)",
             ),
             shareLink(
-                "LinkedIn",
-                url: "https://www.linkedin.com/sharing/share-offsite/?url=\(encodedURL)",
+                "HN",
+                url: "https://news.ycombinator.com/submitlink?u=\(encodedURL)&t=\(encodedTitle)",
             ),
             shareLink(
-                "Facebook",
-                url: "https://www.facebook.com/sharer/sharer.php?u=\(encodedURL)",
+                "Bluesky",
+                url: "https://bsky.app/intent/compose?text=\(encodedTitle)%20\(encodedURL)",
             ),
             shareLink(
-                "Email",
-                url: "mailto:?subject=\(encodedTitle)&body=\(encodedURL)",
+                "Mastodon",
+                url: "https://toot.kytta.dev/?text=\(encodedTitle)%20\(encodedURL)",
             ),
         ]
     }
