@@ -33,7 +33,7 @@ struct SiteThemeTagBarTests {
         // filter that can never eclipse the page.
         let css = try #require(fileSystem.files["dist/styles.css"])
         #expect(css.contains(".td-tagbar { position: sticky;"))
-        #expect(css.contains("max-height: clamp(6rem, 28vh, 14rem); overflow-y: auto;"))
+        #expect(css.contains("max-height: clamp(6rem, 28vh, 11rem); overflow-y: auto;"))
     }
 
     private func makeGenerator(

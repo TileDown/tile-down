@@ -192,7 +192,7 @@ public extension TileKit.Site {
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }
         .td-tagbar-title { text-align: center; margin: 0 0 1.25rem; }
-        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; max-height: clamp(6rem, 28vh, 14rem); overflow-y: auto; overscroll-behavior: contain; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
+        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; max-height: clamp(6rem, 28vh, 11rem); overflow-y: auto; overscroll-behavior: contain; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
         .td-tagbar .td-tag-lg { font-size: 1.05rem; padding: 0.5rem 1.1rem; }
         .td-tagbar .td-tag-current { color: var(--td-ink); border-color: var(--td-accent); font-weight: 600; }
         .td-tagbar .td-tag-clear { color: #fff; background: var(--td-accent); border-color: var(--td-accent); font-weight: 700; }
@@ -358,7 +358,7 @@ public extension TileKit.Site {
         .td-tags-card { margin-block: 0.6rem 0; gap: 0.4rem; }
         .td-tags-card .td-tag { font-size: 0.72rem; padding: 0.1rem 0.55rem; }
         .td-tagbar-title { text-align: center; margin: 0 0 1.25rem; }
-        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; max-height: clamp(6rem, 28vh, 14rem); overflow-y: auto; overscroll-behavior: contain; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
+        .td-tagbar { position: sticky; top: 3.5rem; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.75rem; padding: 0.85rem 0; max-height: clamp(6rem, 28vh, 11rem); overflow-y: auto; overscroll-behavior: contain; background: var(--td-surface); border-bottom: 1px solid var(--td-border); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); }
         .td-tagbar .td-tag-lg { font-size: 1.05rem; padding: 0.5rem 1.1rem; }
         .td-tagbar .td-tag-current { color: var(--td-ink); border-color: var(--td-accent); font-weight: 600; }
         .td-tagbar .td-tag-clear { color: #fff; background: var(--td-accent); border-color: var(--td-accent); font-weight: 700; }

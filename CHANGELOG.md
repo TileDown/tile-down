@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-06-27
+
+### Changed
+
+- The blog tag bar cap is one row shorter (its maximum height drops from 14rem to
+  11rem) so a tag-rich bar takes even less of the page before its internal scroll.
+
 ## [0.6.3] - 2026-06-27
 
 ### Fixed
