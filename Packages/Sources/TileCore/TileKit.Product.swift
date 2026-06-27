@@ -2,6 +2,6 @@ public extension TileKit {
     enum Product {
         public static let name = "Tiledown"
         public static let commandName = "tiledown"
-        public static let version = "0.6.2"
+        public static let version = "0.6.3"
     }
 }

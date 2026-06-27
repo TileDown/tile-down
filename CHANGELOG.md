@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-06-27
+
+### Fixed
+
+- The blog tag bar no longer overlaps the article list. The tag bar shows every
+  site tag, so with many tags it wraps into several rows, and being sticky with a
+  background it floated over and hid roughly half the page. Its height is now
+  bounded with an internal scroll so it stays a compact filter that cannot eclipse
+  the content.
+
 ## [0.6.2] - 2026-06-26
 
 ### Changed
