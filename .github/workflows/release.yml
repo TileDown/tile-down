@@ -25,7 +25,8 @@ jobs:
         id: package
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          BIN="Packages/$(cd Packages && swift build -c release --product tiledown --show-bin-path)"
+          BIN="$(cd Packages && swift build -c release --product tiledown --show-bin-path)"
+          case "$BIN" in /*) ;; *) BIN="Packages/$BIN" ;; esac
           ASSET="tiledown-${VERSION}-macos-arm64.tar.gz"
           tar -C "$BIN" -czf "$ASSET" tiledown Tiledown_TileMath.bundle
           SHA="$(shasum -a 256 "$ASSET" | awk '{print $1}')"
