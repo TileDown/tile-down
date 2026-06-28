@@ -3,45 +3,30 @@ import TileCore
 import TileSource
 import TileTile
 
-extension TileKit.Site.Generator {
-    func appendingButtondownPages(
-        to pages: [TileKit.Site.Page],
-        request: TileKit.Site.ContentBuildRequest,
-    ) throws -> [TileKit.Site.Page] {
-        var result = pages
-        var occupiedSlugs = Set(pages.map(\.slug))
+public extension TileKit.Site {
+    /// Generates local redirect target pages for Buttondown subscribe flows.
+    struct ButtondownPageGenerator: TilePageGenerating {
+        public init() {}
 
-        for page in pages {
-            let tiles = try buttondownTiles(in: page)
-            for tile in tiles where buttondownGeneratesPages(tile) {
-                for generatedPage in try buttondownPages(
-                    for: tile,
-                    sourcePage: page,
-                    outputRootPath: request.outputRootPath,
-                ) where occupiedSlugs.insert(generatedPage.slug).inserted {
-                    result.append(generatedPage)
-                }
+        public func pages(
+            for context: TileKit.Site.TilePageGenerationContext,
+        ) throws -> [TileKit.Site.Page] {
+            guard context.tile.typeID == TileKit.Tile.ButtondownRenderer.typeID,
+                  buttondownGeneratesPages(context.tile)
+            else {
+                return []
             }
-        }
 
-        return result
+            return try buttondownPages(
+                for: context.tile,
+                sourcePage: context.sourcePage,
+                outputRootPath: context.outputRootPath,
+            )
+        }
     }
 }
 
-private extension TileKit.Site.Generator {
-    func buttondownTiles(
-        in page: TileKit.Site.Page,
-    ) throws -> [TileKit.Tile.Instance] {
-        try tileParser.parseBlocks(page.document.body).compactMap { block in
-            guard case let .tile(tile) = block,
-                  tile.typeID == TileKit.Tile.ButtondownRenderer.typeID
-            else {
-                return nil
-            }
-            return tile
-        }
-    }
-
+private extension TileKit.Site.ButtondownPageGenerator {
     func buttondownGeneratesPages(
         _ tile: TileKit.Tile.Instance,
     ) -> Bool {
@@ -84,7 +69,7 @@ private extension TileKit.Site.Generator {
         let configuredValue = string(tile.property(named: "redirectBasePath"))?
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let rawValue = configuredValue.flatMap { $0.isEmpty ? nil : $0 } ?? fallback
-        return try effectiveSlug(
+        return try TileKit.Site.Generator.effectiveSlug(
             folderSlug: fallback,
             frontMatter: ["slug": rawValue],
         )
@@ -128,6 +113,21 @@ private extension TileKit.Site.Generator {
         slug: String,
     ) -> String {
         join(outputRootPath, slug + "/index.html")
+    }
+
+    func join(
+        _ parent: String,
+        _ child: String,
+    ) -> String {
+        guard !parent.isEmpty else {
+            return child
+        }
+
+        if parent.hasSuffix("/") {
+            return parent + child
+        }
+
+        return parent + "/" + child
     }
 
     func string(

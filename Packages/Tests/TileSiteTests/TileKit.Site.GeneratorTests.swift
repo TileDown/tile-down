@@ -250,6 +250,7 @@ struct SiteGeneratorTests {
     func makeGenerator(
         fileSystem: MemoryFileSystem,
         tileRegistry: TileKit.Tile.Registry = .init(),
+        tilePageGenerators: [any TileKit.Site.TilePageGenerating] = [],
     ) -> TileKit.Site.Generator {
         .init(
             fileSystem: fileSystem,
@@ -261,6 +262,7 @@ struct SiteGeneratorTests {
             ),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+            tilePageGenerators: tilePageGenerators,
         )
     }
 }

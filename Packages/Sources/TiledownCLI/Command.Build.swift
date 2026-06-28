@@ -91,6 +91,9 @@ extension Command {
             htmlRenderer: makeHTMLRenderer(serviceBindings: serviceBindings),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
             pdfRenderer: TileKit.PDF.Renderer(),
         )
     }

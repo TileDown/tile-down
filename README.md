@@ -121,8 +121,9 @@ CSS cascade layers and deduplicated into one shared site stylesheet, site-wide
 configuration reaches templates as `site.*`, and configured content builds can
 write an RSS feed from the shared post collection. The CLI also has a local
 preview server through `tiledown serve`. Built-in tile rendering is wired for
-`callout`, `counter`, `embed`, `chart`, `mermaid`, and `service-form`. A
-`service-form` tile can load a local service contract declared in `tiledown.yml`.
+`callout`, `counter`, `embed`, `chart`, `mermaid`, `service-form`, and
+`buttondown`. A `service-form` tile can load a local service contract declared in
+`tiledown.yml`.
 
 Still missing before it is production-ready: project scaffolding (`tiledown init`),
 watch mode, action tiles such as `poll`, comments, and email-response, runtime
@@ -309,6 +310,35 @@ submitLabel: Calculate
 The contract file is consumed by the build and is not copied into the generated
 site output.
 
+Use the `buttondown` tile for a newsletter signup form that posts directly to
+Buttondown's embedded subscribe endpoint:
+
+```markdown
+:::tile buttondown
+username: mihaela
+title: Apple Frameworks
+body: Notes from framework research and production work.
+emailLabel: Developer email
+placeholder: developer@example.com
+buttonLabel: Subscribe
+note: Occasional notes, no spam.
+tags:
+- swift
+- frameworks
+metadata.source: blog
+thanksBody: Check your inbox to confirm the subscription.
+confirmedBody: You are subscribed.
+:::
+```
+
+`username` is required and selects
+`https://buttondown.com/api/emails/embed-subscribe/<username>`. `tags` become
+hidden `tag` inputs and `metadata.<key>` properties become hidden
+`metadata__<key>` inputs. The CLI also registers a Buttondown page generator:
+unless `generatePages: false` is set, it writes `thanks/` and `confirmed/` pages
+under the source page slug. Use `redirectBasePath` to choose a different base
+path, or author those pages yourself to override the generated defaults.
+
 Fallback 404 redirects help migrated static sites preserve old URLs on hosts
 without wildcard redirect files. `notFoundRedirect.exact.<path>` redirects one
 legacy path, while `notFoundRedirect.prefix.<path>` redirects any path beginning
@@ -430,7 +460,7 @@ flowchart TD
   Current --> CommonMark["CommonMark parsing"]:::done
   Current --> Themes["Built-in layout and system theme"]:::done
   Current --> Tags["Posts, tags, RSS, latest posts"]:::done
-  Current --> TilesNow["Callout, counter, embed, chart, mermaid, service-form"]:::done
+  Current --> TilesNow["Callout, counter, embed, chart, mermaid, service-form, buttondown"]:::done
   Current --> Outputs["HTML, CSS, JSON, canonical fmt"]:::done
   Current --> BrowserGate["Local Playwright browser gate"]:::done
 
@@ -501,6 +531,7 @@ flowchart TD
   Epic --> Embed["#80 Safe embed tile"]:::done
   Epic --> Mermaid["#56 Mermaid tile"]:::done
   Epic --> Charts["#57 Chart tile"]:::done
+  Epic --> Buttondown["Buttondown signup tile"]:::done
 
   classDef done fill:#ddf9e4,stroke:#34c759,color:#111827
   classDef review fill:#fff7d6,stroke:#ffcc00,color:#111827

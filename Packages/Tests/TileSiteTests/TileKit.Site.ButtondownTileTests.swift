@@ -28,6 +28,9 @@ extension SiteGeneratorTests {
                     "buttondown": TileKit.Tile.ButtondownRenderer(),
                 ],
             ),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
         )
 
         let result = try generator.buildContent(
@@ -54,6 +57,43 @@ extension SiteGeneratorTests {
             fileSystem.files["dist/newsletter/confirmed/index.html"] ==
                 "Subscription confirmed|<h1>Subscription confirmed</h1>\n<p>You are subscribed.</p>",
         )
+    }
+
+    @Test("buttondown redirect pages are generated only when a page generator is registered")
+    func buttondownRedirectPagesAreOptIn() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/newsletter/index.md": """
+                ---
+                title: Newsletter
+                ---
+                :::tile buttondown
+                username: mihaela
+                :::
+                """,
+                "templates/page.html": "{{ page.title }}|{{{ page.contents.html }}}",
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(
+                renderers: [
+                    "buttondown": TileKit.Tile.ButtondownRenderer(),
+                ],
+            ),
+        )
+
+        let result = try generator.buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(!result.outputPaths.contains("dist/newsletter/thanks/index.html"))
+        #expect(!result.outputPaths.contains("dist/newsletter/confirmed/index.html"))
     }
 
     @Test("authored buttondown redirect pages override generated defaults")
@@ -85,6 +125,9 @@ extension SiteGeneratorTests {
                     "buttondown": TileKit.Tile.ButtondownRenderer(),
                 ],
             ),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
         )
 
         _ = try generator.buildContent(

@@ -33,8 +33,10 @@ The repository currently has:
 - `Examples/minimal-site/`, a small content-only demo with about, contact, posts,
   footer social links, the `system` theme, and RSS.
 - Page-local tile CSS and browser JavaScript exposed to templates.
-- Built-in `callout`, `counter`, `embed`, `chart`, `mermaid`, and
-  `service-form` tile renderers registered by the CLI.
+- Built-in `callout`, `counter`, `embed`, `chart`, `mermaid`, `service-form`, and
+  `buttondown` tile renderers registered by the CLI.
+- `TileKit.Site.ButtondownPageGenerator`, a generated-page provider that writes
+  local Buttondown redirect target pages when the CLI opts into the provider.
 - Service manifest and service operation contract models.
 - `service-form` request validation, binding, and generated browser output for
   `remote` and `proxy` modes.

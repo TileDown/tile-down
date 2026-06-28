@@ -14,6 +14,7 @@ public extension TileKit.Site {
         private let htmlRenderer: any TileKit.Output.Rendering
         let templateRenderer: any TileKit.Template.Rendering
         private let contentDiscovery: any TileKit.Source.ContentDiscovering
+        let tilePageGenerators: [any TileKit.Site.TilePageGenerating]
         let imageChecker: any ImageChecking
         /// The optional PDF renderer; when nil (or the config opts out), no per-article
         /// PDFs are produced. Visible to the same-module rendering extension.
@@ -26,6 +27,7 @@ public extension TileKit.Site {
             htmlRenderer: any TileKit.Output.Rendering,
             templateRenderer: any TileKit.Template.Rendering,
             contentDiscovery: any TileKit.Source.ContentDiscovering,
+            tilePageGenerators: [any TileKit.Site.TilePageGenerating] = [],
             imageChecker: any ImageChecking = PassthroughImageChecker(),
             pdfRenderer: (any TileKit.PDFRendering)? = nil,
         ) {
@@ -35,6 +37,7 @@ public extension TileKit.Site {
             self.htmlRenderer = htmlRenderer
             self.templateRenderer = templateRenderer
             self.contentDiscovery = contentDiscovery
+            self.tilePageGenerators = tilePageGenerators
             self.imageChecker = imageChecker
             self.pdfRenderer = pdfRenderer
         }
@@ -81,7 +84,7 @@ public extension TileKit.Site {
                 postsDirectory: request.configuration.postsDirectory,
             )
             var pages = try assembledPages(source, posts: posts, request: request)
-            pages = try appendingButtondownPages(to: pages, request: request)
+            pages = try appendingGeneratedTilePages(to: pages, request: request)
             try assertUniqueSlugs(pages)
             let template = try template(from: request.template)
 
