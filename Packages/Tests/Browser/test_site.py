@@ -586,6 +586,35 @@ def check_service_form(page):
     contract_status = page.evaluate("async () => (await fetch('/contracts/calculator.json', {method:'HEAD'})).status")
     check("service-form contract source is not published", contract_status == 404, f"status={contract_status}")
 
+    buttondown = page.locator("[data-td-buttondown]").first
+    buttondown_form = buttondown.locator("form").first
+    check("buttondown tile renders", buttondown.count() == 1)
+    check(
+        "buttondown form uses embed endpoint",
+        buttondown_form.get_attribute("action")
+        == "https://buttondown.com/api/emails/embed-subscribe/tiledown",
+    )
+    check("buttondown form posts email", buttondown_form.get_attribute("method").lower() == "post")
+    check("buttondown email input is required", buttondown.locator("input[name='email']").get_attribute("required") is not None)
+    hidden_fields = page.eval_on_selector_all(
+        ".td-buttondown input[type='hidden']",
+        "els => els.map(e => [e.getAttribute('name'), e.getAttribute('value')])",
+    )
+    check(
+        "buttondown hidden fields include embed, tags, and metadata",
+        ["embed", "1"] in hidden_fields
+        and ["tag", "tiledown"] in hidden_fields
+        and ["tag", "developers"] in hidden_fields
+        and ["metadata__source", "everything-fixture"] in hidden_fields,
+        str(hidden_fields),
+    )
+    check("buttondown emits no browser runtime", "__tdButtondownRuntime" not in page.evaluate("Object.keys(window).join(' ')"))
+
+    page.goto(NORMAL + "/services/thanks/", wait_until="networkidle")
+    check("buttondown thanks page is generated", "Check your inbox to confirm the Tiledown Dispatch subscription." in page.inner_text("body"))
+    page.goto(NORMAL + "/services/confirmed/", wait_until="networkidle")
+    check("buttondown confirmed page is generated", "You are subscribed to Tiledown Dispatch." in page.inner_text("body"))
+
 
 def check_source_code_page(page):
     page.goto(NORMAL + "/source-code/", wait_until="networkidle")

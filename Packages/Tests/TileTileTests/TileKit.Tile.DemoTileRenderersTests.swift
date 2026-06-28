@@ -51,6 +51,85 @@ struct DemoTileRenderersTests {
         #expect(rendered.javascript.contains("[data-td-counter]"))
     }
 
+    @Test("buttondown renders a subscribe form with tags and metadata")
+    func buttondownRenders() throws {
+        let rendered = try TileKit.Tile.ButtondownRenderer().render(
+            .init(
+                typeID: "buttondown",
+                properties: [
+                    .init(key: "username", value: .string("mihaela")),
+                    .init(key: "title", value: .string("Apple Frameworks")),
+                    .init(key: "body", value: .string("Clean-room notes <daily>")),
+                    .init(key: "emailLabel", value: .string("Work email")),
+                    .init(key: "placeholder", value: .string("you@example.com")),
+                    .init(key: "buttonLabel", value: .string("Join")),
+                    .init(key: "note", value: .string("No spam.")),
+                    .init(key: "tags", value: .list(["swift", "frameworks"])),
+                    .init(key: "metadata.source", value: .string("tiledown")),
+                ],
+            ),
+        )
+
+        #expect(
+            rendered.html.contains(
+                #"action="https://buttondown.com/api/emails/embed-subscribe/mihaela""#,
+            ),
+        )
+        #expect(rendered.html.contains(#"<input type="hidden" name="embed" value="1">"#))
+        #expect(rendered.html.contains(#"<input type="hidden" name="tag" value="swift">"#))
+        #expect(rendered.html.contains(#"<input type="hidden" name="tag" value="frameworks">"#))
+        #expect(rendered.html.contains(#"<input type="hidden" name="metadata__source" value="tiledown">"#))
+        #expect(rendered.html.contains("Clean-room notes &lt;daily&gt;"))
+        #expect(rendered.html.contains(#"placeholder="you@example.com""#))
+        #expect(rendered.html.contains(#"<button class="td-buttondown-submit" type="submit">Join</button>"#))
+        #expect(rendered.html.contains("Powered by Buttondown."))
+        #expect(rendered.css.contains(".td-buttondown"))
+        #expect(rendered.javascript.isEmpty)
+    }
+
+    @Test("buttondown can hide attribution and rejects unsafe inputs")
+    func buttondownRejectsUnsafeInputs() throws {
+        let rendered = try TileKit.Tile.ButtondownRenderer().render(
+            .init(
+                typeID: "buttondown",
+                properties: [
+                    .init(key: "username", value: .string("mihaela")),
+                    .init(key: "poweredBy", value: .string("false")),
+                ],
+            ),
+        )
+        #expect(!rendered.html.contains("Powered by Buttondown."))
+
+        #expect(throws: TileKit.Tile.ButtondownRendererError.missingProperty("username")) {
+            try TileKit.Tile.ButtondownRenderer().render(
+                .init(typeID: "buttondown", properties: []),
+            )
+        }
+
+        #expect(throws: TileKit.Tile.ButtondownRendererError.invalidUsername("bad/name")) {
+            try TileKit.Tile.ButtondownRenderer().render(
+                .init(
+                    typeID: "buttondown",
+                    properties: [
+                        .init(key: "username", value: .string("bad/name")),
+                    ],
+                ),
+            )
+        }
+
+        #expect(throws: TileKit.Tile.ButtondownRendererError.invalidMetadataKey("")) {
+            try TileKit.Tile.ButtondownRenderer().render(
+                .init(
+                    typeID: "buttondown",
+                    properties: [
+                        .init(key: "username", value: .string("mihaela")),
+                        .init(key: "metadata.", value: .string("x")),
+                    ],
+                ),
+            )
+        }
+    }
+
     @Test("embed renders a responsive YouTube iframe through youtube-nocookie")
     func embedRendersYouTube() throws {
         let rendered = try TileKit.Tile.EmbedRenderer().render(

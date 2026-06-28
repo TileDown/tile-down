@@ -180,6 +180,10 @@ extension Command {
                 for: TileKit.Tile.CalloutRenderer.typeID,
             )
             .registering(
+                TileKit.Tile.ButtondownRenderer(),
+                for: TileKit.Tile.ButtondownRenderer.typeID,
+            )
+            .registering(
                 TileKit.Tile.ChartRenderer(),
                 for: TileKit.Tile.ChartRenderer.typeID,
             )
