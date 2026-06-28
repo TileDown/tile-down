@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a `buttondown` tile that renders a Buttondown subscribe form, supports
+  hidden tags and subscriber metadata, and generates default Buttondown redirect
+  pages for confirmation flows.
+
 ## [0.6.4] - 2026-06-27
 
 ### Changed

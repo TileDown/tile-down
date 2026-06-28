@@ -91,6 +91,9 @@ extension Command {
             htmlRenderer: makeHTMLRenderer(serviceBindings: serviceBindings),
             templateRenderer: TileKit.Template.SimpleMustacheRenderer(),
             contentDiscovery: TileKit.Source.IndexContentDiscovery(),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
             pdfRenderer: TileKit.PDF.Renderer(),
         )
     }
@@ -178,6 +181,10 @@ extension Command {
             .registering(
                 TileKit.Tile.CalloutRenderer(),
                 for: TileKit.Tile.CalloutRenderer.typeID,
+            )
+            .registering(
+                TileKit.Tile.ButtondownRenderer(),
+                for: TileKit.Tile.ButtondownRenderer.typeID,
             )
             .registering(
                 TileKit.Tile.ChartRenderer(),

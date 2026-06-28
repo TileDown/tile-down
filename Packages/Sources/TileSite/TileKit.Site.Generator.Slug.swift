@@ -11,6 +11,16 @@ extension TileKit.Site.Generator {
         folderSlug: String,
         frontMatter: [String: String],
     ) throws -> String {
+        try Self.effectiveSlug(
+            folderSlug: folderSlug,
+            frontMatter: frontMatter,
+        )
+    }
+
+    static func effectiveSlug(
+        folderSlug: String,
+        frontMatter: [String: String],
+    ) throws -> String {
         guard let override = frontMatter["slug"], !override.isEmpty else {
             return folderSlug
         }
@@ -34,7 +44,7 @@ extension TileKit.Site.Generator {
         return result
     }
 
-    private func containsURLSyntaxCharacters(
+    private static func containsURLSyntaxCharacters(
         _ slug: String,
     ) -> Bool {
         slug.unicodeScalars.contains { scalar in

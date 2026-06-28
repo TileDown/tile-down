@@ -41,6 +41,7 @@ layout needs them.
 | `slug` | string | The published URL path, taken verbatim. See [Slugs](#slugs). |
 | `date` | date | Post date. Drives ordering and the feed. |
 | `draft` | boolean | `true` keeps the page out of normal builds. See [Drafts](#drafts). |
+| `sitemap` | boolean | `false` keeps a published utility page out of `sitemap.xml`. |
 | `image` | path | Hero/social image, for example `/images/blog/post/hero.jpg`. |
 | `imageDark` | path | Alternate hero image for dark mode. |
 | `tags` | list | Comma-separated tags, for example `Swift, OpenAPI`. |
