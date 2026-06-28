@@ -15,9 +15,11 @@ struct ChartSVGRenderer {
         case .bar:
             cartesian(data, marks: bars(data, range: valueRange(data)))
         case .line:
-            hasNumericPoints(data)
-                ? pointPlot(data, connect: true)
-                : cartesian(data, marks: lines(data, range: valueRange(data), pointsOnly: false))
+            if hasNumericPoints(data) {
+                pointPlot(data, connect: true)
+            } else {
+                cartesian(data, marks: lines(data, range: valueRange(data), pointsOnly: false))
+            }
         case .scatter:
             scatter(data)
         case .pie:

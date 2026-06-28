@@ -1,5 +1,6 @@
 import Foundation
 
+// The per-language keyword and token tables are long but cohesive; they belong in one file.
 // swiftlint:disable file_length
 
 public extension TileKit {

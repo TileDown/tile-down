@@ -301,10 +301,10 @@ struct ChartFenceRenderingTests {
         #expect(svg.contains(">week</text>"))
 
         // The points span the plot horizontally rather than collapsing to one x.
-        let xs = polylineXs(svg)
-        #expect(xs.count == 4)
-        #expect(Set(xs).count == 4)
-        #expect((xs.max() ?? 0) - (xs.min() ?? 0) > 200)
+        let xValues = polylineXs(svg)
+        #expect(xValues.count == 4)
+        #expect(Set(xValues).count == 4)
+        #expect((xValues.max() ?? 0) - (xValues.min() ?? 0) > 200)
         #expect(!svg.contains("<script"))
     }
 

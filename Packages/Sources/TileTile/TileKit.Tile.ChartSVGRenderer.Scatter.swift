@@ -49,13 +49,22 @@ extension ChartSVGRenderer {
         \(line(className: "td-chart-axis", startX: left, startY: zeroY, endX: width - right, endY: zeroY))
         \(line(className: "td-chart-axis", startX: left, startY: top, endX: left, endY: Double(data.height) - bottom))
         \(numericXAxis(xRange: xRange, plotWidth: plotWidth, axisY: stack.axisY))
-        \(pointMarks(data, xRange: xRange, yRange: yRange, plotWidth: plotWidth, plotHeight: plotHeight, connect: connect))
+        \(pointMarks(
+            data,
+            xRange: xRange,
+            yRange: yRange,
+            plotWidth: plotWidth,
+            plotHeight: plotHeight,
+            connect: connect,
+        ))
         \(axisCaptions(data, captionY: stack.captionY))
         \(legendNodes)
         </svg>
         """
     }
 
+    // Plot geometry (ranges and pixel extents) plus the connect flag all place points here.
+    // swiftlint:disable:next function_parameter_count
     private func pointMarks(
         _ data: ChartData,
         xRange: ClosedRange<Double>,
