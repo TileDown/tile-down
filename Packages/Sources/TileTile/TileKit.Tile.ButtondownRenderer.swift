@@ -56,7 +56,10 @@ private extension TileKit.Tile.ButtondownRenderer {
             placeholder: string(tile.property(named: "placeholder")) ?? "you@example.com",
             buttonLabel: string(tile.property(named: "buttonLabel")) ?? "Subscribe",
             note: string(tile.property(named: "note")) ?? "",
-            poweredBy: bool(tile.property(named: "poweredBy")) ?? true,
+            poweredBy: bool(
+                tile.property(named: "poweredBy"),
+                property: "poweredBy",
+            ) ?? true,
             tags: tags(from: tile.property(named: "tags")),
             metadata: metadata(from: tile),
         )
@@ -85,9 +88,19 @@ private extension TileKit.Tile.ButtondownRenderer {
 
     static func bool(
         _ value: TileKit.Tile.Value?,
-    ) -> Bool? {
-        guard let raw = string(value)?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
-              !raw.isEmpty
+        property: String,
+    ) throws -> Bool? {
+        guard let value else {
+            return nil
+        }
+        guard let rawValue = string(value) else {
+            throw TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: property,
+                value: "list",
+            )
+        }
+        let raw = rawValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !raw.isEmpty
         else {
             return nil
         }
@@ -97,7 +110,10 @@ private extension TileKit.Tile.ButtondownRenderer {
         case "0", "false", "no", "off":
             return false
         default:
-            return nil
+            throw TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: property,
+                value: rawValue,
+            )
         }
     }
 

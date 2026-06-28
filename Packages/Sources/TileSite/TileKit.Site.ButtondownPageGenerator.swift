@@ -12,7 +12,7 @@ public extension TileKit.Site {
             for context: TileKit.Site.TilePageGenerationContext,
         ) throws -> [TileKit.Site.Page] {
             guard context.tile.typeID == TileKit.Tile.ButtondownRenderer.typeID,
-                  buttondownGeneratesPages(context.tile)
+                  try buttondownGeneratesPages(context.tile)
             else {
                 return []
             }
@@ -29,8 +29,11 @@ public extension TileKit.Site {
 private extension TileKit.Site.ButtondownPageGenerator {
     func buttondownGeneratesPages(
         _ tile: TileKit.Tile.Instance,
-    ) -> Bool {
-        bool(tile.property(named: "generatePages")) ?? true
+    ) throws -> Bool {
+        try bool(
+            tile.property(named: "generatePages"),
+            property: "generatePages",
+        ) ?? true
     }
 
     func buttondownPages(
@@ -141,11 +144,21 @@ private extension TileKit.Site.ButtondownPageGenerator {
 
     func bool(
         _ value: TileKit.Tile.Value?,
-    ) -> Bool? {
-        guard let raw = string(value)?
+        property: String,
+    ) throws -> Bool? {
+        guard let value else {
+            return nil
+        }
+        guard let rawValue = string(value) else {
+            throw TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: property,
+                value: "list",
+            )
+        }
+        let raw = rawValue
             .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased(),
-            !raw.isEmpty
+            .lowercased()
+        guard !raw.isEmpty
         else {
             return nil
         }
@@ -155,7 +168,10 @@ private extension TileKit.Site.ButtondownPageGenerator {
         case "0", "false", "no", "off":
             return false
         default:
-            return nil
+            throw TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: property,
+                value: rawValue,
+            )
         }
     }
 }

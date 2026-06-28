@@ -6,6 +6,7 @@ public extension TileKit.Tile {
         case invalidTileType(actual: String)
         case missingProperty(String)
         case invalidUsername(String)
+        case invalidBoolean(property: String, value: String)
         case invalidMetadataKey(String)
         case invalidMetadataValue(String)
 
@@ -17,6 +18,8 @@ public extension TileKit.Tile {
                 "Add the \(name) property to the buttondown tile."
             case let .invalidUsername(username):
                 "Buttondown username must contain only letters, numbers, underscores, or hyphens, not \(username)."
+            case let .invalidBoolean(property, value):
+                "Buttondown \(property) must be true or false, not \(value)."
             case let .invalidMetadataKey(key):
                 "Buttondown metadata key must be non-empty and URL form safe, not \(key)."
             case let .invalidMetadataValue(key):

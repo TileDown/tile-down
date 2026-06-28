@@ -96,6 +96,97 @@ extension SiteGeneratorTests {
         #expect(!result.outputPaths.contains("dist/newsletter/confirmed/index.html"))
     }
 
+    @Test("buttondown page generation rejects invalid generatePages values")
+    func buttondownPageGenerationRejectsInvalidBoolean() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/newsletter/index.md": """
+                ---
+                title: Newsletter
+                ---
+                :::tile buttondown
+                username: mihaela
+                generatePages: flase
+                :::
+                """,
+                "templates/page.html": "{{ page.title }}|{{{ page.contents.html }}}",
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(
+                renderers: [
+                    "buttondown": TileKit.Tile.ButtondownRenderer(),
+                ],
+            ),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
+        )
+
+        #expect(
+            throws: TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: "generatePages",
+                value: "flase",
+            ),
+        ) {
+            try generator.buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+    }
+
+    @Test("buttondown page generation rejects list generatePages values")
+    func buttondownPageGenerationRejectsListBoolean() throws {
+        let fileSystem = MemoryFileSystem(
+            files: [
+                "content/newsletter/index.md": """
+                ---
+                title: Newsletter
+                ---
+                :::tile buttondown
+                username: mihaela
+                generatePages:
+                  - false
+                :::
+                """,
+                "templates/page.html": "{{ page.title }}|{{{ page.contents.html }}}",
+            ],
+        )
+        let generator = makeGenerator(
+            fileSystem: fileSystem,
+            tileRegistry: .init(
+                renderers: [
+                    "buttondown": TileKit.Tile.ButtondownRenderer(),
+                ],
+            ),
+            tilePageGenerators: [
+                TileKit.Site.ButtondownPageGenerator(),
+            ],
+        )
+
+        #expect(
+            throws: TileKit.Tile.ButtondownRendererError.invalidBoolean(
+                property: "generatePages",
+                value: "list",
+            ),
+        ) {
+            try generator.buildContent(
+                .init(
+                    contentRootPath: "content",
+                    template: .file(path: "templates/page.html"),
+                    outputRootPath: "dist",
+                    configuration: .init(theme: nil),
+                ),
+            )
+        }
+    }
+
     @Test("authored buttondown redirect pages override generated defaults")
     func authoredButtondownPagesWin() throws {
         let fileSystem = MemoryFileSystem(
