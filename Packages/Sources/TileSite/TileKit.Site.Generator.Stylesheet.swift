@@ -14,8 +14,14 @@ extension TileKit.Site.Generator {
         configuration: TileKit.Site.Configuration,
         outputPaths: inout [String],
     ) throws -> String {
-        let tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
+        var tiles = pages.reduce(TileKit.Output.Stylesheet()) { result, page in
             result.merging(page.stylesheet)
+        }
+        // The site-wide newsletter form is rendered by the layout, not by a tile
+        // on any page, so its CSS is merged in explicitly when configured. It uses
+        // the same themed-layer posture as the inline buttondown tile.
+        if let newsletterCSS = try renderedNewsletter(configuration)?.css {
+            tiles = tiles.merging(TileKit.Output.Stylesheet(themed: [newsletterCSS]))
         }
         let css = Self.composeStylesheet(
             theme: configuration.theme,

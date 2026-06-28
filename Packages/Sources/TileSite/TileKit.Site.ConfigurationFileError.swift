@@ -23,6 +23,7 @@ public extension TileKit.Site {
         case invalidServiceBindingMode(serviceID: String, mode: String)
         case invalidServiceBindingAvailability(serviceID: String, availability: String)
         case missingServiceBindingField(serviceID: String, field: String)
+        case newsletterMissingUsername
 
         public var description: String {
             switch self {
@@ -69,6 +70,8 @@ public extension TileKit.Site {
                 "Invalid availability `\(availability)` for service binding `\(serviceID)`."
             case let .missingServiceBindingField(serviceID, field):
                 "Missing service binding field `\(field)` for service `\(serviceID)`."
+            case .newsletterMissingUsername:
+                "Site newsletter is configured without `newsletter.username`."
             }
         }
     }

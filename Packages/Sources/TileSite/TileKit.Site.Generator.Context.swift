@@ -88,6 +88,15 @@ extension TileKit.Site.Generator {
                 // Non-empty only when there are latest posts to show, so the
                 // recent-posts block (and its wrapper) disappears at count 0.
                 "hasLatestPosts": .string(latest.isEmpty ? "" : "true"),
+                // The site-wide newsletter form, raw HTML gated per placement.
+                // Empty (and so the layout section is skipped) when no newsletter
+                // is configured or that placement is disabled.
+                "newsletterEndOfPost": .string(
+                    configuration.newsletter?.endOfPost == true ? sitePaths.newsletterHTML : "",
+                ),
+                "newsletterFooter": .string(
+                    configuration.newsletter?.footer == true ? sitePaths.newsletterHTML : "",
+                ),
             ],
         )
     }

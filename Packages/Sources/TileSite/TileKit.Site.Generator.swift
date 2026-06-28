@@ -108,9 +108,10 @@ public extension TileKit.Site {
                 request: request,
                 outputPaths: &outputPaths,
             )
-            let sitePaths = TileKit.Site.GeneratedSitePaths(
+            let sitePaths = try TileKit.Site.GeneratedSitePaths(
                 stylesheetPath: stylesheetPath,
                 feedPath: feedPath,
+                newsletterHTML: renderedNewsletter(request.configuration)?.html ?? "",
             )
 
             let finalOutputPaths = try writeFinalOutputs(.init(

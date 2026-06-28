@@ -117,6 +117,31 @@ analytics.head: <script defer src="https://cloud.umami.is/script.js" data-websit
 | `showSource` | boolean | `false` | Expose the Markdown source of a page. |
 | `articlePDF` | boolean | `false` | Generate a per-article PDF and link to it. |
 
+## Newsletter
+
+A site-wide signup form, rendered into the layout at the end of every article and
+in the footer of every page, backed by [Buttondown](https://buttondown.com)'s
+embedded subscribe endpoint. It uses the same renderer as the inline `buttondown`
+tile, so the markup and styling match. Set `newsletter.username` to turn it on; a
+site with no `newsletter.*` keys emits no form.
+
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `newsletter.username` | string | required | Buttondown username whose list the form subscribes to. |
+| `newsletter.title` | string | `Subscribe` | Heading above the form. |
+| `newsletter.body` | string | `""` | A sentence above the form. |
+| `newsletter.buttonLabel` | string | `Subscribe` | Submit button label. |
+| `newsletter.placeholder` | string | `you@example.com` | Email field placeholder. |
+| `newsletter.note` | string | `""` | A reassurance line below the form. |
+| `newsletter.endOfPost` | boolean | `true` | Render the form at the end of every article. |
+| `newsletter.footer` | boolean | `true` | Render the form in the footer of every page. |
+
+```yaml
+newsletter.username: tiledown
+newsletter.title: TileDown Updates
+newsletter.body: Stay updated with every new feature we bring to TileDown.
+```
+
 ## Static passthrough
 
 `static.<outputPath>: <sourcePath>` copies a file or directory from inside the

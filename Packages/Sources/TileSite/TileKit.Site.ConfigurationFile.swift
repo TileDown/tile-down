@@ -39,7 +39,7 @@ public extension TileKit.Site {
             var serviceBindings: [String: ServiceBindingBuilder] = [:]
 
             for item in try entries(in: source) {
-                if try applySocialLink(item, to: &result) {
+                if try applyPrefixedSetting(item, to: &result) {
                     continue
                 }
                 if applyOutboundLink(item, to: &result) {
@@ -81,13 +81,14 @@ public extension TileKit.Site {
                 feed,
                 feedEnabled: feedEnabled,
             )
+            result.configuration.newsletter = try resolvedNewsletter(result.configuration.newsletter)
             // Order generators by name so the run order is deterministic.
             result.generators.sort { $0.name < $1.name }
             result.serviceBindings = try resolvedServiceBindings(from: serviceBindings)
             return result
         }
 
-        private static func applySocialLink(
+        static func applySocialLink(
             _ item: (key: String, value: String),
             to result: inout ConfigurationFile,
         ) throws -> Bool {

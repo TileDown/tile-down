@@ -76,6 +76,9 @@ public extension TileKit.Site {
         /// Static files or directories to copy from the content tree to explicit
         /// output paths, e.g. root deployment files or migrated public assets.
         public var staticPassthroughs: [StaticPassthrough]
+        /// An opt-in site-wide newsletter signup, rendered into the layout's
+        /// end-of-post and footer regions. `nil` (the default) emits no signup.
+        public var newsletter: Newsletter?
 
         public init(
             title: String = "",
@@ -99,6 +102,7 @@ public extension TileKit.Site {
             staticPassthroughs: [StaticPassthrough] = [],
             faviconPath: String = "",
             subtitle: String = "",
+            newsletter: Newsletter? = nil,
         ) {
             self.title = title
             self.baseURL = baseURL
@@ -121,6 +125,7 @@ public extension TileKit.Site {
             self.notFoundRedirects = notFoundRedirects
             self.staticPassthroughs = staticPassthroughs
             self.subtitle = subtitle
+            self.newsletter = newsletter
         }
     }
 }
