@@ -1048,6 +1048,8 @@ def run(page):
     check("sitemap has absolute live post", f"<loc>{NORMAL}/posts/live/</loc>" in sitemap)
     check("sitemap excludes draft", "/posts/secret/" not in sitemap)
     check("sitemap excludes redirect", "/legacy-live/" not in sitemap)
+    check("sitemap excludes buttondown thanks page", "/services/thanks/" not in sitemap)
+    check("sitemap excludes buttondown confirmed page", "/services/confirmed/" not in sitemap)
 
 
 def main():

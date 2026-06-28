@@ -44,19 +44,15 @@ extension SiteGeneratorTests {
 
         #expect(result.outputPaths.contains("dist/newsletter/thanks/index.html"))
         #expect(result.outputPaths.contains("dist/newsletter/confirmed/index.html"))
-        #expect(
-            fileSystem.files["dist/newsletter/index.html"]?.contains(
-                #"action="https://buttondown.com/api/emails/embed-subscribe/mihaela""#,
-            ) == true,
-        )
-        #expect(
-            fileSystem.files["dist/newsletter/thanks/index.html"] ==
-                "Check your email|<h1>Check your email</h1>\n<p>Confirm from your inbox.</p>",
-        )
-        #expect(
-            fileSystem.files["dist/newsletter/confirmed/index.html"] ==
-                "Subscription confirmed|<h1>Subscription confirmed</h1>\n<p>You are subscribed.</p>",
-        )
+        let newsletter = try #require(fileSystem.files["dist/newsletter/index.html"])
+        let thanks = try #require(fileSystem.files["dist/newsletter/thanks/index.html"])
+        let confirmed = try #require(fileSystem.files["dist/newsletter/confirmed/index.html"])
+        #expect(newsletter.contains(#"action="https://buttondown.com/api/emails/embed-subscribe/mihaela""#))
+        #expect(thanks == "Check your email|<h1>Check your email</h1>\n<p>Confirm from your inbox.</p>")
+        #expect(confirmed == "Subscription confirmed|<h1>Subscription confirmed</h1>\n<p>You are subscribed.</p>")
+        let sitemap = try #require(fileSystem.files["dist/sitemap.xml"])
+        #expect(!sitemap.contains("/newsletter/thanks/"))
+        #expect(!sitemap.contains("/newsletter/confirmed/"))
     }
 
     @Test("buttondown redirect pages are generated only when a page generator is registered")

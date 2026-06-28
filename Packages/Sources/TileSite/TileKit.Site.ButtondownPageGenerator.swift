@@ -88,6 +88,7 @@ private extension TileKit.Site.ButtondownPageGenerator {
             frontMatter: [
                 "title": title,
                 "nav": "false",
+                "sitemap": "false",
             ],
             body: """
             # \(title)

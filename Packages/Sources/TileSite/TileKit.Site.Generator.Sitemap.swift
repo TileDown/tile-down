@@ -26,6 +26,12 @@ extension TileKit.Site.Generator {
     private func sitemapExcluded(
         _ page: TileKit.Site.Page,
     ) -> Bool {
-        isDraft(page) || isRedirect(page)
+        isDraft(page) || isRedirect(page) || !sitemapIncluded(page)
+    }
+
+    private func sitemapIncluded(
+        _ page: TileKit.Site.Page,
+    ) -> Bool {
+        page.document.frontMatter["sitemap"].map(sectionIsTruthy) ?? true
     }
 }

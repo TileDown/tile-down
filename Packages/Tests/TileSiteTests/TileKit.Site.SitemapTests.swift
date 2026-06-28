@@ -44,6 +44,31 @@ extension SiteGeneratorTests {
         #expect(!sitemap.contains("/posts/draft/"))
     }
 
+    @Test("content builds keep sitemap false pages out of the sitemap")
+    func contentBuildExcludesSitemapFalsePagesFromSitemap() throws {
+        let fileSystem = sitemapFixture()
+        fileSystem.files["content/thanks/index.md"] = """
+        ---
+        title: Thanks
+        sitemap: false
+        ---
+        # Thanks
+        """
+
+        _ = try makeGenerator(fileSystem: fileSystem).buildContent(
+            .init(
+                contentRootPath: "content",
+                template: .file(path: "templates/page.html"),
+                outputRootPath: "dist",
+                configuration: .init(theme: nil),
+            ),
+        )
+
+        #expect(fileSystem.files["dist/thanks/index.html"] != nil)
+        let sitemap = try #require(fileSystem.files["dist/sitemap.xml"])
+        #expect(!sitemap.contains("/thanks/"))
+    }
+
     private func sitemapFixture() -> MemoryFileSystem {
         MemoryFileSystem(
             files: [
