@@ -186,9 +186,8 @@ def check_article_page(page):
     )
     check(
         "article share links are configured",
-        [item[0] for item in share_hrefs] == ["X", "LinkedIn", "Facebook", "Email"]
+        [item[0] for item in share_hrefs] == ["X", "HN", "Bluesky", "Mastodon"]
         and "%2Fposts%2Flive%2F" in share_hrefs[0][1]
-        and share_hrefs[3][1].startswith("mailto:?subject=Live%20Post")
         and all(item[2] == "_blank" and item[3] == "noopener" for item in share_hrefs),
         str(share_hrefs),
     )
